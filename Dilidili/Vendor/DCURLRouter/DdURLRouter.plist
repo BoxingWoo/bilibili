@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>http</key>
+	<string>DdWebViewController</string>
+	<key>https</key>
+	<string>DdWebViewController</string>
+	<key>bilibili</key>
+	<dict>
+		<key>bilibili://video</key>
+		<string></string>
+		<key>bilibili://live</key>
+		<string></string>
+		<key>bilibili://bangumi</key>
+		<string></string>
+	</dict>
+</dict>
+</plist>
