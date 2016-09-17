@@ -14,6 +14,8 @@
 
 //UserDefaults
 #define USER_DEFAULTS [NSUserDefaults standardUserDefaults]
+//弱引用
+#define WeakSelf __weak typeof(self) weakSelf = self
 
 //Log
 #ifdef DEBUG

@@ -20,4 +20,10 @@
     }
 }
 
++ (NSString *)stringForMediaTime:(NSTimeInterval)time
+{
+    int intDuration = time;
+    return [NSString stringWithFormat:@"%02d:%02d", (int)(intDuration / 60), (int)(intDuration % 60)];
+}
+
 @end

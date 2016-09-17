@@ -9,7 +9,7 @@
 	<key>bilibili</key>
 	<dict>
 		<key>bilibili://video</key>
-		<string></string>
+		<string>DdVideoViewController</string>
 		<key>bilibili://live</key>
 		<string></string>
 		<key>bilibili://bangumi</key>

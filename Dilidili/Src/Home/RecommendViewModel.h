@@ -40,9 +40,9 @@ static NSString *const recommendScrollCellID = @"RecommendScrollCell";
 /**
  *  @brief 构造方法
  *
- *  @param model          推荐列表模型
+ *  @param model 推荐列表模型
  *
- *  @return 实例对象
+ *  @return 推荐模块视图模型实例
  */
 - (instancetype)initWithModel:(RecommendListModel *)model;
 

@@ -17,7 +17,7 @@
  */
 @interface YYFPSLabel : UILabel
 
-+ (instancetype)shareFPSLabel;
++ (instancetype)sharedFPSLabel;
 
 + (void)show;
 

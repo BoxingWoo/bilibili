@@ -74,17 +74,18 @@
 - (void)layoutSubviews
 {
     [super layoutSubviews];
+    //布局内容视图
+    CGFloat width = CGRectGetWidth(self.scrollView.bounds);
+    CGFloat height = CGRectGetHeight(self.scrollView.bounds);
+    for (int i = 0; i < _pageCount; i++) {
+        UIView *contentView = self.contentViews[i];
+        contentView.frame = CGRectMake((i + 1) * width, 0, width, height);
+    }
+    
+    [self layoutIfNeeded];
     
     if (_shouldLayoutSubviews) {
         _shouldLayoutSubviews = NO;
-        //布局内容视图
-        CGFloat width = CGRectGetWidth(self.scrollView.bounds);
-        CGFloat height = CGRectGetHeight(self.scrollView.bounds);
-        for (int i = 0; i < _pageCount; i++) {
-            UIView *contentView = self.contentViews[i];
-            contentView.frame = CGRectMake((i + 1) * width, 0, width, height);
-        }
-        
         if (_pageCount) {
             self.scrollView.contentSize = CGSizeMake((_pageCount + 2) * width, height);
             [self.scrollView scrollRectToVisible:CGRectMake(width, 0, width, height) animated:NO];

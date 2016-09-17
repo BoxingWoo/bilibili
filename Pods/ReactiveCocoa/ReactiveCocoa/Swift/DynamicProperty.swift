@@ -1,5 +1,14 @@
 import Foundation
+import ReactiveSwift
 import enum Result.NoError
+
+/// Models types that can be represented in Objective-C (i.e., reference
+/// types, including generic types when boxed via `AnyObject`).
+private protocol ObjectiveCRepresentable {
+	associatedtype Value
+	static func extract(from representation: Any) -> Value
+	static func represent(_ value: Value) -> Any
+}
 
 /// Wraps a `dynamic` property, or one defined in Objective-C, using Key-Value
 /// Coding and Key-Value Observing.
@@ -7,24 +16,30 @@ import enum Result.NoError
 /// Use this class only as a last resort! `MutableProperty` is generally better
 /// unless KVC/KVO is required by the API you're using (for example,
 /// `NSOperation`).
-@objc public final class DynamicProperty: RACDynamicPropertySuperclass, MutablePropertyType {
-	public typealias Value = AnyObject?
+public final class DynamicProperty<Value>: MutablePropertyProtocol {
+	fileprivate weak var object: NSObject?
+	fileprivate let keyPath: String
 
-	private weak var object: NSObject?
-	private let keyPath: String
+	fileprivate let extractValue: (_ from: Any) -> Value
+	fileprivate let represent: (Value) -> Any
 
-	private var property: MutableProperty<AnyObject?>?
+	fileprivate var property: MutableProperty<Value?>?
 
 	/// The current value of the property, as read and written using Key-Value
 	/// Coding.
-	public var value: AnyObject? {
-		@objc(rac_value) get {
-			return object?.valueForKeyPath(keyPath)
+	public var value: Value? {
+		get {
+			return object?.value(forKeyPath: keyPath).map(extractValue)
 		}
 
-		@objc(setRac_value:) set(newValue) {
-			object?.setValue(newValue, forKeyPath: keyPath)
+		set(newValue) {
+			object?.setValue(newValue.map(represent), forKeyPath: keyPath)
 		}
+	}
+
+	/// The lifetime of the property.
+	public var lifetime: Lifetime {
+		return object?.rac_lifetime ?? .empty
 	}
 
 	/// A producer that will create a Key-Value Observer for the given object,
@@ -33,59 +48,97 @@ import enum Result.NoError
 	///
 	/// - important: This only works if the object given to init() is KVO-compliant.
 	///              Most UI controls are not!
-	public var producer: SignalProducer<AnyObject?, NoError> {
-		return property?.producer ?? .empty
+	public var producer: SignalProducer<Value?, NoError> {
+		return (object.map { $0.values(forKeyPath: keyPath) } ?? .empty)
+			.map { [extractValue = self.extractValue] in $0.map(extractValue) }
 	}
 
-	public var signal: Signal<AnyObject?, NoError> {
-		return property?.signal ?? .empty
-	}
+	public lazy var signal: Signal<Value?, NoError> = { [unowned self] in
+		var signal: Signal<DynamicProperty.Value, NoError>!
+		self.producer.startWithSignal { innerSignal, _ in signal = innerSignal }
+		return signal
+	}()
 
 	/// Initializes a property that will observe and set the given key path of
-	/// the given object.
+	/// the given object, using the supplied representation.
 	///
 	/// - important: `object` must support weak references!
 	///
 	/// - parameters:
 	///   - object: An object to be observed.
 	///   - keyPath: Key path to observe on the object.
-	public init(object: NSObject?, keyPath: String) {
+	///   - representable: A representation that bridges the values across the
+	///                    language boundary.
+	fileprivate init<Representatable: ObjectiveCRepresentable>(
+		object: NSObject?,
+		keyPath: String,
+		representable: Representatable.Type
+	)
+		where Representatable.Value == Value
+	{
 		self.object = object
 		self.keyPath = keyPath
-		self.property = MutableProperty(nil)
+
+		self.extractValue = Representatable.extract(from:)
+		self.represent = Representatable.represent
 
 		/// A DynamicProperty will stay alive as long as its object is alive.
 		/// This is made possible by strong reference cycles.
-		super.init()
-
-		object?.rac_valuesForKeyPath(keyPath, observer: nil)?
-			.toSignalProducer()
-			.start { event in
-				switch event {
-				case let .Next(newValue):
-					self.property?.value = newValue
-				case let .Failed(error):
-					fatalError("Received unexpected error from KVO signal: \(error)")
-				case .Interrupted, .Completed:
-					self.property = nil
-				}
-			}
+		_ = object?.rac_lifetime.ended.observeCompleted { _ = self }
 	}
 }
 
-// MARK: Operators
-
-/// Binds a signal to a `DynamicProperty`, automatically bridging values to Objective-C.
-public func <~ <S: SignalType where S.Value: _ObjectiveCBridgeable, S.Error == NoError>(property: DynamicProperty, signal: S) -> Disposable {
-	return property <~ signal.map { $0._bridgeToObjectiveC() }
+extension DynamicProperty where Value: _ObjectiveCBridgeable {
+	/// Initializes a property that will observe and set the given key path of
+	/// the given object, where `Value` is a value type that is bridgeable
+	/// to Objective-C.
+	///
+	/// - important: `object` must support weak references!
+	///
+	/// - parameters:
+	///   - object: An object to be observed.
+	///   - keyPath: Key path to observe on the object.
+	public convenience init(object: NSObject?, keyPath: String) {
+		self.init(object: object, keyPath: keyPath, representable: BridgeableRepresentation.self)
+	}
 }
 
-/// Binds a signal producer to a `DynamicProperty`, automatically bridging values to Objective-C.
-public func <~ <S: SignalProducerType where S.Value: _ObjectiveCBridgeable, S.Error == NoError>(property: DynamicProperty, producer: S) -> Disposable {
-	return property <~ producer.map { $0._bridgeToObjectiveC() }
+extension DynamicProperty where Value: AnyObject {
+	/// Initializes a property that will observe and set the given key path of
+	/// the given object, where `Value` is a reference type that can be
+	/// represented directly in Objective-C via `AnyObject`.
+	///
+	/// - important: `object` must support weak references!
+	///
+	/// - parameters:
+	///   - object: An object to be observed.
+	///   - keyPath: Key path to observe on the object.
+	public convenience init(object: NSObject?, keyPath: String) {
+		self.init(object: object, keyPath: keyPath, representable: DirectRepresentation.self)
+	}
 }
 
-/// Binds `destinationProperty` to the latest values of `sourceProperty`, automatically bridging values to Objective-C.
-public func <~ <Source: PropertyType where Source.Value: _ObjectiveCBridgeable>(destinationProperty: DynamicProperty, sourceProperty: Source) -> Disposable {
-	return destinationProperty <~ sourceProperty.producer
+/// Represents values in Objective-C directly, via `AnyObject`.
+private struct DirectRepresentation<Value: AnyObject>: ObjectiveCRepresentable {
+	static func extract(from representation: Any) -> Value {
+		return representation as! Value
+	}
+
+	static func represent(_ value: Value) -> Any {
+		return value
+	}
+}
+
+/// Represents values in Objective-C indirectly, via bridging.
+private struct BridgeableRepresentation<Value: _ObjectiveCBridgeable>: ObjectiveCRepresentable {
+	static func extract(from representation: Any) -> Value {
+		let object = representation as! Value._ObjectiveCType
+		var result: Value?
+		Value._forceBridgeFromObjectiveC(object, result: &result)
+		return result!
+	}
+
+	static func represent(_ value: Value) -> Any {
+		return value._bridgeToObjectiveC()
+	}
 }

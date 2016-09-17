@@ -11,8 +11,13 @@
 
 #define kSize CGSizeMake(55, 20)
 
+@interface YYFPSLabel ()
+
+@property (nonatomic, strong) CADisplayLink *link;
+
+@end
+
 @implementation YYFPSLabel {
-    CADisplayLink *_link;
     NSUInteger _count;
     NSTimeInterval _lastTime;
     UIFont *_font;
@@ -21,30 +26,37 @@
     NSTimeInterval _llll;
 }
 
-+ (instancetype)shareFPSLabel
++ (instancetype)sharedFPSLabel
 {
     static YYFPSLabel *_instance;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
-        _instance = [[YYFPSLabel alloc] initWithFrame:CGRectMake(5, kScreenHeight - 88, kSize.width, kSize.height)];
+        _instance = [[YYFPSLabel alloc] initWithFrame:CGRectMake(5, kScreenHeight - 68 - kSize.height, kSize.width, kSize.height)];
     });
     return _instance;
 }
 
 + (void)show
 {
+    [self dismiss];
+    
     UIWindow *fpswindow = [UIApplication sharedApplication].windows.firstObject;
-    YYFPSLabel *fpsLabel = [YYFPSLabel shareFPSLabel];
+    YYFPSLabel *fpsLabel = [YYFPSLabel sharedFPSLabel];
     if (fpsLabel.superview == nil) {
         [fpswindow addSubview:fpsLabel];
     }else {
         [fpswindow bringSubviewToFront:fpsLabel];
     }
+    fpsLabel.link = [CADisplayLink displayLinkWithTarget:[YYWeakProxy proxyWithTarget:fpsLabel] selector:@selector(tick:)];
+    [fpsLabel.link addToRunLoop:[NSRunLoop mainRunLoop] forMode:NSRunLoopCommonModes];
 }
 
 + (void)dismiss
 {
-    [[YYFPSLabel shareFPSLabel] removeFromSuperview];
+    YYFPSLabel *fpsLabel = [YYFPSLabel sharedFPSLabel];
+    [fpsLabel removeFromSuperview];
+    [fpsLabel.link invalidate];
+    fpsLabel.link = nil;
 }
 
 - (instancetype)initWithFrame:(CGRect)frame {
@@ -67,13 +79,12 @@
         _subFont = [UIFont fontWithName:@"Courier" size:4];
     }
     
-    _link = [CADisplayLink displayLinkWithTarget:[YYWeakProxy proxyWithTarget:self] selector:@selector(tick:)];
-    [_link addToRunLoop:[NSRunLoop mainRunLoop] forMode:NSRunLoopCommonModes];
     return self;
 }
 
 - (void)dealloc {
     [_link invalidate];
+    _link = nil;
 }
 
 - (CGSize)sizeThatFits:(CGSize)size {

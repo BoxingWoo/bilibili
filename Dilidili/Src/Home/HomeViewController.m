@@ -32,7 +32,10 @@
     
     [self createUI];
     
+#ifdef DEBUG
     [YYFPSLabel show];
+#endif
+    
 }
 
 - (void)viewWillAppear:(BOOL)animated
@@ -111,7 +114,7 @@
     return vc;
 }
 
-- (void)multiViewControl:(BSMultiViewControl *)multiViewControl didClickButtonAtIndex:(NSUInteger)index withViewController:(UIViewController *)vc
+- (void)multiViewControl:(BSMultiViewControl *)multiViewControl didSelectViewController:(UIViewController *)vc atIndex:(NSUInteger)index
 {
     
 }

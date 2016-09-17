@@ -142,12 +142,12 @@ typedef NS_ENUM(NSInteger, BSMultiViewControlStyle) {
 @optional
 
 /**
- *  @brief 点击标题按钮代理方法，子视图控制器可在此方法中进行数据请求操作
+ *  @brief 选中子视图控制器代理方法，子视图控制器可在此方法中进行数据请求操作
  *
  *  @param multiViewControl 多视图控制器
- *  @param index            索引
  *  @param vc               子视图控制器
+ *  @param index            索引
  */
-- (void)multiViewControl:(BSMultiViewControl *)multiViewControl didClickButtonAtIndex:(NSUInteger)index withViewController:(UIViewController *)vc;
+- (void)multiViewControl:(BSMultiViewControl *)multiViewControl didSelectViewController:(UIViewController *)vc atIndex:(NSUInteger)index;
 
 @end

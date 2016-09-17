@@ -52,10 +52,16 @@
     return @"27eb53fc9058f8c3";
 }
 
+#pragma mark 版本号
++ (NSString *)appver
+{
+    return @"3710";
+}
+
 #pragma mark 编译号
 + (NSString *)build
 {
-    return @"3600";
+    return @"3710";
 }
 
 #pragma mark 频道
@@ -89,16 +95,31 @@
 }
 
 #pragma mark 签名
-+ (NSString *)sign
++ (NSString *)signParameters:(NSDictionary *)parameters byTimeStamp:(NSInteger)timeStamp
 {
-    return @"207007525573941d525bb02b501243d3";
+    if (parameters == nil || parameters.count == 0) {
+        return @"";
+    }
+    
+    NSArray *keys = parameters.allKeys;
+    keys = [keys sortedArrayUsingSelector:@selector(compare:)];
+    NSMutableString *signElements = [[NSMutableString alloc] init];
+    for (id key in keys) {
+        [signElements appendFormat:@"%@=%@&", key, parameters[key]];
+    }
+    [signElements deleteCharactersInRange:NSMakeRange(signElements.length - 1, 1)];
+    
+    NSData *signData = [signElements dataUsingEncoding:NSUTF8StringEncoding];
+    NSData *signKey = [[NSString stringWithFormat:@"%li", timeStamp].md5String dataUsingEncoding:NSUTF8StringEncoding];
+    NSString *signedString = [signData aes256EncryptWithKey:signKey iv:nil].base64EncodedString.md5String;
+    return signedString;
 }
 
 #pragma mark 时间戳
-+ (NSTimeInterval)ts
++ (NSInteger)ts
 {
     NSTimeInterval timeInterval = [[NSDate date] timeIntervalSince1970];
-    return timeInterval;
+    return (NSInteger)timeInterval;
 }
 
 @end

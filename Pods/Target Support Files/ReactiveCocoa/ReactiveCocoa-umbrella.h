@@ -33,7 +33,6 @@
 #import "RACCompoundDisposable.h"
 #import "RACDelegateProxy.h"
 #import "RACDisposable.h"
-#import "RACDynamicPropertySuperclass.h"
 #import "RACDynamicSequence.h"
 #import "RACDynamicSignal.h"
 #import "RACEagerSequence.h"

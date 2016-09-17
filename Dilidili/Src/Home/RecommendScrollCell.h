@@ -12,6 +12,7 @@
 
 @property (nonatomic, weak) UIImageView *coverImageView;
 @property (nonatomic, weak) UILabel *titleLabel;
+@property (nonatomic, strong) NSIndexPath *indexPath;
 
 @end
 

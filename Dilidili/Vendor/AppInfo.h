@@ -51,6 +51,11 @@
 + (NSString *)appkey;
 
 /**
+ *  @brief 版本号
+ */
++ (NSString *)appver;
+
+/**
  *  @brief 编译号
  */
 + (NSString *)build;
@@ -82,12 +87,15 @@
 
 /**
  *  @brief 签名
+ *
+ *  @param parameters 参数
+ *  @param timeStamp  时间戳
  */
-+ (NSString *)sign;
++ (NSString *)signParameters:(NSDictionary *)parameters byTimeStamp:(NSInteger)timeStamp;
 
 /**
  *  @brief 时间戳
  */
-+ (NSTimeInterval)ts;
++ (NSInteger)ts;
 
 @end

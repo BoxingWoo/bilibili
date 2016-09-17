@@ -24,6 +24,23 @@
     // Dispose of any resources that can be recreated.
 }
 
+#pragma mark - Others
+
+- (BOOL)shouldAutorotate
+{
+    return YES;
+}
+
+- (UIInterfaceOrientationMask)supportedInterfaceOrientations
+{
+    return UIInterfaceOrientationMaskPortrait;
+}
+
+- (UIStatusBarStyle)preferredStatusBarStyle
+{
+    return UIStatusBarStyleLightContent;
+}
+
 /*
 #pragma mark - Navigation
 

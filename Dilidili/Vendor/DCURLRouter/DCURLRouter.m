@@ -55,7 +55,6 @@
 }
 
 + (void)pushViewController:(UIViewController *)viewController animated:(BOOL)animated {
-
     [DCURLNavgation pushViewController:viewController animated:animated replace:NO];
 }
 
@@ -65,20 +64,23 @@
 
 + (void)pushURLString:(NSString *)urlString animated:(BOOL)animated {
 
-    UIViewController *viewController = [UIViewController initFromString:urlString fromConfig:[DCURLRouter sharedDCURLRouter].configDict];
-    [DCURLNavgation pushViewController:viewController animated:animated replace:NO];
+    [self pushURLString:urlString query:@{} animated:animated replace:NO];
 }
 
 + (void)pushURLString:(NSString *)urlString query:(NSDictionary *)query animated:(BOOL)animated{
-    UIViewController *viewController = [UIViewController initFromString:urlString withQuery:query fromConfig:[DCURLRouter sharedDCURLRouter].configDict];    
-    [DCURLNavgation pushViewController:viewController animated:animated replace:NO];
+    
+    [self pushURLString:urlString query:query animated:animated replace:NO];
 }
 
 + (void)pushURLString:(NSString *)urlString animated:(BOOL)animated replace:(BOOL)replace{
-    UIViewController *viewController = [UIViewController initFromString:urlString fromConfig:[DCURLRouter sharedDCURLRouter].configDict];
-    [DCURLNavgation pushViewController:viewController animated:YES replace:replace];
+    
+    [self pushURLString:urlString query:@{} animated:animated replace:replace];
 }
 
++ (void)pushURLString:(NSString *)urlString query:(NSDictionary *)query animated:(BOOL)animated replace:(BOOL)replace{
+    UIViewController *viewController = [UIViewController initFromString:urlString withQuery:query fromConfig:[DCURLRouter sharedDCURLRouter].configDict];
+        [DCURLNavgation pushViewController:viewController animated:animated replace:replace];
+}
 
 + (void)presentViewController:(UIViewController *)viewControllerToPresent animated: (BOOL)flag completion:(void (^ __nullable)(void))completion {
     [DCURLNavgation presentViewController:viewControllerToPresent animated:flag completion:completion];
@@ -103,13 +105,6 @@
     UIViewController *viewController = [UIViewController initFromString:urlString withQuery:query fromConfig:[DCURLRouter sharedDCURLRouter].configDict];
     [DCURLNavgation presentViewController:viewController animated:animated completion:completion];
 }
-
-
-+ (void)pushURLString:(NSString *)urlString query:(NSDictionary *)query animated:(BOOL)animated replace:(BOOL)replace{
-    UIViewController *viewController = [UIViewController initFromString:urlString withQuery:query fromConfig:[DCURLRouter sharedDCURLRouter].configDict];
-    [DCURLNavgation pushViewController:viewController animated:animated replace:replace];
-}
-
 
 + (void)presentURLString:(NSString *)urlString animated:(BOOL)animated withNavigationClass:(Class)classType completion:(void (^ __nullable)(void))completion{
     

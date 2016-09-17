@@ -51,11 +51,12 @@
         [self addSubview:moreBtn];
         [moreBtn mas_makeConstraints:^(MASConstraintMaker *make) {
             make.right.equalTo(arrowImageView.mas_left).offset(-6.0);
-            make.left.equalTo(titleLabel.mas_right).offset(8.0);
+            make.left.greaterThanOrEqualTo(titleLabel.mas_right).offset(8.0);
             make.centerY.equalTo(iconImageView.mas_centerY);
             make.height.equalTo(iconImageView.mas_height);
         }];
         [moreBtn setContentCompressionResistancePriority:749 forAxis:UILayoutConstraintAxisHorizontal];
+        [moreBtn setContentHuggingPriority:252 forAxis:UILayoutConstraintAxisHorizontal];
     }
     return self;
 }

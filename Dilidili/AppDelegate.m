@@ -134,8 +134,11 @@
     self.window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
     self.window.backgroundColor = kBgColor;
     
+#ifdef DEBUG
+    DdTabBarController *rvc = [[DdTabBarController alloc] init];
+#else
     LaunchViewController *rvc = [[LaunchViewController alloc] init];
-//    DdTabBarController *rvc = [[DdTabBarController alloc] init];
+#endif
     
     self.window.rootViewController = rvc;
     [self.window makeKeyAndVisible];

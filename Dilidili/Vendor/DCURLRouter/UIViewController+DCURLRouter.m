@@ -59,7 +59,7 @@ static char URLparams;
 - (void)open:(NSURL *)url withQuery:(NSDictionary *)query{
     self.path = [url path];
     self.originUrl = url;
-    if (query) {   // 如果自定义url后面有拼接参数,而且又通过query传入了参数,那么优先query传入了参数
+    if (query.count > 0) {   // 如果自定义url后面有拼接参数,而且又通过query传入了参数,那么优先query传入了参数
         self.params = query;
     }else {
         self.params = [self paramsURL:url];
@@ -69,12 +69,12 @@ static char URLparams;
 + (UIViewController *)initFromURL:(NSURL *)url withQuery:(NSDictionary *)query fromConfig:(NSDictionary *)configDict
 {
     UIViewController *VC = nil;
-    NSString *home;
-    if(url.path == nil){ // 处理url,去掉有可能会拼接的参数
-        home = [NSString stringWithFormat:@"%@://%@", url.scheme, url.host];
-    }else{
-        home = [NSString stringWithFormat:@"%@://%@%@", url.scheme, url.host,url.path];
-    }
+    NSString *home = [NSString stringWithFormat:@"%@://%@", url.scheme, url.host];
+//    if(url.path == nil){ // 处理url,去掉有可能会拼接的参数
+//        home = [NSString stringWithFormat:@"%@://%@", url.scheme, url.host];
+//    }else{
+//        home = [NSString stringWithFormat:@"%@://%@%@", url.scheme, url.host,url.path];
+//    }
     if([configDict.allKeys containsObject:url.scheme]){ // 字典中的所有的key是否包含传入的协议头
         id config = [configDict objectForKey:url.scheme]; // 根据协议头取出值
         Class class = nil;

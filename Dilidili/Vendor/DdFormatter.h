@@ -15,4 +15,6 @@
 
 + (NSString *)stringForCount:(NSUInteger)count;
 
++ (NSString *)stringForMediaTime:(NSTimeInterval)time;
+
 @end

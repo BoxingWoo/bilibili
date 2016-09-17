@@ -21,4 +21,7 @@
 //默认视图背景颜色
 #define kBgColor [UIColor colorWithWhite:243 / 255.0 alpha:1.0]
 
+//默认边框颜色
+#define kBorderColor [UIColor colorWithWhite:203 / 255.0 alpha:1.0]
+
 #endif /* AllColor_h */

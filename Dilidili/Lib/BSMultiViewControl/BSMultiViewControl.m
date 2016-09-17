@@ -137,14 +137,6 @@ static CGFloat animateDuration = 0.25;
         [arrowBtn addTarget:self action:@selector(showButtonListBox:) forControlEvents:UIControlEventTouchUpInside];
     }
     
-    if (_showSeparatedLine) {
-        UIView *separatedLine = [[UIView alloc] init];
-        _separatedLine = separatedLine;
-        [listBar addSubview:separatedLine];
-        separatedLine.userInteractionEnabled = NO;
-        separatedLine.backgroundColor = [UIColor colorWithWhite:203 / 255.0 alpha:1.0];
-    }
-    
     _buttons = [[NSMutableArray alloc] init];
     for (NSInteger i = 0; i < _itemsCount; i++) {
         UIButton *button = [self.dataSource multiViewControl:self buttonAtIndex:i];
@@ -163,6 +155,14 @@ static CGFloat animateDuration = 0.25;
     }
     
     [self createMainScrollView];
+    
+    if (_showSeparatedLine) {
+        UIView *separatedLine = [[UIView alloc] init];
+        _separatedLine = separatedLine;
+        [self addSubview:separatedLine];
+        separatedLine.userInteractionEnabled = NO;
+        separatedLine.backgroundColor = [UIColor colorWithWhite:203 / 255.0 alpha:1.0];
+    }
 }
 
 //创建竖向列表式标题栏
@@ -243,80 +243,85 @@ static CGFloat animateDuration = 0.25;
 - (void)layoutSubviews
 {
     [super layoutSubviews];
-    if (self.shouldLayoutSubViews) {
-        self.shouldLayoutSubViews = NO;
+    
+    if (_style != BSMultiViewControlVertical) {
+        if (_listBarWidth == 0) _listBarWidth = CGRectGetWidth(self.bounds);
+        if (_listBarHeight == 0) _listBarHeight = 36.0;
+        self.listBar.frame = CGRectMake((CGRectGetWidth(self.bounds) - _listBarWidth) / 2, 0, _listBarWidth, _listBarHeight);
+        if (_showButtonListBox) {
+            self.arrowBtn.frame = CGRectMake(_listBarWidth - arrowButtonWidth, 0, arrowButtonWidth, _listBarHeight);
+            self.listBarScrollView.frame = CGRectMake(0, 0, _listBarWidth - arrowButtonWidth, _listBarHeight);
+        }else {
+            self.listBarScrollView.frame = self.listBar.bounds;
+        }
+        if (_showSeparatedLine) {
+            self.separatedLine.frame = CGRectMake(0, _listBarHeight - 0.5, CGRectGetWidth(self.bounds), 0.5);
+        }
+        self.mainScrollView.frame = CGRectMake(0, _listBarHeight, CGRectGetWidth(self.bounds), CGRectGetHeight(self.bounds) - _listBarHeight);
         
-        if (_style != BSMultiViewControlVertical) {
-            if (_listBarWidth == 0) _listBarWidth = CGRectGetWidth(self.bounds);
-            if (_listBarHeight == 0) _listBarHeight = 36.0;
-            self.listBar.frame = CGRectMake((CGRectGetWidth(self.bounds) - _listBarWidth) / 2, 0, _listBarWidth, _listBarHeight);
-            if (_showButtonListBox) {
-                self.arrowBtn.frame = CGRectMake(_listBarWidth - arrowButtonWidth, 0, arrowButtonWidth, _listBarHeight);
-                self.listBarScrollView.frame = CGRectMake(0, 0, _listBarWidth - arrowButtonWidth, _listBarHeight);
-            }else {
-                self.listBarScrollView.frame = self.listBar.bounds;
-            }
-            if (_showSeparatedLine) {
-                self.separatedLine.frame = CGRectMake(0, _listBarHeight - 0.5, CGRectGetWidth(self.bounds), 0.5);
-            }
-            self.mainScrollView.frame = CGRectMake(0, _listBarHeight, CGRectGetWidth(self.bounds), CGRectGetHeight(self.bounds) - _listBarHeight);
-            
-            if (_style == BSMultiViewControlFixedSpace) {
-                CGFloat totalWidth = _fixedSpace / 2;
-                for (NSInteger i = 0; i < _itemsCount; i++) {
-                    UIButton *button = self.buttons[i];
-                    
-                    //适配
-                    [button.titleLabel sizeToFit];
-                    [button sizeToFit];
-                    button.center = CGPointMake(totalWidth + CGRectGetWidth(button.bounds) / 2, self.listBarScrollView.center.y);
-                    if (i == _itemsCount - 1) {
-                        totalWidth += CGRectGetWidth(button.bounds) + _fixedSpace / 2;
-                    }else {
-                        totalWidth += CGRectGetWidth(button.bounds) + _fixedSpace;
-                    }
-                }
-                CGSize contentSize = CGSizeMake(totalWidth, CGRectGetHeight(self.listBarScrollView.bounds));
-                self.listBarScrollView.contentSize = contentSize.width > CGRectGetWidth(self.listBarScrollView.bounds) ? contentSize : self.listBarScrollView.bounds.size;
+        if (_style == BSMultiViewControlFixedSpace) {
+            CGFloat totalWidth = _fixedSpace / 2;
+            for (NSInteger i = 0; i < _itemsCount; i++) {
+                UIButton *button = self.buttons[i];
                 
-            }else if (_style == BSMultiViewControlFixedPageSize) {
-                CGFloat width = CGRectGetWidth(self.listBarScrollView.bounds) / _fixedPageSize;
-                for (NSInteger i = 0; i < _itemsCount; i++) {
-                    UIButton *button = self.buttons[i];
-                    
-                    //适配
-                    [button.titleLabel sizeToFit];
-                    [button sizeToFit];
-                    CGFloat buttonHeight = CGRectGetHeight(button.bounds);
-                    button.frame = CGRectMake(i * width, (CGRectGetHeight(self.listBarScrollView.bounds) - buttonHeight) / 2, width, buttonHeight);
+                //适配
+                [button.titleLabel sizeToFit];
+                [button sizeToFit];
+                button.center = CGPointMake(totalWidth + CGRectGetWidth(button.bounds) / 2, self.listBarScrollView.center.y);
+                if (i == _itemsCount - 1) {
+                    totalWidth += CGRectGetWidth(button.bounds) + _fixedSpace / 2;
+                }else {
+                    totalWidth += CGRectGetWidth(button.bounds) + _fixedSpace;
                 }
-                CGSize contentSize = CGSizeMake(width * self.itemsCount, CGRectGetHeight(self.listBarScrollView.bounds));
-                self.listBarScrollView.contentSize = contentSize.width > CGRectGetWidth(self.listBarScrollView.bounds) ? contentSize : self.listBarScrollView.bounds.size;
             }
+            CGSize contentSize = CGSizeMake(totalWidth, CGRectGetHeight(self.listBarScrollView.bounds));
+            self.listBarScrollView.contentSize = contentSize.width > CGRectGetWidth(self.listBarScrollView.bounds) ? contentSize : self.listBarScrollView.bounds.size;
             
             UIButton *selectedBtn = self.buttons[_selectedIndex];
             self.selectedButtonBottomLine.frame = CGRectMake(selectedBtn.frame.origin.x + (CGRectGetWidth(selectedBtn.bounds) - CGRectGetWidth(selectedBtn.titleLabel.bounds)) / 2, CGRectGetHeight(self.listBarScrollView.bounds) - selectedButtonBottomLineHeight, CGRectGetWidth(selectedBtn.titleLabel.bounds), selectedButtonBottomLineHeight);
             
-            CGFloat width = CGRectGetWidth(self.mainScrollView.bounds);
-            CGFloat height = CGRectGetHeight(self.mainScrollView.bounds);
+        }else if (_style == BSMultiViewControlFixedPageSize) {
+            CGFloat width = CGRectGetWidth(self.listBarScrollView.bounds) / _fixedPageSize;
             for (NSInteger i = 0; i < _itemsCount; i++) {
-                UIViewController *vc = self.viewControllers[i];
-                vc.view.frame = CGRectMake(i * width, 0, width, height);
+                UIButton *button = self.buttons[i];
+                
+                //适配
+                [button.titleLabel sizeToFit];
+                [button sizeToFit];
+                CGFloat buttonHeight = CGRectGetHeight(button.bounds);
+                button.frame = CGRectMake(i * width, (CGRectGetHeight(self.listBarScrollView.bounds) - buttonHeight) / 2, width, buttonHeight);
             }
-            self.mainScrollView.contentSize = CGSizeMake(width * self.itemsCount, height);
-        }else {
-            if (_listBarWidth == 0) _listBarWidth = 84.0;
-            if (_listBarHeight == 0) _listBarHeight = CGRectGetHeight(self.bounds);
-            self.listBar.frame = CGRectMake(0, (CGRectGetHeight(self.bounds) - _listBarHeight) / 2, _listBarWidth, _listBarHeight);
-            self.listBarTableView.frame = self.listBar.bounds;
-            self.mainContentView.frame = CGRectMake(_listBarWidth, 0, CGRectGetWidth(self.bounds) - _listBarWidth, CGRectGetHeight(self.bounds));
+            CGSize contentSize = CGSizeMake(width * self.itemsCount, CGRectGetHeight(self.listBarScrollView.bounds));
+            self.listBarScrollView.contentSize = contentSize.width > CGRectGetWidth(self.listBarScrollView.bounds) ? contentSize : self.listBarScrollView.bounds.size;
             
-            for (NSInteger i = 0; i < _itemsCount; i++) {
-                UIViewController *vc = self.viewControllers[i];
-                vc.view.frame = self.mainContentView.bounds;
-            }
+            UIButton *selectedBtn = self.buttons[_selectedIndex];
+            self.selectedButtonBottomLine.frame = CGRectMake(selectedBtn.frame.origin.x, CGRectGetHeight(self.listBarScrollView.bounds) - selectedButtonBottomLineHeight, CGRectGetWidth(selectedBtn.bounds), selectedButtonBottomLineHeight);
         }
         
+        CGFloat width = CGRectGetWidth(self.mainScrollView.bounds);
+        CGFloat height = CGRectGetHeight(self.mainScrollView.bounds);
+        for (NSInteger i = 0; i < _itemsCount; i++) {
+            UIViewController *vc = self.viewControllers[i];
+            vc.view.frame = CGRectMake(i * width, 0, width, height);
+        }
+        self.mainScrollView.contentSize = CGSizeMake(width * self.itemsCount, height);
+    }else {
+        if (_listBarWidth == 0) _listBarWidth = 84.0;
+        if (_listBarHeight == 0) _listBarHeight = CGRectGetHeight(self.bounds);
+        self.listBar.frame = CGRectMake(0, (CGRectGetHeight(self.bounds) - _listBarHeight) / 2, _listBarWidth, _listBarHeight);
+        self.listBarTableView.frame = self.listBar.bounds;
+        self.mainContentView.frame = CGRectMake(_listBarWidth, 0, CGRectGetWidth(self.bounds) - _listBarWidth, CGRectGetHeight(self.bounds));
+        
+        for (NSInteger i = 0; i < _itemsCount; i++) {
+            UIViewController *vc = self.viewControllers[i];
+            vc.view.frame = self.mainContentView.bounds;
+        }
+    }
+    
+    [self layoutIfNeeded];
+    
+    if (self.shouldLayoutSubViews) {
+        self.shouldLayoutSubViews = NO;
         //设置选中
         self.selectedIndex = _selectedIndex;
     }
@@ -331,8 +336,8 @@ static CGFloat animateDuration = 0.25;
         if (self.style != BSMultiViewControlVertical) {
             [self.mainScrollView setContentOffset:CGPointMake(selectedIndex * CGRectGetWidth(self.mainScrollView.bounds), 0)];
             [self synSelectButtonAction:selectedIndex];
-            if ([self.delegate respondsToSelector:@selector(multiViewControl:didClickButtonAtIndex:withViewController:)]) {
-                [self.delegate multiViewControl:self didClickButtonAtIndex:selectedIndex withViewController:self.viewControllers[selectedIndex]];
+            if ([self.delegate respondsToSelector:@selector(multiViewControl:didSelectViewController:atIndex:)]) {
+                [self.delegate multiViewControl:self didSelectViewController:self.viewControllers[selectedIndex] atIndex:selectedIndex];
             }
         }else {
             [self synSelectButtonAction:selectedIndex];
@@ -510,7 +515,16 @@ static CGFloat animateDuration = 0.25;
         //设置选中
         UIButton *selectedBtn = self.buttons[index];
         selectedBtn.selected = YES;
-        self.selectedButtonBottomLine.frame = CGRectMake(selectedBtn.frame.origin.x + (CGRectGetWidth(selectedBtn.bounds) - CGRectGetWidth(selectedBtn.titleLabel.bounds)) / 2, CGRectGetHeight(self.listBarScrollView.bounds) - selectedButtonBottomLineHeight, CGRectGetWidth(selectedBtn.titleLabel.bounds), selectedButtonBottomLineHeight);
+        if (self.style == BSMultiViewControlFixedSpace) {
+            
+            self.selectedButtonBottomLine.frame = CGRectMake(selectedBtn.frame.origin.x + (CGRectGetWidth(selectedBtn.bounds) - CGRectGetWidth(selectedBtn.titleLabel.bounds)) / 2, CGRectGetHeight(self.listBarScrollView.bounds) - selectedButtonBottomLineHeight, CGRectGetWidth(selectedBtn.titleLabel.bounds), selectedButtonBottomLineHeight);
+            
+        }else if (self.style == BSMultiViewControlFixedPageSize) {
+            
+            self.selectedButtonBottomLine.frame = CGRectMake(selectedBtn.frame.origin.x, CGRectGetHeight(self.listBarScrollView.bounds) - selectedButtonBottomLineHeight, CGRectGetWidth(selectedBtn.bounds), selectedButtonBottomLineHeight);
+            
+        }
+        
         
         //同步滑动
         if (self.style == BSMultiViewControlFixedSpace) {
@@ -545,8 +559,8 @@ static CGFloat animateDuration = 0.25;
         //顶格滑动
         [self.listBarTableView scrollToRowAtIndexPath:[NSIndexPath indexPathForRow:index inSection:0] atScrollPosition:UITableViewScrollPositionTop animated:YES];
         
-        if ([self.delegate respondsToSelector:@selector(multiViewControl:didClickButtonAtIndex:withViewController:)]) {
-            [self.delegate multiViewControl:self didClickButtonAtIndex:index withViewController:self.viewControllers[index]];
+        if ([self.delegate respondsToSelector:@selector(multiViewControl:didSelectViewController:atIndex:)]) {
+            [self.delegate multiViewControl:self didSelectViewController:self.viewControllers[index] atIndex:index];
         }
     }
     
@@ -585,7 +599,12 @@ static CGFloat animateDuration = 0.25;
             v1 = (NSInteger)(_clickedIndex - index) * CGRectGetWidth(scrollView.bounds);
         }
         UIButton *selectedBtn = self.buttons[index];
-        CGFloat v2 = (targetBtn.frame.origin.x + (CGRectGetWidth(targetBtn.bounds) - CGRectGetWidth(targetBtn.titleLabel.bounds)) / 2) - (selectedBtn.frame.origin.x + (CGRectGetWidth(selectedBtn.bounds) - CGRectGetWidth(selectedBtn.titleLabel.bounds)) / 2);
+        CGFloat v2;
+        if (self.style == BSMultiViewControlFixedSpace) {
+            v2 = (targetBtn.frame.origin.x + (CGRectGetWidth(targetBtn.bounds) - CGRectGetWidth(targetBtn.titleLabel.bounds)) / 2) - (selectedBtn.frame.origin.x + (CGRectGetWidth(selectedBtn.bounds) - CGRectGetWidth(selectedBtn.titleLabel.bounds)) / 2);
+        }else if (self.style == BSMultiViewControlFixedPageSize) {
+            v2 = (targetBtn.frame.origin.x - selectedBtn.frame.origin.x);
+        }
         CGFloat originXDelta = offsetXDelta / v1 * v2;
         self.selectedButtonBottomLine.frame = CGRectMake(self.selectedButtonBottomLine.frame.origin.x + originXDelta, self.selectedButtonBottomLine.frame.origin.y, CGRectGetWidth(self.selectedButtonBottomLine.bounds), CGRectGetHeight(self.selectedButtonBottomLine.bounds));
         
@@ -598,8 +617,8 @@ static CGFloat animateDuration = 0.25;
     if (scrollView == self.mainScrollView) {
         NSInteger page = scrollView.contentOffset.x / scrollView.bounds.size.width;
         [self synSelectButtonAction:page];
-        if ([self.delegate respondsToSelector:@selector(multiViewControl:didClickButtonAtIndex:withViewController:)]) {
-            [self.delegate multiViewControl:self didClickButtonAtIndex:page withViewController:self.viewControllers[page]];
+        if ([self.delegate respondsToSelector:@selector(multiViewControl:didSelectViewController:atIndex:)]) {
+            [self.delegate multiViewControl:self didSelectViewController:self.viewControllers[page] atIndex:page];
         }
     }
 }
@@ -609,8 +628,8 @@ static CGFloat animateDuration = 0.25;
     if (scrollView == self.mainScrollView) {
         NSInteger page = scrollView.contentOffset.x / scrollView.bounds.size.width;
         [self synSelectButtonAction:page];
-        if ([self.delegate respondsToSelector:@selector(multiViewControl:didClickButtonAtIndex:withViewController:)]) {
-            [self.delegate multiViewControl:self didClickButtonAtIndex:page withViewController:self.viewControllers[page]];
+        if ([self.delegate respondsToSelector:@selector(multiViewControl:didSelectViewController:atIndex:)]) {
+            [self.delegate multiViewControl:self didSelectViewController:self.viewControllers[page] atIndex:page];
         }
     }
 }

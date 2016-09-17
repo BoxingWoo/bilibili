@@ -8,11 +8,15 @@
 
 #import "RecommendViewController.h"
 #import "DdCollectionView.h"
+#import "UIScrollView+EmptyDataSet.h"
 #import "DdProgressHUD.h"
 #import "DdRefreshHeader.h"
 #import "RecommendViewModel.h"
 
-@interface RecommendViewController () <UICollectionViewDataSource, UICollectionViewDelegate, UICollectionViewDelegateFlowLayout, BSLoopScrollViewDelegate>
+@interface RecommendViewController () <UICollectionViewDataSource, UICollectionViewDelegate, UICollectionViewDelegateFlowLayout, BSLoopScrollViewDelegate, DZNEmptyDataSetSource, DZNEmptyDataSetDelegate>
+{
+    BOOL _isNoData;
+}
 
 @property (nonatomic, weak) DdCollectionView *collectionView;
 @property (nonatomic, strong) NSMutableArray <RecommendViewModel *> *dataArr;
@@ -51,13 +55,15 @@
 - (void)createUI
 {
     UICollectionViewFlowLayout *flowLayout = [[UICollectionViewFlowLayout alloc] init];
-    flowLayout.minimumInteritemSpacing = 10.0;
+    flowLayout.minimumInteritemSpacing = 8.0;
     flowLayout.minimumLineSpacing = 8.0;
     DdCollectionView *collectionView = [[DdCollectionView alloc] initWithFrame:self.view.bounds collectionViewLayout:flowLayout];
     _collectionView = collectionView;
     collectionView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     collectionView.dataSource = self;
     collectionView.delegate = self;
+    collectionView.emptyDataSetSource = self;
+    collectionView.emptyDataSetDelegate = self;
     collectionView.backgroundColor = kBgColor;
     collectionView.contentInset = UIEdgeInsetsMake(0, 0, kTabBarHeight, 0);
     collectionView.scrollIndicatorInsets = collectionView.contentInset;
@@ -234,7 +240,9 @@
 {
     RecommendViewModel *viewModel = self.dataArr[indexPath.section];
     if (![viewModel.model.style isEqualToString:RecommendStyleSmall]) {
-        
+        RecommendViewModel *viewModel = self.dataArr[indexPath.section];
+        RecommendModel *model = viewModel.model.body[indexPath.item];
+        [DCURLRouter pushURLString:model.uri query:@{@"from":viewModel.model.param, @"title":model.title, @"cover":model.cover} animated:YES];
     }
 }
 
@@ -249,7 +257,7 @@
     }else if ([loopScrollView.superview isKindOfClass:[RecommendSectionFooter class]]) {
         bannerModel = viewModel.model.bannerBottom[index];
     }
-    [DCURLRouter pushURLString:bannerModel.uri animated:YES];
+    [DCURLRouter pushURLString:bannerModel.uri query:@{@"from":viewModel.model.param, @"title":bannerModel.title,  @"cover":bannerModel.image} animated:YES];
 }
 
 #pragma mark - HandleAction
@@ -275,26 +283,31 @@
     RecommendViewModel *viewModel = self.dataArr[button.tag];
     [[[viewModel refreshRecommendData] execute:nil] subscribeNext:^(id x) {
         @strongify(self);
-        [self.collectionView reloadSections:[NSIndexSet indexSetWithIndex:button.tag]];
-    } error:^(NSError *error) {
-        [DdProgressHUD showErrorWithStatus:error.localizedDescription];
-    } completed:^{
         button.enabled = YES;
         [button.layer pop_removeAnimationForKey:@"refresh_rotate"];
         button.layer.transform = CATransform3DIdentity;
+        [self.collectionView reloadSections:[NSIndexSet indexSetWithIndex:button.tag]];
+    } error:^(NSError *error) {
+        button.enabled = YES;
+        [button.layer pop_removeAnimationForKey:@"refresh_rotate"];
+        button.layer.transform = CATransform3DIdentity;
+        [DdProgressHUD showErrorWithStatus:error.localizedDescription];
     }];
 }
 
 #pragma mark 跳转
-- (void)handleLink:(UIControl *)sender
+- (void)handleLink:(RecommendScrollContentView *)sender
 {
-    
+    RecommendViewModel *viewModel = self.dataArr[sender.indexPath.section];
+    RecommendModel *model = viewModel.model.body[sender.indexPath.item];
+    [DCURLRouter pushURLString:model.uri animated:YES];
 }
 
 #pragma mark - Utility
 #pragma mark 请求数据
 - (void)requestData:(BOOL)forceReload
 {
+    _isNoData = NO;
     [[[RecommendViewModel requestRecommendData:forceReload] execute:nil] subscribeNext:^(NSArray *modelArr) {
         
         [self.collectionView.mj_header endRefreshing];
@@ -306,9 +319,63 @@
         [self.collectionView reloadData];
         
     } error:^(NSError *error) {
+        _isNoData = YES;
         [self.collectionView.mj_header endRefreshing];
         [DdProgressHUD showErrorWithStatus:error.localizedDescription];
     }];
+}
+
+#pragma mark - EmptyDataSet
+
+- (UIView *)customViewForEmptyDataSet:(UIScrollView *)scrollView
+{
+    UIView *customView = [[UIView alloc] init];
+    UILabel *titleLabel = [[UILabel alloc] init];
+    titleLabel.font = [UIFont systemFontOfSize:15];
+    titleLabel.textColor = kTextColor;
+    if (_isNoData) {
+        titleLabel.text = @"电波无法到达哟 code:0";
+    }else {
+        titleLabel.text = @"正在玩命加载数据...";
+    }
+    [customView addSubview:titleLabel];
+    [titleLabel mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.bottom.equalTo(customView.mas_centerY).offset(-10.0);
+        make.centerX.equalTo(customView.mas_centerX);
+    }];
+    
+    UIImageView *imageView = [[UIImageView alloc] init];
+    if (_isNoData) {
+        imageView.image = [UIImage imageNamed:@"common_loading_noData"];
+    }else {
+        NSMutableArray *animationImages = [[NSMutableArray alloc] init];
+        for (NSInteger i = 1; i <= 2; i++) {
+            UIImage *image = [UIImage imageNamed:[NSString stringWithFormat:@"common_loading_loading_%li", i]];
+            [animationImages addObject:image];
+        }
+        imageView.animationImages = animationImages;
+        imageView.animationDuration = animationImages.count * 0.5;
+        imageView.animationRepeatCount = 0;
+        [imageView startAnimating];
+    }
+    [customView addSubview:imageView];
+    CGFloat width = widthEx(200.0);
+    [imageView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.centerX.equalTo(customView.mas_centerX);
+        make.bottom.equalTo(titleLabel.mas_top);
+        make.width.height.mas_equalTo(width);
+    }];
+    
+    return customView;
+}
+
+- (BOOL)emptyDataSetShouldAllowScroll:(UIScrollView *)scrollView
+{
+    if (_isNoData) {
+        return YES;
+    }else {
+        return NO;
+    }
 }
 
 /*

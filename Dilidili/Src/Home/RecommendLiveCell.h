@@ -11,7 +11,7 @@
 @interface RecommendLiveCell : UICollectionViewCell
 
 @property (nonatomic, weak) UIImageView *coverImageView;
-@property (nonatomic, weak) UIImageView *faceImageView;
+@property (nonatomic, weak) YYAnimatedImageView *faceImageView;
 @property (nonatomic, weak) UILabel *nameLabel;
 @property (nonatomic, weak) UILabel *onlineLabel;
 @property (nonatomic, weak) UILabel *titleLabel;

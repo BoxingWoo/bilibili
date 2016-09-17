@@ -146,5 +146,6 @@ NS_ASSUME_NONNULL_BEGIN
 /** dismiss到根层控制器 */
 + (void)dismissToRootViewControllerAnimated: (BOOL)flag completion: (void (^ __nullable)(void))completion;
 
-NS_ASSUME_NONNULL_END
 @end
+
+NS_ASSUME_NONNULL_END

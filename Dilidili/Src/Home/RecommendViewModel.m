@@ -40,7 +40,7 @@
 
             } completion:NULL];
             contentView.titleLabel.text = model.title;
-            contentView.tag = i;
+            contentView.indexPath = [NSIndexPath indexPathForItem:i inSection:indexPath.section];
             [contentViews addObject:contentView];
         }
         scrollCell.contentViews = contentViews;
@@ -55,7 +55,7 @@
                 return [DdImageManager transformImage:image size:liveCell.coverImageView.size cornerRadius:kCoverCornerRadius style:DdImageDarkGradient];
                 
             } completion:NULL];
-            [liveCell.faceImageView setImageWithURL:[NSURL URLWithString:model.face] placeholder:[DdImageManager face_placeholderImage] options:0 progress:NULL transform:^UIImage * _Nullable(UIImage * _Nonnull image, NSURL * _Nonnull url) {
+            [liveCell.faceImageView setImageWithURL:[NSURL URLWithString:model.face] placeholder:[DdImageManager face_placeholderImage] options:YYWebImageOptionIgnoreDiskCache progress:NULL transform:^UIImage * _Nullable(UIImage * _Nonnull image, NSURL * _Nonnull url) {
                 
                 UIImage *transformImage = [image imageByResizeToSize:CGSizeMake(liveCell.faceImageView.width * kScreenScale, liveCell.faceImageView.height * kScreenScale)];
                 transformImage = [transformImage imageByRoundCornerRadius:transformImage.size.width / 2 borderWidth:2.0 borderColor:[UIColor whiteColor]];
@@ -225,14 +225,26 @@
     }
 }
 
-#pragma mark 请求推荐模块数据
-+ (RACCommand *)requestRecommendData:(BOOL)forceReload
+#pragma mark 刷新推荐列表数据
+- (RACCommand *)refreshRecommendData
 {
     return [[RACCommand alloc] initWithSignalBlock:^RACSignal *(id input) {
-        
         RACSignal *signal = [RACSignal createSignal:^RACDisposable *(id<RACSubscriber> subscriber) {
             
+            NSString *url;
             NSMutableDictionary *parameters = [NSMutableDictionary dictionary];
+            if ([self.model.type isEqualToString:RecommendTypeRecommend]) {
+                url = DdRecommendHotRefreshURL;
+                parameters[@"rand"] = @(1);
+            }else if ([self.model.type isEqualToString:RecommendTypeLive]) {
+                url = DdRecommendLiveRefreshURL;
+                parameters[@"rand"] = @(0);
+            }else {
+                url = [NSString stringWithFormat:@"%@/%@.json", DdRecommendRegionRefreshURL, self.model.param];
+                parameters[@"pagesize"] = @(4);
+                parameters[@"tid"] = self.model.param;
+            }
+            
             parameters[@"actionKey"] = [AppInfo actionKey];
             parameters[@"appkey"] = [AppInfo appkey];
             parameters[@"build"] = [AppInfo build];
@@ -241,9 +253,52 @@
             parameters[@"mobi_app"] = [AppInfo mobi_app];
             parameters[@"plat"] = [AppInfo plat];
             parameters[@"platform"] = [AppInfo platform];
-            parameters[@"sign"] = [AppInfo sign];
+            parameters[@"sign"] = [AppInfo signParameters:nil byTimeStamp:0];
             parameters[@"ts"] = @([AppInfo ts]);
+            DdHTTPSessionManager *manager = [DdHTTPSessionManager manager];
+            [manager GET:url parameters:parameters complection:^(ResponseCode code, NSDictionary *responseObject, NSError *error) {
+                if (code == 0) {
+                    NSArray *body;
+                    if ([self.model.type isEqualToString:RecommendTypeRecommend] || [self.model.type isEqualToString:RecommendTypeLive]) {
+                        body = [NSArray modelArrayWithClass:RecommendModel.class json:responseObject[kResponseDataKey]];
+                    }else {
+                        body = [NSArray modelArrayWithClass:RecommendModel.class json:responseObject[kResponseListKey]];
+                    }
+                    
+                    self.model.body = body;
+                    [subscriber sendNext:nil];
+                }else {
+                    [subscriber sendError:error];
+                }
+                [subscriber sendCompleted];
+            }];
+            return nil;
+            
+        }];
+        return signal;
+    }];
+}
+
+#pragma mark 请求推荐模块数据
++ (RACCommand *)requestRecommendData:(BOOL)forceReload
+{
+    return [[RACCommand alloc] initWithSignalBlock:^RACSignal *(id input) {
+        
+        RACSignal *signal = [RACSignal createSignal:^RACDisposable *(id<RACSubscriber> subscriber) {
+            
+            NSMutableDictionary *parameters = [NSMutableDictionary dictionary];
             parameters[@"warm"] = 0;
+            parameters[@"actionKey"] = [AppInfo actionKey];
+            parameters[@"appkey"] = [AppInfo appkey];
+            parameters[@"build"] = [AppInfo build];
+            parameters[@"channel"] = [AppInfo channel];
+            parameters[@"device"] = [AppInfo device];
+            parameters[@"mobi_app"] = [AppInfo mobi_app];
+            parameters[@"plat"] = [AppInfo plat];
+            parameters[@"platform"] = [AppInfo platform];
+            parameters[@"sign"] = [AppInfo signParameters:nil byTimeStamp:0];
+            parameters[@"ts"] = @([AppInfo ts]);
+            
             DdHTTPSessionManager *manager = [DdHTTPSessionManager manager];
 #ifdef DEBUG
             if (forceReload) {
@@ -267,60 +322,6 @@
             return nil;
         }];
         
-        return signal;
-    }];
-}
-
-#pragma mark 刷新推荐列表数据
-- (RACCommand *)refreshRecommendData
-{
-    return [[RACCommand alloc] initWithSignalBlock:^RACSignal *(id input) {
-        RACSignal *signal = [RACSignal createSignal:^RACDisposable *(id<RACSubscriber> subscriber) {
-
-            NSString *url;
-            NSMutableDictionary *parameters = [NSMutableDictionary dictionary];
-            if ([self.model.type isEqualToString:RecommendTypeRecommend]) {
-                url = DdRecommendHotRefreshURL;
-                parameters[@"rand"] = @(1);
-            }else if ([self.model.type isEqualToString:RecommendTypeLive]) {
-                url = DdRecommendLiveRefreshURL;
-                parameters[@"rand"] = @(0);
-            }else {
-                url = [NSString stringWithFormat:@"%@/%@.json", DdRecommendRegionRefreshURL, self.model.param];
-                parameters[@"pagesize"] = @(4);
-                parameters[@"tid"] = self.model.param;
-            }
-            
-            parameters[@"actionKey"] = [AppInfo actionKey];
-            parameters[@"appkey"] = [AppInfo appkey];
-            parameters[@"build"] = [AppInfo build];
-            parameters[@"channel"] = [AppInfo channel];
-            parameters[@"device"] = [AppInfo device];
-            parameters[@"mobi_app"] = [AppInfo mobi_app];
-            parameters[@"plat"] = [AppInfo plat];
-            parameters[@"platform"] = [AppInfo platform];
-            parameters[@"sign"] = [AppInfo sign];
-            parameters[@"ts"] = @([AppInfo ts]);
-            DdHTTPSessionManager *manager = [DdHTTPSessionManager manager];
-            [manager GET:url parameters:parameters complection:^(ResponseCode code, NSDictionary *responseObject, NSError *error) {
-                if (code == 0) {
-                    NSArray *body;
-                    if ([self.model.type isEqualToString:RecommendTypeRecommend] || [self.model.type isEqualToString:RecommendTypeLive]) {
-                        body = [NSArray modelArrayWithClass:RecommendModel.class json:responseObject[kResponseDataKey]];
-                    }else {
-                        body = [NSArray modelArrayWithClass:RecommendModel.class json:responseObject[kResponseListKey]];
-                    }
-                    
-                    self.model.body = body;
-                    [subscriber sendNext:nil];
-                }else {
-                    [subscriber sendError:error];
-                }
-                [subscriber sendCompleted];
-            }];
-            return nil;
-            
-        }];
         return signal;
     }];
 }

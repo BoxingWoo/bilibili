@@ -22,7 +22,7 @@
             make.height.equalTo(coverImageView.mas_width).multipliedBy(0.63);
         }];
         
-        UIImageView *faceImageView = [[UIImageView alloc] init];
+        YYAnimatedImageView *faceImageView = [[YYAnimatedImageView alloc] init];
         _faceImageView = faceImageView;
 //        faceImageView.contentMode = UIViewContentModeScaleAspectFill;
         [self.contentView addSubview:faceImageView];

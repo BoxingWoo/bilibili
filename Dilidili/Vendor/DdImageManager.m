@@ -12,6 +12,13 @@
 
 static NSString *const PlaceholderImageName = @"default_img";
 
++ (void)load
+{
+    YYImageCache *imageCache = [YYImageCache sharedCache];
+    imageCache.diskCache.costLimit = 1024 * 1024 * 100;
+    imageCache.diskCache.ageLimit = 60 * 60 * 1;
+}
+
 + (UIImage *)face_placeholderImage
 {
     NSString *name = @"misc_avatarDefault";
