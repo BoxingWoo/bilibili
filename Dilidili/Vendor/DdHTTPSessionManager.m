@@ -133,6 +133,7 @@ NSString *const DdRequestErrorDomain = @"BoxingWoo.Dilidili.RequestErrorDomain";
         code = [responseDict[kResponseCodeKey] integerValue];
         if (code != 0) {
             error = [NSError errorWithDomain:DdRequestErrorDomain code:code userInfo:@{NSLocalizedDescriptionKey:responseDict[kResponseMessageKey]}];
+            DDLogError(@"%@", error.localizedDescription);
         }
         
         if (self.cachePolicy != RequestUseDefaultCachePolicy) {
@@ -224,6 +225,7 @@ NSString *const DdRequestErrorDomain = @"BoxingWoo.Dilidili.RequestErrorDomain";
         code = [responseDict[kResponseCodeKey] integerValue];
         if (code != 0) {
             error = [NSError errorWithDomain:DdRequestErrorDomain code:code userInfo:@{NSLocalizedDescriptionKey:responseDict[kResponseMessageKey]}];
+            DDLogError(@"%@", error.localizedDescription);
         }
         
         if (self.cachePolicy != RequestUseDefaultCachePolicy) {

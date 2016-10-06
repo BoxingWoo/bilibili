@@ -11,14 +11,8 @@
 #import "DdImageManager.h"
 #import "BSTimeCalculate.h"
 #import "DdFormatter.h"
+#import "UITableView+FDTemplateLayoutCell.h"
 
-
-@interface DdReplyViewModel ()
-
-/** 单元格高度 */
-@property (nonatomic, assign) CGFloat cellHeight;
-
-@end
 
 @implementation DdReplyViewModel
 
@@ -29,7 +23,6 @@
         _model = model;
         _isSub = NO;
         _isHot = NO;
-        _cellHeight = 0;
         NSMutableArray *replies = [NSMutableArray array];
         for (DdReplyModel *replyModel in model.replies) {
             DdReplyViewModel *replyViewModel = [[DdReplyViewModel alloc] initWithModel:replyModel];
@@ -41,31 +34,10 @@
     return self;
 }
 
-#pragma mark 计算布局
-- (void)layout
-{
-    if (_cellHeight != 0) return;
-    UITableViewCell *cell;
-    if (!_isSub) {
-        DdVideoReplyCell *replyCell = [[DdVideoReplyCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:videoReplyCellID];
-        replyCell.contentLabel.text = self.model.content.message;
-        cell = replyCell;
-    }else {
-        DdVideoReplySubCell *subCell = [[DdVideoReplySubCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:videoReplySubCellID];
-        subCell.contentLabel.text = self.model.content.message;
-        cell = subCell;
-    }
-    
-    NSLayoutConstraint *tempWidthConstraint = [NSLayoutConstraint constraintWithItem:cell.contentView attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual toItem:nil attribute:NSLayoutAttributeNotAnAttribute multiplier:1.0 constant:kScreenWidth];
-    [cell.contentView addConstraint:tempWidthConstraint];
-    _cellHeight = [cell.contentView systemLayoutSizeFittingSize:UILayoutFittingCompressedSize].height + 1 / kScreenScale;
-    [cell removeConstraint:tempWidthConstraint];
-}
-
 #pragma mark 配置单元格
 - (void)configureCell:(UITableViewCell *)cell atIndexPath:(NSIndexPath *)indexPath
 {
-    if (indexPath.row == 0) {
+    if (!self.isSub) {
         DdVideoReplyCell *replyCell = (DdVideoReplyCell *)cell;
         [replyCell.faceImageView setImageWithURL:[NSURL URLWithString:self.model.member.avatar] placeholder:[DdImageManager face_placeholderImage] options:YYWebImageOptionIgnoreDiskCache progress:NULL transform:^UIImage * _Nullable(UIImage * _Nonnull image, NSURL * _Nonnull url) {
             
@@ -95,6 +67,20 @@
     }
 }
 
+#pragma mark 单元格高度
+- (CGFloat)heightForCellOnTableView:(UITableView *)tableView atIndexPath:(NSIndexPath *)indexPath
+{
+    NSString *identifier = nil;
+    if (!self.isSub) {
+        identifier = videoReplyCellID;
+    }else {
+        identifier = videoReplySubCellID;
+    }
+    return [tableView fd_heightForCellWithIdentifier:identifier cacheByIndexPath:indexPath configuration:^(id cell) {
+        [self configureCell:cell atIndexPath:indexPath];
+    }];
+}
+
 #pragma mark 请求评论数据
 + (RACCommand *)requestReplyDataByOid:(NSString *)oid pageNum:(NSUInteger)pageNum
 {
@@ -114,7 +100,7 @@
             parameters[@"platform"] = [AppInfo platform];
             parameters[@"pn"] = @(pageNum);
             parameters[@"ps"] = @(kDefaultPageSize);
-            parameters[@"sign"] = [AppInfo signParameters:nil byTimeStamp:0];
+            parameters[@"sign"] = [AppInfo sign];
             parameters[@"sort"] = @(0);
             parameters[@"type"] = @(1);
             

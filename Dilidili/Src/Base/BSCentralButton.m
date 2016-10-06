@@ -66,6 +66,8 @@
     [super layoutSubviews];
     
     if (self.imageView.image) {
+        [self.imageView sizeToFit];
+        [self.titleLabel sizeToFit];
         CGRect imageFrame = self.imageView.frame;
         CGRect titleFrame = self.titleLabel.frame;
         CGFloat topSpace = (self.frame.size.height - imageFrame.size.height - titleFrame.size.height - self.contentSpace) / 2;

@@ -40,11 +40,6 @@ static NSString *const videoReplySectionFooterID = @"DdVideoReplySectionFooter";
 - (instancetype)initWithModel:(DdReplyModel *)model;
 
 /**
- *  @brief 计算布局
- */
-- (void)layout;
-
-/**
  *  @brief 配置单元格
  *
  *  @param cell      单元格
@@ -55,9 +50,12 @@ static NSString *const videoReplySectionFooterID = @"DdVideoReplySectionFooter";
 /**
  *  @brief 单元格高度
  *
+ *  @param tableView 表视图
+ *  @param indexPath indexPath
+ *
  *  @return 单元格高度
  */
-- (CGFloat)cellHeight;
+- (CGFloat)heightForCellOnTableView:(UITableView *)tableView atIndexPath:(NSIndexPath *)indexPath;
 
 /**
  *  @brief 请求评论数据

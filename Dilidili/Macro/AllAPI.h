@@ -13,8 +13,9 @@
 #define DdServer_Api @"http://api.bilibili.com"
 #define DdServer_Bilibili @"http://www.bilibili.com"
 #define DdServer_Danmaku @"http://comment.bilibili.com"
-#define DdServer_Umeng @"http://oc.umeng.com"
+#define DdServer_live @"http://live.bilibili.com"
 #define DdServer_Bangumi @"http://bangumi.bilibili.com"
+#define DdServer_Umeng @"http://oc.umeng.com"
 
 //推荐列表接口 http://app.bilibili.com/x/v2/show?actionKey=appkey&appkey=27eb53fc9058f8c3&build=3600&channel=appstore&device=phone&mobi_app=iphone&plat=1&platform=ios&sign=207007525573941d525bb02b501243d3&ts=1472090858&warm=0
 #define DdRecommendListURL DdServer_App@"/x/v2/show"
@@ -34,10 +35,27 @@
 //视频评论接口 http://api.bilibili.com/x/reply?_device=iphone&_hwid=2e771212f4b4dc67&_ulv=0&access_key=&appkey=27eb53fc9058f8c3&appver=3710&build=3710&oid=6206361&platform=ios&pn=1&ps=20&sign=fd4c5da7003bf1ea7a62165b4e68cb73&sort=0&type=1
 #define DdVideoReplyURL DdServer_Api@"/x/reply"
 
-//获取视频播放链接接口(html5) http://www.bilibili.com/m/html5?aid=6011162&page=1
-#define DdVideoPathURL DdServer_Bilibili@"/m/html5"
+//获取视频播放链接接口(html5) http://api.bilibili.com/playurl?callback=jQuery172024158705611356257_1475488753004&aid=6206361&page=1&platform=html5&quality=1&vtype=mp4&type=jsonp&_=1475488753070
+#define DdVideoPathURL DdServer_Api@"/playurl"
 
-//视频弹幕接口 http://comment.bilibili.com/10080432.xml
-#define DdVideoDanmakuURL DdServer_Danmaku
+//弹幕接口 http://comment.bilibili.com/10080432.xml
+#define DdDanmakuURL DdServer_Danmaku
+
+//直播列表推荐接口 http://live.bilibili.com/AppNewIndex/recommend?actionKey=appkey&appkey=27eb53fc9058f8c3&build=3870&buvid=E25A38CE-0436-44C9-AC81-7D82A7CDA6985936infoc&device=phone&mobi_app=iphone&platform=ios&scale=2&sign=62a5dd5d2012b839dfde09f6eee471d7&ts=1475576150
+#define DdLiveRecommendURL DdServer_live@"/AppNewIndex/recommend"
+
+//直播列表接口 http://live.bilibili.com/AppNewIndex/common?scale=2&device=phone&platform=ios
+#define DdLiveListURL DdServer_live@"/AppNewIndex/common"
+
+//直播列表推荐刷新接口 http://live.bilibili.com/AppIndex/recommendRefresh?actionKey=appkey&appkey=27eb53fc9058f8c3&build=3870&device=phone&mobi_app=iphone&platform=ios&sign=39e3b557397f1026ddb239731c213004&ts=1475576802
+#define DdLiveRecommendRefreshURL DdServer_live@"/AppIndex/recommendRefresh"
+
+//直播列表刷新接口 http://live.bilibili.com/AppIndex/dynamic?actionKey=appkey&appkey=27eb53fc9058f8c3&area=draw&build=3870&device=phone&mobi_app=iphone&platform=ios&sign=4b9e74f5855c99526b53bd4302df8d8c&ts=1475576931
+#define DdLiveRefreshURL DdServer_live@"/AppIndex/dynamic"
+
+//全部直播接口（最热：sort=hottest，最新：sort=latest） http://live.bilibili.com/mobile/rooms?actionKey=appkey&appkey=27eb53fc9058f8c3&area_id=0&build=3870&device=phone&mobi_app=iphone&page=1&platform=ios&sign=3ef31cf1ae047a52691d2fa7bc43b778&sort=hottest&ts=1475577110
+#define DdLiveAllURL DdServer_live@"mobile/rooms"
+
+
 
 #endif /* AllAPI_h */

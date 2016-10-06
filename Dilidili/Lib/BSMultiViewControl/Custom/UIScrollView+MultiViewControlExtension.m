@@ -10,23 +10,23 @@
 
 @implementation UIScrollView (MultiViewControlExtension)
 
-- (void)setSynScrollContentViews:(NSArray *)synScrollContentViews
+- (void)setSynScrollingContentViews:(NSArray *)synScrollingContentViews
 {
-    objc_setAssociatedObject(self, @selector(synScrollContentViews), synScrollContentViews, OBJC_ASSOCIATION_COPY_NONATOMIC);
+    objc_setAssociatedObject(self, @selector(synScrollingContentViews), synScrollingContentViews, OBJC_ASSOCIATION_COPY_NONATOMIC);
 }
 
-- (NSArray *)synScrollContentViews
+- (NSArray *)synScrollingContentViews
 {
     return objc_getAssociatedObject(self, _cmd);
 }
 
-//居中式同步滑动方法
+#pragma mark 居中式同步滑动方法
 - (void)centerSynScrollByIndexOfSubview:(NSInteger)index andPageSize:(NSInteger)pageSize
 {
-    if (index >= self.synScrollContentViews.count) {
+    if (index >= self.synScrollingContentViews.count) {
         return;
     }
-    NSUInteger count = self.synScrollContentViews.count;
+    NSUInteger count = self.synScrollingContentViews.count;
     NSInteger offsetCenter = pageSize / 2 + 1;
     CGFloat offset;
     if (index < offsetCenter) {
@@ -39,22 +39,22 @@
     [self setContentOffset:CGPointMake(offset, 0) animated:YES];
 }
 
-//两边式同步滑动方法
+#pragma mark 两边式同步滑动方法
 - (void)edgeSynScrollByIndexOfSubview:(NSInteger)index andItemSpace:(CGFloat)itemSpace
 {
-    if (index >= self.synScrollContentViews.count) {
+    if (index >= self.synScrollingContentViews.count) {
         return;
     }
     CGFloat distance = 0;
     CGFloat x = self.contentOffset.x;
     CGFloat width = self.frame.size.width;
     UIView *nextView = nil;
-    if (index + 1 < self.synScrollContentViews.count) {
-        nextView = self.synScrollContentViews[index + 1];
+    if (index + 1 < self.synScrollingContentViews.count) {
+        nextView = self.synScrollingContentViews[index + 1];
     }
     UIView *previousView = nil;
     if (index - 1 >= 0) {
-        previousView = self.synScrollContentViews[index - 1];
+        previousView = self.synScrollingContentViews[index - 1];
     }
     if (nextView) {
         distance = nextView.frame.origin.x + nextView.frame.size.width + itemSpace - x;

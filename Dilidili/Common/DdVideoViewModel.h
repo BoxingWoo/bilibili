@@ -16,8 +16,6 @@
 
 /** 视频模型 */
 @property (nonatomic, strong) DdVideoModel *model;
-/** 视频URL */
-@property (nonatomic, copy) NSURL *contentURL;
 
 /**
  *  @brief 构造方法
@@ -29,12 +27,6 @@
 - (instancetype)initWithModel:(DdVideoModel *)model;
 
 /**
- *  @brief 获取视频播放链接
- *  @return RACCommand instance
- */
-+ (RACCommand *)requestVideoPathByAid:(NSString *)aid;
-
-/**
  *  @brief 获取视频信息链接
  *
  *  @param aid  视频标识
@@ -44,5 +36,12 @@
  */
 + (RACCommand *)requestVideoInfoByAid:(NSString *)aid from:(NSString *)from;
 
+/**
+ *  @brief 获取视频播放链接
+ *  @param aid  视频标识
+ *
+ *  @return RACCommand instance
+ */
++ (RACCommand *)requestVideoURLByAid:(NSString *)aid;
 
 @end

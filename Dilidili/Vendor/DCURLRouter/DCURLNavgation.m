@@ -38,8 +38,7 @@ DCSingletonM(DCURLNavgation)
         else {
             UINavigationController *navigationController = [DCURLNavgation sharedDCURLNavgation].currentNavigationViewController;
             if (navigationController) { // 导航控制器存在
-                // In case it should replace, look for the last UIViewController on the UINavigationController, if it's of the same class, replace it with a new one.
-                if (replace && [navigationController.viewControllers.lastObject isKindOfClass:[viewController class]]) {
+                if (replace) {
                                         
                     NSArray *viewControllers = [navigationController.viewControllers subarrayWithRange:NSMakeRange(0, navigationController.viewControllers.count-1)];
                     [navigationController setViewControllers:[viewControllers arrayByAddingObject:viewController] animated:animated];

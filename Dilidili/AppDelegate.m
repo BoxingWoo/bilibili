@@ -68,19 +68,19 @@
     //配置调试日志输出
 #ifdef DEBUG
     
-    //控制台输出染色
-    //ERROR(错误) > 红色
-    //WARN(警告) > 黄色
-    //INFO(信息) > 蓝色
-    //DEBUG(调试）> 黑色
-    setenv("XcodeColors", "YES", 0);
+//    //控制台输出染色
+//    //ERROR(错误) > 红色
+//    //WARN(警告) > 黄色
+//    //INFO(信息) > 蓝色
+//    //DEBUG(调试）> 黑色
+//    setenv("XcodeColors", "YES", 0);
     
     //Xcode console
     [DDTTYLogger sharedInstance].logFormatter = [[MyCustomLogFormatter alloc] init];
     [DDLog addLogger:[DDTTYLogger sharedInstance]];
     
-    [[DDTTYLogger sharedInstance] setColorsEnabled:YES];
-    [[DDTTYLogger sharedInstance] setForegroundColor:[UIColor blueColor] backgroundColor:nil forFlag:DDLogFlagInfo];
+//    [[DDTTYLogger sharedInstance] setColorsEnabled:YES];
+//    [[DDTTYLogger sharedInstance] setForegroundColor:[UIColor blueColor] backgroundColor:nil forFlag:DDLogFlagInfo];
     
 #else
     

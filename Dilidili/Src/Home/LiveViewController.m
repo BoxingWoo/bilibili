@@ -7,22 +7,324 @@
 //
 
 #import "LiveViewController.h"
+#import <pop/POP.h>
+#import "UIScrollView+EmptyDataSet.h"
+#import "DdProgressHUD.h"
+#import "DdRefreshMainHeader.h"
+#import "DdImageManager.h"
+#import "LiveFlowLayout.h"
+#import "LiveViewModel.h"
 
-@interface LiveViewController ()
+@interface LiveViewController () <UICollectionViewDataSource, UICollectionViewDelegate, BSLoopScrollViewDataSource, BSLoopScrollViewDelegate, DZNEmptyDataSetSource, DZNEmptyDataSetDelegate>
+{
+    BOOL _isNoData;
+}
+
+@property (nonatomic, weak) UICollectionView *collectionView;
+@property (nonatomic, weak) LiveFlowLayout *flowLayout;
+@property (nonatomic, strong) NSMutableArray <LiveViewModel *> *dataArr;
+@property (nonatomic, strong) NSMutableArray <LiveBannerModel *> *banners;
 
 @end
 
 @implementation LiveViewController
 
+#pragma mark - LifeCycle
+
 - (void)viewDidLoad {
     [super viewDidLoad];
     
-    self.view.backgroundColor = kBgColor;
+    self.view.backgroundColor = [UIColor clearColor];
+    
+    [self createUI];
+    
+    [self requestData:NO];
 }
 
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
+}
+
+#pragma mark - Initialization
+
+- (NSMutableArray<LiveViewModel *> *)dataArr
+{
+    if (!_dataArr) {
+        _dataArr = [[NSMutableArray alloc] init];
+    }
+    return _dataArr;
+}
+
+- (NSMutableArray<LiveBannerModel *> *)banners
+{
+    if (!_banners) {
+        _banners = [[NSMutableArray alloc] init];
+    }
+    return _banners;
+}
+
+- (void)createUI
+{
+    LiveFlowLayout *flowLayout = [[LiveFlowLayout alloc] init];
+    _flowLayout = flowLayout;
+    UICollectionView *collectionView = [[UICollectionView alloc] initWithFrame:self.view.bounds collectionViewLayout:flowLayout];
+    _collectionView = collectionView;
+    collectionView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+    collectionView.dataSource = self;
+    collectionView.delegate = self;
+    collectionView.emptyDataSetSource = self;
+    collectionView.emptyDataSetDelegate = self;
+    collectionView.layer.cornerRadius = 6.0;
+    collectionView.layer.masksToBounds = YES;
+    collectionView.backgroundColor = kBgColor;
+    collectionView.contentInset = UIEdgeInsetsMake(0, 0, kTabBarHeight, 0);
+    collectionView.showsVerticalScrollIndicator = NO;
+    
+    [collectionView registerClass:[LiveCell class] forCellWithReuseIdentifier:liveCellID];
+    [collectionView registerClass:[LiveRefreshCell class] forCellWithReuseIdentifier:liveRefreshCellID];
+    [collectionView registerClass:[LiveSectionHeader class] forSupplementaryViewOfKind:UICollectionElementKindSectionHeader withReuseIdentifier:liveSectionHeaderID];
+    [collectionView registerClass:[LiveHeaderView class] forSupplementaryViewOfKind:LiveCollectionElementKindHeaderView withReuseIdentifier:liveHeaderViewID];
+    [collectionView registerClass:[LiveFooterView class] forSupplementaryViewOfKind:LiveCollectionElementKindFooterView withReuseIdentifier:liveFooterViewID];
+    collectionView.mj_header = (MJRefreshHeader *)[DdRefreshMainHeader headerWithRefreshingBlock:^{
+        [self requestData:YES];
+    }];
+    
+    [self.view addSubview:collectionView];
+}
+
+#pragma mark - CollectionViewDataSource
+
+- (NSInteger)numberOfSectionsInCollectionView:(UICollectionView *)collectionView
+{
+    return self.dataArr.count;
+}
+
+- (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section
+{
+    if (section == 0) {
+        LiveViewModel *viewModel = self.dataArr[section];
+        return viewModel.model.lives.count;
+    }else {
+        return 4;
+    }
+}
+
+- (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath
+{
+    LiveViewModel *viewModel = self.dataArr[indexPath.section];
+    LiveCell *cell = nil;
+    if (indexPath.item == [self collectionView:collectionView numberOfItemsInSection:indexPath.section] - 1) {
+        LiveRefreshCell *refreshCell = [collectionView dequeueReusableCellWithReuseIdentifier:liveRefreshCellID forIndexPath:indexPath];
+        cell = refreshCell;
+        NSArray *actions = [refreshCell.refreshBtn actionsForTarget:self forControlEvent:UIControlEventTouchUpInside];
+        if (![actions containsObject:NSStringFromSelector(@selector(handleRefresh:))]) {
+            [refreshCell.refreshBtn addTarget:self action:@selector(handleRefresh:) forControlEvents:UIControlEventTouchUpInside];
+        }
+    }else {
+        cell = [collectionView dequeueReusableCellWithReuseIdentifier:liveCellID forIndexPath:indexPath];
+    }
+    [viewModel configureCell:cell atIndexPath:indexPath];
+    return cell;
+}
+
+- (UICollectionReusableView *)collectionView:(UICollectionView *)collectionView viewForSupplementaryElementOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath
+{
+    if ([kind isEqualToString:LiveCollectionElementKindHeaderView]) {
+        LiveHeaderView *headerView = [collectionView dequeueReusableSupplementaryViewOfKind:kind withReuseIdentifier:liveHeaderViewID forIndexPath:indexPath];
+        headerView.loopScrollView.dataSource = self;
+        headerView.loopScrollView.delegate = self;
+        if (headerView.loopScrollView.contentViews.count == 0) {
+            [headerView.loopScrollView reloadData];
+        }
+#pragma mark Action - 功能选项
+        if (!headerView.actionSubject) {
+            headerView.actionSubject = [RACSubject subject];
+            [headerView.actionSubject subscribeNext:^(UIButton *x) {
+                
+            }];
+        }
+        return headerView;
+    }
+    
+    if ([kind isEqualToString:LiveCollectionElementKindFooterView]) {
+        LiveFooterView *footerView = [collectionView dequeueReusableSupplementaryViewOfKind:kind withReuseIdentifier:liveFooterViewID forIndexPath:indexPath];
+        NSArray *actions = [footerView.allBtn actionsForTarget:self forControlEvent:UIControlEventTouchUpInside];
+        if (![actions containsObject:NSStringFromSelector(@selector(handleAll))]) {
+            [footerView.allBtn addTarget:self action:@selector(handleAll) forControlEvents:UIControlEventTouchUpInside];
+        }
+        return footerView;
+    }
+    
+    if ([kind isEqualToString:UICollectionElementKindSectionHeader]) {
+        LiveViewModel *viewModel = self.dataArr[indexPath.section];
+        LiveSectionHeader *sectionHeader = [collectionView dequeueReusableSupplementaryViewOfKind:kind withReuseIdentifier:liveSectionHeaderID forIndexPath:indexPath];
+        [viewModel configureSectionHeader:sectionHeader atIndex:indexPath.section];
+        NSArray *actions = [sectionHeader.moreBtn actionsForTarget:self forControlEvent:UIControlEventTouchUpInside];
+        if (![actions containsObject:NSStringFromSelector(@selector(handleMore:))]) {
+            [sectionHeader.moreBtn addTarget:self action:@selector(handleMore:) forControlEvents:UIControlEventTouchUpInside];
+        }
+        return sectionHeader;
+    }
+    
+    return nil;
+}
+
+#pragma mark - CollectionViewDelegate
+
+- (void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath
+{
+    
+}
+
+#pragma mark - LoopScrollView
+
+- (NSUInteger)numberOfItemsInLoopScrollView:(BSLoopScrollView *)loopScrollView
+{
+    return self.banners.count;
+}
+
+- (UIView *)loopScrollView:(BSLoopScrollView *)loopScrollView contentViewAtIndex:(NSUInteger)index
+{
+    LiveBannerModel *bannerModel = self.banners[index];
+    UIImageView *imageView = [[UIImageView alloc] init];
+    imageView.contentMode = UIViewContentModeScaleAspectFill;
+    [imageView setImageWithURL:[NSURL URLWithString:bannerModel.img] placeholder:[DdImageManager banner_placeholderImageBySize:CGSizeMakeEx(320, 96)]];
+    return imageView;
+}
+
+- (void)loopScrollView:(BSLoopScrollView *)loopScrollView didTouchContentView:(UIView *)contentView atIndex:(NSUInteger)index
+{
+    LiveBannerModel *bannerModel = self.banners[index];
+    [DCURLRouter pushURLString:bannerModel.link query:@{@"title":bannerModel.title, @"cover":bannerModel.img} animated:YES];
+}
+
+#pragma mark - HandleAction
+#pragma mark 查看全部
+- (void)handleAll
+{
+    
+}
+
+#pragma mark 查看更多
+- (void)handleMore:(UIButton *)button
+{
+    
+}
+
+
+#pragma mark 刷新数据
+- (void)handleRefresh:(UIButton *)button
+{
+    POPBasicAnimation *rotateAnimation = [POPBasicAnimation animationWithPropertyNamed:kPOPLayerRotation];
+    rotateAnimation.fromValue = @(0);
+    rotateAnimation.toValue = @(2 * M_PI);
+    rotateAnimation.duration = 0.8;
+    rotateAnimation.repeatForever = YES;
+    rotateAnimation.timingFunction = [CAMediaTimingFunction functionWithName:@"linear"];
+    [button.layer pop_addAnimation:rotateAnimation forKey:@"refresh_rotate"];
+    
+    button.enabled = NO;
+    @weakify(self);
+    LiveViewModel *viewModel = self.dataArr[button.tag];
+    [[[viewModel refreshLiveDataAtIndex:button.tag] execute:nil] subscribeNext:^(id x) {
+        @strongify(self);
+        button.enabled = YES;
+        [button.layer pop_removeAnimationForKey:@"refresh_rotate"];
+        button.layer.transform = CATransform3DIdentity;
+        [self.collectionView reloadSections:[NSIndexSet indexSetWithIndex:button.tag]];
+    } error:^(NSError *error) {
+        button.enabled = YES;
+        [button.layer pop_removeAnimationForKey:@"refresh_rotate"];
+        button.layer.transform = CATransform3DIdentity;
+        [DdProgressHUD showErrorWithStatus:error.localizedDescription];
+    }];
+}
+
+#pragma mark - Utility
+
+- (void)requestData:(BOOL)forceReload
+{
+    _isNoData = NO;
+    [[[LiveViewModel requestLiveData:forceReload] execute:nil] subscribeNext:^(RACTuple *x) {
+        
+        [self.collectionView.mj_header endRefreshing];
+        [self.dataArr removeAllObjects];
+        [self.banners removeAllObjects];
+        
+        LiveListModel *recommendedModel = x.first;
+        LiveViewModel *recommendedViewModel = [[LiveViewModel alloc] initWithModel:recommendedModel];
+        [self.dataArr addObject:recommendedViewModel];
+        
+        RACTuple *tuple = x.second;
+        RACTupleUnpack(NSArray *partitions, NSArray *banners) = tuple;
+        for (LiveListModel *model in partitions) {
+            LiveViewModel *viewModel = [[LiveViewModel alloc] initWithModel:model];
+            [self.dataArr addObject:viewModel];
+        }
+        [self.banners addObjectsFromArray:banners];
+        
+        self.flowLayout.viewModels = self.dataArr;
+        [self.collectionView reloadData];
+        
+    } error:^(NSError * _Nullable error) {
+        _isNoData = YES;
+        [self.collectionView.mj_header endRefreshing];
+        [DdProgressHUD showErrorWithStatus:error.localizedDescription];
+    }];
+}
+
+#pragma mark - EmptyDataSet
+
+- (UIView *)customViewForEmptyDataSet:(UIScrollView *)scrollView
+{
+    UIView *customView = [[UIView alloc] init];
+    UILabel *titleLabel = [[UILabel alloc] init];
+    titleLabel.font = [UIFont systemFontOfSize:15];
+    titleLabel.textColor = kTextColor;
+    if (_isNoData) {
+        titleLabel.text = @"电波无法到达哟 code:0";
+    }else {
+        titleLabel.text = @"正在玩命加载数据...";
+    }
+    [customView addSubview:titleLabel];
+    [titleLabel mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.bottom.equalTo(customView.mas_centerY).offset(-10.0);
+        make.centerX.equalTo(customView.mas_centerX);
+    }];
+    
+    UIImageView *imageView = [[UIImageView alloc] init];
+    if (_isNoData) {
+        imageView.image = [UIImage imageNamed:@"common_loading_noData"];
+    }else {
+        NSMutableArray *animationImages = [[NSMutableArray alloc] init];
+        for (NSInteger i = 1; i <= 2; i++) {
+            UIImage *image = [UIImage imageNamed:[NSString stringWithFormat:@"common_loading_loading_%li", i]];
+            [animationImages addObject:image];
+        }
+        imageView.animationImages = animationImages;
+        imageView.animationDuration = animationImages.count * 0.5;
+        imageView.animationRepeatCount = 0;
+        [imageView startAnimating];
+    }
+    [customView addSubview:imageView];
+    CGFloat width = widthEx(200.0);
+    [imageView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.centerX.equalTo(customView.mas_centerX);
+        make.bottom.equalTo(titleLabel.mas_top);
+        make.width.height.mas_equalTo(width);
+    }];
+    
+    return customView;
+}
+
+- (BOOL)emptyDataSetShouldAllowScroll:(UIScrollView *)scrollView
+{
+    if (_isNoData) {
+        return YES;
+    }else {
+        return NO;
+    }
 }
 
 /*

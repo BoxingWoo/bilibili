@@ -91,6 +91,13 @@
     return kSize;
 }
 
+- (void)layoutSubviews
+{
+    [super layoutSubviews];
+    self.left = 5;
+    self.bottom = kScreenHeight - 68;
+}
+
 - (void)tick:(CADisplayLink *)link {
     if (_lastTime == 0) {
         _lastTime = link.timestamp;

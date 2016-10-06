@@ -14,7 +14,14 @@
  */
 @interface DdVideoInfoViewController : UIViewController
 
-/** 视频视图模型 */
-@property (nonatomic, strong) DdVideoViewModel *videoViewModel;
+/** 标识 */
+@property (nonatomic, copy) NSString *aid;
+/** 类别 */
+@property (nonatomic, copy) NSString *from;
+
+/**
+ *  @brief 请求数据
+ */
+- (RACSignal *)requestData;
 
 @end

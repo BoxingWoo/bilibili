@@ -10,7 +10,7 @@
 @interface UIScrollView (MultiViewControlExtension)
 
 /** 同步滑动内容视图数组 */
-@property (nonatomic, copy) NSArray *synScrollContentViews;
+@property (nonatomic, copy) NSArray *synScrollingContentViews;
 
 /**
  *  @brief 居中式同步滑动方法

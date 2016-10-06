@@ -12,6 +12,7 @@
 
 /** 网页视图 */
 @property (nonatomic, weak) UIWebView *webView;
+@property (nonatomic, strong) UIBarButtonItem *leftBarButtonItem;
 
 @end
 
@@ -56,6 +57,7 @@
     [self.navigationController setNavigationBarHidden:NO animated:YES];
     UIBarButtonItem *leftBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"返回" style:UIBarButtonItemStylePlain target:self action:@selector(handleBack)];
     [leftBarButtonItem setTitleTextAttributes:@{NSFontAttributeName:[UIFont systemFontOfSize:18]} forState:UIControlStateNormal];
+    _leftBarButtonItem = leftBarButtonItem;
     self.navigationItem.leftBarButtonItem = leftBarButtonItem;
 }
 
@@ -65,9 +67,25 @@
 {
     if (self.webView.canGoBack) {
         [self.webView goBack];
+        UIBarButtonItem *closeBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"关闭" style:UIBarButtonItemStylePlain target:self action:@selector(handleClose)];
+        [closeBarButtonItem setTitleTextAttributes:[self.leftBarButtonItem titleTextAttributesForState:UIControlStateNormal] forState:UIControlStateNormal];
+        self.navigationItem.leftBarButtonItems = @[self.leftBarButtonItem, closeBarButtonItem];
+        [self performSelector:@selector(hideCloseBarButtonItem) withObject:nil afterDelay:3.0];
     }else {
-        [self.navigationController popViewControllerAnimated:YES];
+        [self handleClose];
     }
+}
+
+- (void)handleClose
+{
+    [self.navigationController popViewControllerAnimated:YES];
+}
+
+#pragma mark - Utility
+- (void)hideCloseBarButtonItem
+{
+    [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(hideCloseBarButtonItem) object:nil];
+    self.navigationItem.leftBarButtonItems = @[self.leftBarButtonItem];
 }
 
 #pragma mark - WebViewDelegate
@@ -80,6 +98,12 @@
     if ([request.URL.scheme isEqualToString:@"itms-appss"]) {
         [[UIApplication sharedApplication] openURL:request.URL];
         return NO;
+    }else if ([request.URL.scheme isEqualToString:@"bilibili"]) {
+        NSString *js = @"document.getElementById('share_pic').alt";
+        NSString *title = [webView stringByEvaluatingJavaScriptFromString:js];
+        js = @"document.getElementById('share_pic').src";
+        NSString *cover = [webView stringByEvaluatingJavaScriptFromString:js];
+        [DCURLRouter pushURLString:urlString query:@{@"title":title, @"cover":cover} animated:YES];
     }
     return YES;
 }
@@ -88,6 +112,10 @@
 {
     NSString *js = @"document.title";
     self.navigationItem.title = [webView stringByEvaluatingJavaScriptFromString:js];
+    if ([webView.request.URL.absoluteString hasPrefix:[NSString stringWithFormat:@"%@/mobile/video", DdServer_Bilibili]]) {
+        NSString *js = @"document.getElementsByClassName('launch-app')[0].click()";
+        [webView stringByEvaluatingJavaScriptFromString:js];
+    }
 }
 
 - (void)webView:(UIWebView *)webView didFailLoadWithError:(NSError *)error

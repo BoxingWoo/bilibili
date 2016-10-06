@@ -13,8 +13,6 @@
 
 @interface DdMediaControl ()
 
-/** 屏幕方向切换命令 */
-@property (nonatomic, strong) RACCommand *handleFullScreenCommand;
 /** 加载控制面板 */
 @property (nonatomic, weak) UIView *loadingControlPanel;
 /** 加载描述标签 */
@@ -33,26 +31,6 @@
     if (self = [super initWithFrame:frame]) {
         _interfaceOrientationMask = UIInterfaceOrientationMaskPortrait;
         _statusBarHidden = NO;
-        
-        @weakify(self);
-        _handleFullScreenCommand = [[RACCommand alloc] initWithSignalBlock:^RACSignal *(id input) {
-            RACSignal *signal = [RACSignal createSignal:^RACDisposable *(id<RACSubscriber> subscriber) {
-                @strongify(self);
-                if (self.interfaceOrientationMask == UIInterfaceOrientationMaskPortrait) {
-                    
-                    self.interfaceOrientationMask = UIInterfaceOrientationMaskLandscapeRight;
-                    
-                }else if (self.interfaceOrientationMask == UIInterfaceOrientationMaskLandscape) {
-                    
-                    self.interfaceOrientationMask = UIInterfaceOrientationMaskPortrait;
-                    
-                }
-                
-                [subscriber sendCompleted];
-                return nil;
-            }];
-            return signal;
-        }];
         
         [self installMovieNotificationObservers];
     }
@@ -110,8 +88,11 @@
         loadingImageView.animationDuration = animateImages.count * 1 / 30;
         loadingImageView.animationRepeatCount = 0;
         [loadingControlPanel addSubview:loadingImageView];
+        CGFloat loadingImageViewWidth = widthEx(72.0);
         [loadingImageView mas_makeConstraints:^(MASConstraintMaker *make) {
-            make.center.equalTo(loadingControlPanel);
+            make.centerX.equalTo(loadingControlPanel.mas_centerX).offset(8.0);
+            make.centerY.equalTo(loadingControlPanel.mas_centerY);
+            make.width.height.mas_equalTo(loadingImageViewWidth);
         }];
         [loadingImageView startAnimating];
         
@@ -261,6 +242,7 @@
             self.landscapeMediaControl.handleFullScreenCommand = self.handleFullScreenCommand;
             self.landscapeMediaControl.handleStatusBarHiddenCommand = self.handleStatusBarHiddenCommand;
             self.landscapeMediaControl.delegatePlayer = self.delegatePlayer;
+            self.landscapeMediaControl.dvc = self.dvc;
             
             [self.landscapeMediaControl refreshLandscapeMediaControl];
         }
@@ -285,7 +267,7 @@
 }
 
 #pragma mark 准备播放
-- (void)mediaIsPreparedToPlayDidChange:(NSNotification*)notification
+- (void)mediaIsPreparedToPlayDidChange:(NSNotification *)notification
 {
     DDLogInfo(@"mediaIsPreparedToPlayDidChange\n");
     [self refreshMediaControl];

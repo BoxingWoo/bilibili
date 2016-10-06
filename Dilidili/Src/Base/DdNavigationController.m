@@ -42,20 +42,51 @@
     // Dispose of any resources that can be recreated.
 }
 
+#pragma mark - Setter
+
+- (void)setViewControllers:(NSArray<UIViewController *> *)viewControllers animated:(BOOL)animated
+{
+    for (NSInteger i = 0; i < viewControllers.count; i++) {
+        UIViewController *vc = viewControllers[i];
+        vc.hidesBottomBarWhenPushed = YES;
+        if (i != 0) {
+            UIBarButtonItem *leftBarButtonItem = [[UIBarButtonItem alloc] initWithImage:[UIImage imageNamed:@"common_back_v2"] style:UIBarButtonItemStylePlain target:self action:@selector(handleBack)];
+            vc.navigationItem.leftBarButtonItem = leftBarButtonItem;
+        }
+    }
+    [super setViewControllers:viewControllers animated:animated];
+    UIViewController *rootViewController = viewControllers.firstObject;
+    rootViewController.hidesBottomBarWhenPushed = NO;
+}
+
 #pragma mark - Push & Pop
+
+- (void)pushViewController:(UIViewController *)viewController animated:(BOOL)animated replace:(BOOL)replace
+{
+    if (replace) {
+        
+        NSArray *viewControllers = [self.viewControllers subarrayWithRange:NSMakeRange(0, self.viewControllers.count - 1)];
+        [self setViewControllers:[viewControllers arrayByAddingObject:viewController] animated:animated];
+        
+    }else {
+        
+        UIViewController *fromViewController = self.topViewController;
+        fromViewController.hidesBottomBarWhenPushed = YES;
+        if (fromViewController) {
+            UIBarButtonItem *leftBarButtonItem = [[UIBarButtonItem alloc] initWithImage:[UIImage imageNamed:@"common_back_v2"] style:UIBarButtonItemStylePlain target:self action:@selector(handleBack)];
+            viewController.navigationItem.leftBarButtonItem = leftBarButtonItem;
+        }
+        [super pushViewController:viewController animated:animated];
+        if (fromViewController == self.viewControllers.firstObject) {
+            fromViewController.hidesBottomBarWhenPushed = NO;
+        }
+        
+    }
+}
 
 - (void)pushViewController:(UIViewController *)viewController animated:(BOOL)animated
 {
-    UIViewController *fromViewController = self.topViewController;
-    fromViewController.hidesBottomBarWhenPushed = YES;
-    if (fromViewController) {
-        UIBarButtonItem *leftBarButtonItem = [[UIBarButtonItem alloc] initWithImage:[UIImage imageNamed:@"common_back_v2"] style:UIBarButtonItemStylePlain target:self action:@selector(handleBack)];
-        viewController.navigationItem.leftBarButtonItem = leftBarButtonItem;
-    }
-    [super pushViewController:viewController animated:animated];
-    if (fromViewController == self.viewControllers.firstObject) {
-        fromViewController.hidesBottomBarWhenPushed = NO;
-    }
+    [self pushViewController:viewController animated:animated replace:NO];
 }
 
 - (NSArray<UIViewController *> *)popToViewController:(UIViewController *)viewController animated:(BOOL)animated
@@ -97,7 +128,7 @@
     [self popViewControllerAnimated:YES];
 }
 
-#pragma mark gestureRecognizerDelegate
+#pragma mark GestureRecognizerDelegate
 
 - (BOOL)gestureRecognizerShouldBegin:(UIPanGestureRecognizer *)gestureRecognizer
 {

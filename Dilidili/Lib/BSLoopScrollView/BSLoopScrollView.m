@@ -139,7 +139,6 @@
     _contentViews = contentViews;
     _shouldLayoutSubviews = YES;
     [self setNeedsLayout];
-    [self layoutIfNeeded];
     
     //手动滚动
     if (_pageCount > 1) {

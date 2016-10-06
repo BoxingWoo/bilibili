@@ -88,11 +88,21 @@
     return kSize;
 }
 
+- (void)layoutSubviews
+{
+    [super layoutSubviews];
+    self.right = kScreenWidth - 5;
+    self.bottom = kScreenHeight - 68;
+}
+
 - (void)tick:(NSTimer *)timer {
-    CGFloat progress = self.player.fpsAtOutput;
+    CGFloat progress = 0.0;
+    if (self.player.fpsInMeta != 0) {
+        progress = self.player.fpsAtOutput / self.player.fpsInMeta;
+    }
     UIColor *color = [UIColor colorWithHue:0.27 * (progress - 0.2) saturation:1 brightness:0.9 alpha:1];
     
-    NSMutableAttributedString *text = [[NSMutableAttributedString alloc] initWithString:[NSString stringWithFormat:@"%d MVFPS",(int)round(progress)]];
+    NSMutableAttributedString *text = [[NSMutableAttributedString alloc] initWithString:[NSString stringWithFormat:@"%d MVFPS",(int)round(self.player.fpsAtOutput)]];
     [text setColor:color range:NSMakeRange(0, text.length - 5)];
     [text setColor:[UIColor whiteColor] range:NSMakeRange(text.length - 5, 5)];
     text.font = _font;

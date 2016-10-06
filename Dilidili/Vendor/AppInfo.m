@@ -55,13 +55,19 @@
 #pragma mark 版本号
 + (NSString *)appver
 {
-    return @"3710";
+    return @"3870";
 }
 
 #pragma mark 编译号
 + (NSString *)build
 {
-    return @"3710";
+    return @"3870";
+}
+
+#pragma mark 标识号
++ (NSString *)buvid
+{
+    return @"E25A38CE-0436-44C9-AC81-7D82A7CDA6985936infoc";
 }
 
 #pragma mark 频道
@@ -95,24 +101,9 @@
 }
 
 #pragma mark 签名
-+ (NSString *)signParameters:(NSDictionary *)parameters byTimeStamp:(NSInteger)timeStamp
++ (NSString *)sign
 {
-    if (parameters == nil || parameters.count == 0) {
-        return @"";
-    }
-    
-    NSArray *keys = parameters.allKeys;
-    keys = [keys sortedArrayUsingSelector:@selector(compare:)];
-    NSMutableString *signElements = [[NSMutableString alloc] init];
-    for (id key in keys) {
-        [signElements appendFormat:@"%@=%@&", key, parameters[key]];
-    }
-    [signElements deleteCharactersInRange:NSMakeRange(signElements.length - 1, 1)];
-    
-    NSData *signData = [signElements dataUsingEncoding:NSUTF8StringEncoding];
-    NSData *signKey = [[NSString stringWithFormat:@"%li", timeStamp].md5String dataUsingEncoding:NSUTF8StringEncoding];
-    NSString *signedString = [signData aes256EncryptWithKey:signKey iv:nil].base64EncodedString.md5String;
-    return signedString;
+    return @"";
 }
 
 #pragma mark 时间戳

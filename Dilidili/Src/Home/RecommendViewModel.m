@@ -34,7 +34,7 @@
         for (NSInteger i = 0; i < self.model.body.count; i++) {
             RecommendModel *model = self.model.body[i];
             RecommendScrollContentView *contentView = [scrollCell dequeueReusableContentViewforIndex:i];
-            [contentView.coverImageView setImageWithURL:[NSURL URLWithString:model.cover] placeholder:[DdImageManager cover_placeholderImageBySize:CGSizeMakeEx(158.0, 90.0)] options:YYWebImageOptionSetImageWithFadeAnimation progress:NULL transform:^UIImage * _Nullable(UIImage * _Nonnull image, NSURL * _Nonnull url) {
+            [contentView.coverImageView setImageWithURL:[NSURL URLWithString:model.cover] placeholder:[DdImageManager activity_placeholderImageBySize:CGSizeMakeEx(158.0, 90.0)] options:YYWebImageOptionSetImageWithFadeAnimation progress:NULL transform:^UIImage * _Nullable(UIImage * _Nonnull image, NSURL * _Nonnull url) {
                 
                 return [DdImageManager transformImage:image size:contentView.coverImageView.size cornerRadius:kCoverCornerRadius style:DdImageStyleNone];
 
@@ -253,7 +253,7 @@
             parameters[@"mobi_app"] = [AppInfo mobi_app];
             parameters[@"plat"] = [AppInfo plat];
             parameters[@"platform"] = [AppInfo platform];
-            parameters[@"sign"] = [AppInfo signParameters:nil byTimeStamp:0];
+            parameters[@"sign"] = [AppInfo sign];
             parameters[@"ts"] = @([AppInfo ts]);
             DdHTTPSessionManager *manager = [DdHTTPSessionManager manager];
             [manager GET:url parameters:parameters complection:^(ResponseCode code, NSDictionary *responseObject, NSError *error) {
@@ -296,7 +296,7 @@
             parameters[@"mobi_app"] = [AppInfo mobi_app];
             parameters[@"plat"] = [AppInfo plat];
             parameters[@"platform"] = [AppInfo platform];
-            parameters[@"sign"] = [AppInfo signParameters:nil byTimeStamp:0];
+            parameters[@"sign"] = [AppInfo sign];
             parameters[@"ts"] = @([AppInfo ts]);
             
             DdHTTPSessionManager *manager = [DdHTTPSessionManager manager];

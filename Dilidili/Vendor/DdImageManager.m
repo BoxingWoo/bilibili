@@ -67,6 +67,19 @@ static NSString *const PlaceholderImageName = @"default_img";
     return placeholderImage;
 }
 
++ (UIImage *)activity_placeholderImageBySize:(CGSize)size
+{
+    NSString *key = [NSString stringWithFormat:@"activity_%@_%@", PlaceholderImageName, [NSValue valueWithCGSize:size]].md5String;
+    YYImageCache *imageCache = [YYImageCache sharedCache];
+    UIImage *placeholderImage = [imageCache getImageForKey:key];
+    if (placeholderImage == nil) {
+        placeholderImage = [self _placeholderImageBySize:size];
+        placeholderImage = [placeholderImage imageByRoundCornerRadius:kCoverCornerRadius];
+        [imageCache setImage:placeholderImage forKey:key];
+    }
+    return placeholderImage;
+}
+
 + (UIImage *)banner_placeholderImageBySize:(CGSize)size
 {
     NSString *key = [NSString stringWithFormat:@"banner_%@_%@", PlaceholderImageName, [NSValue valueWithCGSize:size]].md5String;

@@ -8,64 +8,46 @@
 		<dict>
 			<key>isShown</key>
 			<false/>
-			<key>orderHint</key>
-			<integer>1</integer>
+		</dict>
+		<key>BarrageRenderer.xcscheme</key>
+		<dict>
+			<key>isShown</key>
+			<false/>
 		</dict>
 		<key>CocoaLumberjack.xcscheme</key>
 		<dict>
 			<key>isShown</key>
 			<false/>
-			<key>orderHint</key>
-			<integer>2</integer>
 		</dict>
 		<key>LFLiveKit.xcscheme</key>
 		<dict>
 			<key>isShown</key>
 			<false/>
-			<key>orderHint</key>
-			<integer>3</integer>
 		</dict>
 		<key>Masonry.xcscheme</key>
 		<dict>
 			<key>isShown</key>
 			<false/>
-			<key>orderHint</key>
-			<integer>4</integer>
 		</dict>
 		<key>Pods-Dilidili.xcscheme</key>
 		<dict>
 			<key>isShown</key>
 			<false/>
-			<key>orderHint</key>
-			<integer>5</integer>
 		</dict>
 		<key>ReactiveCocoa.xcscheme</key>
 		<dict>
 			<key>isShown</key>
 			<false/>
-			<key>orderHint</key>
-			<integer>7</integer>
-		</dict>
-		<key>Result.xcscheme</key>
-		<dict>
-			<key>isShown</key>
-			<false/>
-			<key>orderHint</key>
-			<integer>8</integer>
 		</dict>
 		<key>YYKit.xcscheme</key>
 		<dict>
 			<key>isShown</key>
 			<false/>
-			<key>orderHint</key>
-			<integer>9</integer>
 		</dict>
 		<key>pop.xcscheme</key>
 		<dict>
 			<key>isShown</key>
 			<false/>
-			<key>orderHint</key>
-			<integer>6</integer>
 		</dict>
 	</dict>
 	<key>SuppressBuildableAutocreation</key>
@@ -75,12 +57,22 @@
 			<key>primary</key>
 			<true/>
 		</dict>
-		<key>30AC35DF403A37335CA251D02148B86E</key>
+		<key>2347E298F0D5097B41D6072CD20E59CB</key>
 		<dict>
 			<key>primary</key>
 			<true/>
 		</dict>
-		<key>337C0A77A657B1C9A0005689E426CA68</key>
+		<key>3C62D3C6E105B9EA31384863CD22A94C</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>4E94109E0A0F19733E8CEBD9316348C0</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>5067E110F6A868F433D06317DBDBFDFC</key>
 		<dict>
 			<key>primary</key>
 			<true/>
@@ -90,12 +82,7 @@
 			<key>primary</key>
 			<true/>
 		</dict>
-		<key>8A2E8FED01C8A6BC8ADFCF3C3B78368F</key>
-		<dict>
-			<key>primary</key>
-			<true/>
-		</dict>
-		<key>8BD595503D0CF20666E174C3F37E91ED</key>
+		<key>9341A4EA2E1211609736A33B1A69EBC7</key>
 		<dict>
 			<key>primary</key>
 			<true/>
@@ -105,12 +92,7 @@
 			<key>primary</key>
 			<true/>
 		</dict>
-		<key>BC50EAA00548269C0DEE11897E03ACEF</key>
-		<dict>
-			<key>primary</key>
-			<true/>
-		</dict>
-		<key>C12723D753B7CD1BD8C991FA87090F3C</key>
+		<key>C03D727E171DF75D5E7BF29192E9D6EF</key>
 		<dict>
 			<key>primary</key>
 			<true/>

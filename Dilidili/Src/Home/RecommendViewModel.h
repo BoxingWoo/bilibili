@@ -91,6 +91,13 @@ static NSString *const recommendScrollCellID = @"RecommendScrollCell";
  */
 - (CGFloat)sectionFooterHeight;
 
+/**
+ *  @brief 刷新推荐列表数据
+ *
+ *  @return RACCommand instance
+ */
+- (RACCommand *)refreshRecommendData;
+
 
 /**
  *  @brief 请求推荐模块数据
@@ -99,12 +106,5 @@ static NSString *const recommendScrollCellID = @"RecommendScrollCell";
  *  @return RACCommand instance
  */
 + (RACCommand *)requestRecommendData:(BOOL)forceReload;
-
-/**
- *  @brief 刷新推荐列表数据
- *
- *  @return RACCommand instance
- */
-- (RACCommand *)refreshRecommendData;
 
 @end

@@ -40,7 +40,7 @@ NS_ASSUME_NONNULL_BEGIN
  *  push控制器 类似系统的
  *
  *  @param viewController 目标控制器
- *  @param replace        如果当前控制器和要push的控制器是同一个,可以将replace设置为Yes,进行替换.同一个才能替换哦!
+ *  @param replace        如果当前控制器和要push的控制器是同一个,可以将replace设置为Yes,进行替换.
  */
 + (void)pushViewController:(UIViewController *)viewController animated:(BOOL)animated replace:(BOOL)replace;
 
@@ -63,7 +63,7 @@ NS_ASSUME_NONNULL_BEGIN
  *  push控制器
  *
  *  @param urlString 自定义的URL,可以拼接参数
- *  @param replace   如果当前控制器和要push的控制器是同一个,可以将replace设置为Yes,进行替换.同一个才能替换哦!
+ *  @param replace   如果当前控制器和要push的控制器是同一个,可以将replace设置为Yes,进行替换.
  */
 + (void)pushURLString:(NSString *)urlString animated:(BOOL)animated replace:(BOOL)replace;
 
@@ -72,7 +72,7 @@ NS_ASSUME_NONNULL_BEGIN
  *
  *  @param urlString 自定义URL,也可以拼接参数,但会被下面的query替换掉
  *  @param query     存放参数
- *  @param replace   如果当前控制器和要push的控制器是同一个,可以将replace设置为Yes,进行替换.同一个才能替换哦!
+ *  @param replace   如果当前控制器和要push的控制器是同一个,可以将replace设置为Yes,进行替换.
  */
 + (void)pushURLString:(NSString *)urlString query:(NSDictionary *)query animated:(BOOL)animated replace:(BOOL)replace;
 

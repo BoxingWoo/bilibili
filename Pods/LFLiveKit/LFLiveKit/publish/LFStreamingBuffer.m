@@ -41,7 +41,6 @@ static const NSUInteger defaultSendBufferMaxCount = 600;///< 最大缓冲区为6
         self.maxCount = defaultSendBufferMaxCount;
         self.lastDropFrames = 0;
         self.startTimer = NO;
-        self.needDropFrame = YES;
     }
     return self;
 }
@@ -92,26 +91,21 @@ static const NSUInteger defaultSendBufferMaxCount = 600;///< 最大缓冲区为6
 - (void)removeExpireFrame {
     if (self.list.count < self.maxCount) return;
 
-    if(self.needDropFrame){
-        NSArray *pFrames = [self expirePFrames];///< 第一个P到第一个I之间的p帧
-        self.lastDropFrames += [pFrames count];
-        if (pFrames && pFrames.count > 0) {
-            [self.list removeObjectsInArray:pFrames];
-            return;
-        }
-        
-        NSArray *iFrames = [self expireIFrames];///<  删除一个I帧（但一个I帧可能对应多个nal）
-        self.lastDropFrames += [iFrames count];
-        if (iFrames) {
-            [self.list removeObjectsInArray:iFrames];
-            return;
-        }
-        
-        [self.list removeAllObjects];
-    }else{
-        [self.list lfPopFirstObject];
+    NSArray *pFrames = [self expirePFrames];///< 第一个P到第一个I之间的p帧
+    self.lastDropFrames += [pFrames count];
+    if (pFrames && pFrames.count > 0) {
+        [self.list removeObjectsInArray:pFrames];
+        return;
     }
     
+    NSArray *iFrames = [self expireIFrames];///<  删除一个I帧（但一个I帧可能对应多个nal）
+    self.lastDropFrames += [iFrames count];
+    if (iFrames) {
+        [self.list removeObjectsInArray:iFrames];
+        return;
+    }
+    
+    [self.list removeAllObjects];
 }
 
 - (NSArray *)expirePFrames {
@@ -161,9 +155,9 @@ NSInteger frameDataCompare(id obj1, id obj2, void *context){
     NSInteger decreaseCount = 0;
 
     for (NSNumber *number in self.thresholdList) {
-        if (number.integerValue >= currentCount) {
+        if (number.integerValue > currentCount) {
             increaseCount++;
-        } else {
+        } else{
             decreaseCount++;
         }
         currentCount = [number integerValue];
@@ -176,7 +170,7 @@ NSInteger frameDataCompare(id obj1, id obj2, void *context){
     if (decreaseCount >= self.callBackInterval) {
         return LFLiveBuffferDecline;
     }
-
+    
     return LFLiveBuffferUnknown;
 }
 
@@ -210,7 +204,7 @@ NSInteger frameDataCompare(id obj1, id obj2, void *context){
     dispatch_semaphore_wait(_lock, DISPATCH_TIME_FOREVER);
     [self.thresholdList addObject:@(self.list.count)];
     dispatch_semaphore_signal(_lock);
-
+    
     if (self.currentInterval >= self.callBackInterval) {
         LFLiveBuffferState state = [self currentBufferState];
         if (state == LFLiveBuffferIncrease) {

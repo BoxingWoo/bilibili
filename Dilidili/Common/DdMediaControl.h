@@ -9,6 +9,7 @@
 #import <UIKit/UIKit.h>
 
 @protocol IJKMediaPlayback;
+@class DdDanmakuViewController;
 
 /**
  *  @brief 媒体控制器
@@ -19,6 +20,8 @@
 @property (nonatomic, copy) NSString *title;
 /** 返回命令 */
 @property (nonatomic, strong) RACCommand *handleBackCommand;
+/** 屏幕方向切换命令 */
+@property (nonatomic, strong) RACCommand *handleFullScreenCommand;
 /** 更多命令 */
 @property (nonatomic, strong) RACCommand *handleMoreCommand;
 /** 显示/隐藏状态栏命令 */
@@ -32,6 +35,8 @@
 @property (nonatomic, copy) NSString *loadingDetail;
 /** 媒体播放器 */
 @property (nonatomic, weak) id<IJKMediaPlayback> delegatePlayer;
+/** 弹幕视图控制器 */
+@property (nonatomic, weak) DdDanmakuViewController *dvc;
 
 /**
  *  @brief 刷新媒体控制器

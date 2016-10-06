@@ -14,10 +14,8 @@
  */
 @interface DdVideoReplyViewController : UIViewController
 
-/** 页面信息 */
-@property (nonatomic, copy) NSDictionary *page;
 /** 标识 */
-@property (nonatomic, assign) NSString *oid;
+@property (nonatomic, copy) NSString *oid;
 /** 页数 */
 @property (nonatomic, assign) NSUInteger pageNum;
 

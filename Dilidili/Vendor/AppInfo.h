@@ -61,6 +61,11 @@
 + (NSString *)build;
 
 /**
+ *  @brief 标识号
+ */
++ (NSString *)buvid;
+
+/**
  *  @brief 频道
  */
 + (NSString *)channel;
@@ -87,11 +92,8 @@
 
 /**
  *  @brief 签名
- *
- *  @param parameters 参数
- *  @param timeStamp  时间戳
  */
-+ (NSString *)signParameters:(NSDictionary *)parameters byTimeStamp:(NSInteger)timeStamp;
++ (NSString *)sign;
 
 /**
  *  @brief 时间戳

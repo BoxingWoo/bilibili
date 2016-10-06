@@ -23,6 +23,8 @@ typedef NS_ENUM(NSInteger, DdImageStyle) {
 
 + (UIImage *)live_placeholderImageBySize:(CGSize)size;
 
++ (UIImage *)activity_placeholderImageBySize:(CGSize)size;
+
 + (UIImage *)banner_placeholderImageBySize:(CGSize)size;
 
 + (UIImage *)transformImage:(UIImage *)originImage size:(CGSize)size cornerRadius:(CGFloat)radius style:(DdImageStyle)style;

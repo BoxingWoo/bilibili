@@ -9,6 +9,9 @@
 #ifndef AllConst_h
 #define AllConst_h
 
+//AppScheme
+#define kAppScheme @"dilidili"
+
 //iTunesURL
 #define kAppiTunesURL = @"https://itunes.apple.com/cn/app/bi-li-bi-li-dong-hua-dan-mu/id736536022?mt=8";
 

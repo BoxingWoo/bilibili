@@ -6,6 +6,7 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "BSMultiViewControlButtonCell.h"
 
 /**
  *  @brief 多视图控制器样式
@@ -33,12 +34,15 @@ typedef NS_ENUM(NSInteger, BSMultiViewControlStyle) {
 @property (nonatomic, weak) IBOutlet UIViewController *parentViewController;
 
 /** 子视图控制器数组 */
-@property (nonatomic, copy, readonly) NSArray *viewControllers;
+@property (nonatomic, copy, readonly) NSArray <UIViewController *> *viewControllers;
+
+/** 标题按钮数组 */
+@property (nonatomic, copy, readonly) NSArray <UIButton *> *buttons;
 
 /** 多视图控制器样式 */
 @property (nonatomic, assign) IBInspectable NSInteger style;
 
-/** 标题选中态索引，默认为0 */
+/** 标题选中态索引 */
 @property (nonatomic, assign) IBInspectable NSUInteger selectedIndex;
 
 /** 标题栏背景颜色 */
@@ -61,7 +65,7 @@ typedef NS_ENUM(NSInteger, BSMultiViewControlStyle) {
 /** 标题选中态下划线颜色，用于横向滚动式风格，默认为不填充颜色，即不显示 */
 @property (nonatomic, strong) IBInspectable UIColor *selectedButtonBottomLineColor;
 
-/** 是否显示标题栏与内容滚动视图的分割线，默认为YES */
+/** 是否显示标题栏与内容滚动视图的分割线，用于横向滚动式风格，默认为YES */
 @property (nonatomic, assign) IBInspectable BOOL showSeparatedLine;
 
 /** 是否显示下拉标题框，用于横向滚动式风格，默认为NO */
@@ -75,11 +79,17 @@ typedef NS_ENUM(NSInteger, BSMultiViewControlStyle) {
 
 
 /* 竖向滚动式 */
+/** 标题按钮单元格数组，用于竖向列表式风格 */
+@property (nonatomic, copy, readonly) NSArray <BSMultiViewControlButtonCell *> *buttonCells;
+
 /** 标题单元格高度，用于竖向列表式风格，默认值为44.0 */
 @property (nonatomic, assign) IBInspectable CGFloat buttonCellRowHeight;
 
-/** 标题选中态单元格背景颜色，用于竖向滚动式风格，默认为不填充颜色 */
-@property (nonatomic, strong) IBInspectable UIColor *selectedButtonCellBackgroundColor;
+/** 标题单元格线条颜色，用于竖向滚动式风格，默认为浅灰色 */
+@property (nonatomic, strong) IBInspectable UIColor *buttonCellLineColor;
+
+/** 标题选中态单元格线条颜色，用于竖向滚动式风格，默认为浅灰色 */
+@property (nonatomic, strong) IBInspectable UIColor *selectedButtonCellLineColor;
 
 
 /**
@@ -92,9 +102,18 @@ typedef NS_ENUM(NSInteger, BSMultiViewControlStyle) {
 - (instancetype)initWithFrame:(CGRect)frame andStyle:(BSMultiViewControlStyle)style owner:(UIViewController *)parentViewController;
 
 /**
- *  @brief 加载数据
+ *  @brief 重新加载数据
  */
 - (void)reloadData;
+
+/**
+ 更新视图
+
+ @param duration   动画时间，如果为0则不使用动画
+ @param updates    更新内容Block
+ @param completion 更新完成回调Block
+ */
+- (void)performUpdatesWithAnimateDuration:(NSTimeInterval)duration updates:(void (^)(BSMultiViewControl *multiViewControl))updates completion:(void (^)())completion;
 
 @end
 

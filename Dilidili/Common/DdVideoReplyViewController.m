@@ -7,12 +7,13 @@
 //
 
 #import "DdVideoReplyViewController.h"
-#import "MJRefresh.h"
+#import "DdRefreshNormalHeader.h"
+#import "DdRefreshActivityIndicatorFooter.h"
 
-
-@interface DdVideoReplyViewController () <UITableViewDataSource, UITableViewDelegate, UITextFieldDelegate>
+@interface DdVideoReplyViewController () <UITableViewDataSource, UITableViewDelegate, UITextFieldDelegate, YYTextKeyboardObserver>
 
 @property (nonatomic, weak) UIView *replyView;
+@property (nonatomic, weak) UIControl *overlayView;
 @property (nonatomic, weak) UITableView *tableView;
 @property (nonatomic, strong) UITableView *tableHeaderView;
 
@@ -20,6 +21,8 @@
 @property (nonatomic, copy) NSArray <DdReplyViewModel *> *hots;
 /** 评论列表数组 */
 @property (nonatomic, strong) NSMutableArray <DdReplyViewModel *> *replies;
+/** 页面信息 */
+@property (nonatomic, copy) NSDictionary *page;
 
 @end
 
@@ -40,6 +43,11 @@
     // Dispose of any resources that can be recreated.
 }
 
+- (void)dealloc
+{
+    DDLogWarn(@"%@ dealloc！", [self.class description]);
+}
+
 #pragma mark - Initialization
 
 - (void)createUI
@@ -47,11 +55,6 @@
     UIView *replyView = [[UIView alloc] init];
     _replyView = replyView;
     replyView.backgroundColor = [UIColor whiteColor];
-    [self.view addSubview:replyView];
-    [replyView mas_makeConstraints:^(MASConstraintMaker *make) {
-        make.bottom.left.right.equalTo(self.view);
-        make.height.mas_equalTo(49.0);
-    }];
     
     UIButton *emojiBtn = [UIButton buttonWithType:UIButtonTypeCustom];
     emojiBtn.adjustsImageWhenHighlighted = NO;
@@ -110,6 +113,29 @@
         button.selected = !button.isSelected;
         
     }];
+    
+    [self.view addSubview:replyView];
+    [replyView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.bottom.left.right.equalTo(self.view);
+        make.height.mas_equalTo(49.0);
+    }];
+}
+
+- (UIControl *)overlayView
+{
+    if (!_overlayView) {
+        UIControl *overlayView = [[UIControl alloc] init];
+        _overlayView = overlayView;
+        overlayView.backgroundColor = [UIColor colorWithWhite:0.0 alpha:0.3];
+        [[overlayView rac_signalForControlEvents:UIControlEventTouchUpInside] subscribeNext:^(id  _Nullable x) {
+            [self.view endEditing:YES];
+        }];
+        [self.view insertSubview:overlayView belowSubview:self.replyView];
+        [overlayView mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.edges.mas_equalTo(UIEdgeInsetsZero);
+        }];
+    }
+    return _overlayView;
 }
 
 - (UITableView *)tableView
@@ -117,16 +143,35 @@
     if (!_tableView) {
         UITableView *tableView = [[UITableView alloc] initWithFrame:self.view.bounds style:UITableViewStylePlain];
         _tableView = tableView;
-        tableView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+        [tableView registerClass:[DdVideoReplyCell class] forCellReuseIdentifier:videoReplyCellID];
+        [tableView registerClass:[DdVideoReplySubCell class] forCellReuseIdentifier:videoReplySubCellID];
+        [tableView registerClass:[DdVideoReplySectionFooter class] forHeaderFooterViewReuseIdentifier:videoReplySectionFooterID];
         tableView.dataSource = self;
         tableView.delegate = self;
         tableView.backgroundColor = [UIColor clearColor];
-        tableView.contentInset = UIEdgeInsetsMake(0, 0, 49, 0);
+        tableView.contentInset = UIEdgeInsetsMake(0, 0, -1 / kScreenScale, 0);
         tableView.layoutMargins = UIEdgeInsetsZero;
         tableView.separatorInset = UIEdgeInsetsZero;
         tableView.tableFooterView = [UIView new];
-        [tableView registerClass:[DdVideoReplySectionFooter class] forHeaderFooterViewReuseIdentifier:videoReplySectionFooterID];
+        @weakify(self);
+        tableView.mj_header = [DdRefreshNormalHeader headerWithRefreshingBlock:^{
+            @strongify(self);
+            self.pageNum = 1;
+            [self requestData];
+        }];
+        tableView.mj_footer = [DdRefreshActivityIndicatorFooter footerWithRefreshingBlock:^{
+            @strongify(self);
+            if (self.replies.count < [self.page[@"acount"] unsignedIntegerValue]) {
+                self.pageNum++;
+                [self requestData];
+            }else {
+                [self.tableView.mj_footer endRefreshingWithNoMoreData];
+            }
+        }];
         [self.view insertSubview:tableView belowSubview:self.replyView];
+        [tableView mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.edges.mas_equalTo(UIEdgeInsetsMake(0, 0, 49, 0));
+        }];
     }
     return _tableView;
 }
@@ -136,6 +181,9 @@
     if (!_tableHeaderView) {
         UITableView *tableHeaderView = [[UITableView alloc] initWithFrame:CGRectMake(0, 0, self.view.width, 0) style:UITableViewStylePlain];
         _tableHeaderView = tableHeaderView;
+        [tableHeaderView registerClass:[DdVideoReplyCell class] forCellReuseIdentifier:videoReplyCellID];
+        [tableHeaderView registerClass:[DdVideoReplySubCell class] forCellReuseIdentifier:videoReplySubCellID];
+        [tableHeaderView registerClass:[DdVideoReplySectionFooter class] forHeaderFooterViewReuseIdentifier:videoReplySectionFooterID];
         tableHeaderView.backgroundColor = [UIColor clearColor];
         tableHeaderView.dataSource = self;
         tableHeaderView.delegate = self;
@@ -179,8 +227,6 @@
             make.height.mas_equalTo(0.5);
         }];
         tableHeaderView.tableFooterView = footerView;
-        
-        [tableHeaderView registerClass:[DdVideoReplySectionFooter class] forHeaderFooterViewReuseIdentifier:videoReplySectionFooterID];
     }
     return _tableHeaderView;
 }
@@ -189,9 +235,9 @@
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
 {
-    if (tableView == self.tableHeaderView) {
+    if (tableView == _tableHeaderView) {
         return self.hots.count;
-    }else if (tableView == self.tableView) {
+    }else if (tableView == _tableView) {
         return self.replies.count;
     }
     return 0;
@@ -200,9 +246,9 @@
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
     DdReplyViewModel *viewModel = nil;
-    if (tableView == self.tableHeaderView) {
+    if (tableView == _tableHeaderView) {
         viewModel = self.hots[section];
-    }else if (tableView == self.tableView) {
+    }else if (tableView == _tableView) {
         viewModel = self.replies[section];
     }
     return viewModel != nil ? viewModel.replies.count + 1 : 0;
@@ -211,19 +257,20 @@
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
     DdReplyViewModel *viewModel = nil;
-    if (tableView == self.tableHeaderView) {
+    if (tableView == _tableHeaderView) {
         viewModel = self.hots[indexPath.section];
-    }else if (tableView == self.tableView) {
+    }else if (tableView == _tableView) {
         viewModel = self.replies[indexPath.section];
-        [viewModel layout];
     }
+    
     UITableViewCell *cell = nil;
+    @weakify(self);
     if (indexPath.row == 0) {
         DdVideoReplyCell *replyCell = [tableView dequeueReusableCellWithIdentifier:videoReplyCellID];
-        if (replyCell == nil) {
-            replyCell = [[DdVideoReplyCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:videoReplyCellID];
+        if (!replyCell.moreSubject) {
             replyCell.moreSubject = [RACSubject subject];
             [replyCell.moreSubject subscribeNext:^(DdVideoReplyCell *x) {
+                @strongify(self);
                 NSIndexPath *indexPath = [tableView indexPathForCell:x];
                 DdReplyViewModel *vm = nil;
                 if (tableView == self.tableHeaderView) {
@@ -233,8 +280,11 @@
                 }
                 [self handleMore:vm.model];
             }];
+        }
+        if (!replyCell.likeSubject) {
             replyCell.likeSubject = [RACSubject subject];
             [replyCell.likeSubject subscribeNext:^(DdVideoReplyCell *x) {
+                @strongify(self);
                 NSIndexPath *indexPath = [tableView indexPathForCell:x];
                 DdReplyViewModel *vm = nil;
                 if (tableView == self.tableHeaderView) {
@@ -250,12 +300,11 @@
         cell = replyCell;
     }else {
         viewModel = viewModel.replies[indexPath.row - 1];
-        [viewModel layout];
         DdVideoReplySubCell *subCell = [tableView dequeueReusableCellWithIdentifier:videoReplySubCellID];
-        if (subCell == nil) {
-            subCell = [[DdVideoReplySubCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:videoReplySubCellID];
+        if (!subCell.moreSubject) {
             subCell.moreSubject = [RACSubject subject];
             [subCell.moreSubject subscribeNext:^(DdVideoReplySubCell *x) {
+                @strongify(self);
                 NSIndexPath *indexPath = [tableView indexPathForCell:x];
                 DdReplyViewModel *vm = nil;
                 if (tableView == self.tableHeaderView) {
@@ -277,24 +326,20 @@
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
 {
     DdReplyViewModel *viewModel = nil;
-    if (tableView == self.tableHeaderView) {
+    if (tableView == _tableHeaderView) {
         viewModel = self.hots[indexPath.section];
-    }else if (tableView == self.tableView) {
+    }else if (tableView == _tableView) {
         viewModel = self.replies[indexPath.section];
-        [viewModel layout];
     }
-    if (indexPath.row == 0) {
-
-    }else {
+    if (indexPath.row != 0) {
         viewModel = viewModel.replies[indexPath.row - 1];
-        [viewModel layout];
     }
-    return viewModel.cellHeight;
+    return [viewModel heightForCellOnTableView:tableView atIndexPath:indexPath];
 }
 
 - (UIView *)tableView:(UITableView *)tableView viewForFooterInSection:(NSInteger)section
 {
-    if (tableView == self.tableHeaderView && section == self.hots.count - 1) {
+    if (tableView == _tableHeaderView && section == self.hots.count - 1) {
         return nil;
     }
     
@@ -304,7 +349,7 @@
 
 - (CGFloat)tableView:(UITableView *)tableView heightForFooterInSection:(NSInteger)section
 {
-    if (tableView == self.tableHeaderView && section == self.hots.count - 1) {
+    if (tableView == _tableHeaderView && section == self.hots.count - 1) {
         return 0;
     }
     
@@ -339,19 +384,20 @@
 #pragma mark 计算布局
 - (void)layout
 {
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-        CGFloat tableHeaderViewHeight = 0.0;
-        for (DdReplyViewModel *viewModel in self.hots) {
-            [viewModel layout];
-            tableHeaderViewHeight += viewModel.cellHeight;
+    CGFloat tableHeaderViewHeight = 0.0;
+    for (NSInteger i = 0; i < self.hots.count; i++) {
+        DdReplyViewModel *viewModel = self.hots[i];
+        tableHeaderViewHeight += [viewModel heightForCellOnTableView:self.tableHeaderView atIndexPath:[NSIndexPath indexPathForRow:0 inSection:i]];
+        for (NSInteger j = 0; j < viewModel.replies.count; j++) {
+            DdReplyViewModel *subViewModel = viewModel.replies[j];
+            tableHeaderViewHeight += [subViewModel heightForCellOnTableView:self.tableHeaderView atIndexPath:[NSIndexPath indexPathForRow:j + 1 inSection:i]];
         }
-        dispatch_async(dispatch_get_main_queue(), ^{
-            self.tableHeaderView.height = tableHeaderViewHeight + self.tableHeaderView.tableFooterView.height;
-            [self.tableHeaderView reloadData];
-            self.tableView.tableHeaderView = self.tableHeaderView;
-            [self.tableView reloadData];
-        });
-    });
+    }
+    tableHeaderViewHeight += self.tableHeaderView.tableFooterView.height;
+    self.tableHeaderView.height = tableHeaderViewHeight;
+    [self.tableHeaderView reloadData];
+    self.tableView.tableHeaderView = self.tableHeaderView;
+    [self.tableView reloadData];
 }
 
 #pragma mark 请求数据
@@ -390,14 +436,56 @@
     return repliesSignal;
 }
 
-/*
-#pragma mark - Navigation
+#pragma mark - TextFieldDelegate
 
-// In a storyboard-based application, you will often want to do a little preparation before navigation
-- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
-    // Get the new view controller using [segue destinationViewController].
-    // Pass the selected object to the new view controller.
+- (BOOL)textFieldShouldBeginEditing:(UITextField *)textField
+{
+    [[YYTextKeyboardManager defaultManager] addObserver:self];
+    self.overlayView.hidden = NO;
+    return YES;
 }
-*/
+
+- (BOOL)textFieldShouldEndEditing:(UITextField *)textField
+{
+    [self.overlayView removeFromSuperview];
+    self.overlayView = nil;
+    return YES;
+}
+
+- (void)textFieldDidEndEditing:(UITextField *)textField
+{
+    [[YYTextKeyboardManager defaultManager] removeObserver:self];
+}
+
+- (BOOL)textFieldShouldReturn:(UITextField *)textField
+{
+    textField.text = nil;
+    [textField resignFirstResponder];
+    return YES;
+}
+
+#pragma mark - YYTextKeyboardObserver
+- (void)keyboardChangedWithTransition:(YYTextKeyboardTransition)transition {
+    CGRect toFrame = [[YYTextKeyboardManager defaultManager] convertRect:transition.toFrame toView:self.view];
+    CGFloat offset = toFrame.origin.y - self.view.height;
+    [self.replyView mas_updateConstraints:^(MASConstraintMaker *make) {
+        make.bottom.equalTo(self.view.mas_bottom).offset(offset);
+    }];
+    if (transition.animationDuration != 0) {
+        [UIView animateWithDuration:transition.animationDuration delay:0 options:transition.animationOption | UIViewAnimationOptionBeginFromCurrentState animations:^{
+            [self.replyView layoutIfNeeded];
+        } completion:NULL];
+    }
+}
+
+/*
+ #pragma mark - Navigation
+ 
+ // In a storyboard-based application, you will often want to do a little preparation before navigation
+ - (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
+ // Get the new view controller using [segue destinationViewController].
+ // Pass the selected object to the new view controller.
+ }
+ */
 
 @end

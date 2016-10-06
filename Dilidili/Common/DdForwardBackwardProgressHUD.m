@@ -63,7 +63,6 @@
         UIButton *seekingBtn = [UIButton buttonWithType:UIButtonTypeCustom];
         _seekingBtn = seekingBtn;
         seekingBtn.userInteractionEnabled = NO;
-        seekingBtn.adjustsImageWhenDisabled = NO;
         [seekingBtn setImage:[UIImage imageNamed:@"play_forward_icon"] forState:UIControlStateNormal];
         [seekingBtn setImage:[UIImage imageNamed:@"play_retreat_icon"] forState:UIControlStateSelected];
         [seekingBtn setImage:[UIImage imageNamed:@"cancel_forward_icon"] forState:UIControlStateDisabled];

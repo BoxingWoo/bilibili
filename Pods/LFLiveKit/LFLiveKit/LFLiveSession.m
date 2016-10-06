@@ -90,8 +90,8 @@
 }
 
 - (void)dealloc {
-    self.videoCaptureSource.running = NO;
-    self.audioCaptureSource.running = NO;
+    _videoCaptureSource.running = NO;
+    _audioCaptureSource.running = NO;
 }
 
 #pragma mark -- CustomMethod
@@ -100,7 +100,6 @@
     _streamInfo = streamInfo;
     _streamInfo.videoConfiguration = _videoConfiguration;
     _streamInfo.audioConfiguration = _audioConfiguration;
-    _streamInfo.needDropFrame = (self.captureType & LFLiveCaptureMaskVideo || self.captureType & LFLiveInputMaskVideo) ? YES : NO;//< 有视频执行丢帧算法
     [self.socket start];
 }
 
@@ -108,15 +107,6 @@
     self.uploading = NO;
     [self.socket stop];
     self.socket = nil;
-}
-
-#pragma mark -- PrivateMethod
-- (void)pushSendBuffer:(LFFrame*)frame{
-    if(self.relativeTimestamps == 0){
-        self.relativeTimestamps = frame.timestamp;
-    }
-    frame.timestamp = [self uploadTimestamp:frame.timestamp];
-    [self.socket sendFrame:frame];
 }
 
 - (void)pushVideo:(nullable CVPixelBufferRef)pixelBuffer{
@@ -129,6 +119,15 @@
     if(self.captureType & LFLiveInputMaskAudio){
         if (self.uploading) [self.audioEncoder encodeAudioData:audioData timeStamp:NOW];
     }
+}
+
+#pragma mark -- PrivateMethod
+- (void)pushSendBuffer:(LFFrame*)frame{
+    if(self.relativeTimestamps == 0){
+        self.relativeTimestamps = frame.timestamp;
+    }
+    frame.timestamp = [self uploadTimestamp:frame.timestamp];
+    [self.socket sendFrame:frame];
 }
 
 #pragma mark -- CaptureDelegate

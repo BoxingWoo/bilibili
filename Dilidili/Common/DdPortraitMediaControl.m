@@ -434,7 +434,8 @@
 - (void)handleDragSlider:(UISlider *)slider
 {
     _isMediaSliderDragged = YES;
-    [self refreshPlaybackControlPanel];
+    [self showNoFade];
+    [self performSelector:@selector(hide) withObject:nil afterDelay:10.0];
 }
 
 @end

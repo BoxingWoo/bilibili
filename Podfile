@@ -9,13 +9,9 @@ target 'Dilidili’ do
     pod 'YYKit'
     pod 'Masonry'
     pod 'AFNetworking'
-#pod 'SDWebImage'
     pod 'pop'
     pod 'LFLiveKit'
-#pod 'UMengSocialCOM'
+    pod 'UMengSocialCOM'
+    pod 'BarrageRenderer'
 
 end
-
-
-
-

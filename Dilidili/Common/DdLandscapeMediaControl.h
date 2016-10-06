@@ -9,6 +9,7 @@
 #import <UIKit/UIKit.h>
 
 @protocol IJKMediaPlayback;
+@class DdDanmakuViewController;
 
 /**
  *  @brief 横屏媒体控制器
@@ -27,6 +28,8 @@
 @property (nonatomic, assign) BOOL statusBarHidden;
 /** 媒体播放器 */
 @property (nonatomic, weak) id<IJKMediaPlayback> delegatePlayer;
+/** 弹幕视图控制器 */
+@property (nonatomic, weak) DdDanmakuViewController *dvc;
 
 /**
  *  @brief 刷新媒体控制器

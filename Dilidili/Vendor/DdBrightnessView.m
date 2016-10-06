@@ -20,6 +20,11 @@
 
 @implementation DdBrightnessView
 
++ (void)load
+{
+    [self sharedBrightnessView];
+}
+
 + (instancetype)sharedBrightnessView {
     static DdBrightnessView *instance;
     static dispatch_once_t onceToken;
@@ -82,7 +87,7 @@
             [self.contentView addSubview:longView];
             longView;
         });
-        
+    
         [self createTips];
         [self addNotification];
         [self addObserver];
@@ -92,7 +97,6 @@
     return self;
 }
 
-//创建 Tips
 - (void)createTips {
     
     self.tipArray = [NSMutableArray arrayWithCapacity:16];
@@ -112,43 +116,6 @@
     [self updateLongView:[UIScreen mainScreen].brightness];
 }
 
-#pragma mark - 通知 KVO
-- (void)addNotification {
-    [[[NSNotificationCenter defaultCenter] rac_addObserverForName:UIDeviceOrientationDidChangeNotification object:nil] subscribeNext:^(id x) {
-        self.orientationDidChange = YES;
-        [self setNeedsLayout];
-    }];
-}
-
-- (void)addObserver {
-    [RACObserve([UIScreen mainScreen], brightness) subscribeNext:^(id x) {
-        [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(disappearAndFade) object:nil];
-        [self appear];
-        [self updateLongView:[x floatValue]];
-    }];
-}
-
-#pragma mark - Methond
-- (void)appear {
-    UIWindow *keyWindow = [UIApplication sharedApplication].windows.firstObject;
-    if (!self.superview) {
-         [keyWindow addSubview:self];
-    }else {
-        [keyWindow bringSubviewToFront:self];
-    }
-    self.alpha = 1.0;
-    [self performSelector:@selector(disappearAndFade) withObject:nil afterDelay:3.0];
-}
-
-- (void)disappearAndFade {
-    [UIView animateWithDuration:0.8 animations:^{
-        self.alpha = 0.0;
-    } completion:^(BOOL finished) {
-        [self removeFromSuperview];
-    }];
-}
-
-#pragma mark - Update View
 - (void)updateLongView:(float)brightness {
     float stage = 1 / 15.0;
     NSInteger level = brightness / stage;
@@ -165,7 +132,7 @@
 }
 
 - (void)willMoveToSuperview:(UIView *)newSuperview {
-    [self setNeedsLayout];
+    self.center = CGPointMake(kScreenWidth * 0.5, kScreenHeight * 0.5);
 }
 
 - (void)layoutSubviews {
@@ -182,6 +149,40 @@
     }
     
     self.backImage.center = CGPointMake(155 * 0.5, 155 * 0.5);
+}
+
+- (void)addNotification {
+    [[[NSNotificationCenter defaultCenter] rac_addObserverForName:UIDeviceOrientationDidChangeNotification object:nil] subscribeNext:^(id x) {
+        self.orientationDidChange = YES;
+        [self setNeedsLayout];
+    }];
+}
+
+- (void)addObserver {
+    [RACObserve([UIScreen mainScreen], brightness) subscribeNext:^(id x) {
+        [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(disappearAndFade) object:nil];
+        [self appear];
+        [self updateLongView:[x floatValue]];
+    }];
+}
+
+- (void)appear {
+    UIWindow *keyWindow = [UIApplication sharedApplication].windows.firstObject;
+    if (!self.superview) {
+        [keyWindow addSubview:self];
+    }else {
+        [keyWindow bringSubviewToFront:self];
+    }
+    self.alpha = 1.0;
+    [self performSelector:@selector(disappearAndFade) withObject:nil afterDelay:3.0];
+}
+
+- (void)disappearAndFade {
+    [UIView animateWithDuration:0.8 animations:^{
+        self.alpha = 0.0;
+    } completion:^(BOOL finished) {
+        [self removeFromSuperview];
+    }];
 }
 
 - (void)dealloc {

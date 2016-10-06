@@ -7,10 +7,9 @@
 //
 
 #import "RecommendViewController.h"
-#import "DdCollectionView.h"
 #import "UIScrollView+EmptyDataSet.h"
 #import "DdProgressHUD.h"
-#import "DdRefreshHeader.h"
+#import "DdRefreshMainHeader.h"
 #import "RecommendViewModel.h"
 
 @interface RecommendViewController () <UICollectionViewDataSource, UICollectionViewDelegate, UICollectionViewDelegateFlowLayout, BSLoopScrollViewDelegate, DZNEmptyDataSetSource, DZNEmptyDataSetDelegate>
@@ -18,7 +17,7 @@
     BOOL _isNoData;
 }
 
-@property (nonatomic, weak) DdCollectionView *collectionView;
+@property (nonatomic, weak) UICollectionView *collectionView;
 @property (nonatomic, strong) NSMutableArray <RecommendViewModel *> *dataArr;
 
 @end
@@ -57,16 +56,18 @@
     UICollectionViewFlowLayout *flowLayout = [[UICollectionViewFlowLayout alloc] init];
     flowLayout.minimumInteritemSpacing = 8.0;
     flowLayout.minimumLineSpacing = 8.0;
-    DdCollectionView *collectionView = [[DdCollectionView alloc] initWithFrame:self.view.bounds collectionViewLayout:flowLayout];
+    UICollectionView *collectionView = [[UICollectionView alloc] initWithFrame:self.view.bounds collectionViewLayout:flowLayout];
     _collectionView = collectionView;
     collectionView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     collectionView.dataSource = self;
     collectionView.delegate = self;
     collectionView.emptyDataSetSource = self;
     collectionView.emptyDataSetDelegate = self;
+    collectionView.layer.cornerRadius = 6.0;
+    collectionView.layer.masksToBounds = YES;
     collectionView.backgroundColor = kBgColor;
     collectionView.contentInset = UIEdgeInsetsMake(0, 0, kTabBarHeight, 0);
-    collectionView.scrollIndicatorInsets = collectionView.contentInset;
+    collectionView.showsVerticalScrollIndicator = NO;
     
     [collectionView registerClass:[RecommendCell class] forCellWithReuseIdentifier:recommendCellID];
     [collectionView registerClass:[RecommendRefreshCell class] forCellWithReuseIdentifier:recommendRefreshCellID];
@@ -77,10 +78,10 @@
     [collectionView registerClass:[RecommendBannerSectionHeader class] forSupplementaryViewOfKind:UICollectionElementKindSectionHeader withReuseIdentifier:recommendBannerSectionHeaderID];
     [collectionView registerClass:[RecommendSectionFooter class] forSupplementaryViewOfKind:UICollectionElementKindSectionFooter withReuseIdentifier:recommendSectionFooterID];
     [collectionView registerClass:[RecommendBangumiFooter class] forSupplementaryViewOfKind:UICollectionElementKindSectionFooter withReuseIdentifier:recommendBangumiFooterID];
-    
-    collectionView.mj_header = [DdRefreshHeader headerWithRefreshingBlock:^{
+    collectionView.mj_header = (MJRefreshHeader *)[DdRefreshMainHeader headerWithRefreshingBlock:^{
         [self requestData:YES];
     }];
+
     [self.view addSubview:collectionView];
 }
 
@@ -377,6 +378,7 @@
         return NO;
     }
 }
+
 
 /*
 #pragma mark - Navigation

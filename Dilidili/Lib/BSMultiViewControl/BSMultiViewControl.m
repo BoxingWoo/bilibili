@@ -6,7 +6,6 @@
 //
 
 #import "BSMultiViewControl.h"
-#import "VerticalButtonCell.h"
 #import "UIScrollView+MultiViewControlExtension.h"
 
 @interface BSMultiViewControl () <UITableViewDataSource, UITableViewDelegate>
@@ -23,8 +22,6 @@
 @property (nonatomic, weak) UIView *listBar;
 
 /* 横向滚动式 */
-//标题按钮数组
-@property (nonatomic, strong) NSMutableArray *buttons;
 //标题按钮栏滚动视图
 @property (nonatomic, weak) UIScrollView *listBarScrollView;
 //主滚动视图
@@ -43,8 +40,6 @@
 @property (nonatomic, weak) UIControl *buttonListBoxView;
 
 /* 竖向滚动式 */
-//标题按钮单元格数组
-@property (nonatomic, strong) NSMutableArray *buttonCells;
 //标题按钮栏表视图
 @property (nonatomic, weak) UITableView *listBarTableView;
 //主内容视图
@@ -104,6 +99,8 @@ static CGFloat animateDuration = 0.25;
     _bounces = YES;
     _scrollEnabled = YES;
     _buttonCellRowHeight = 44.0;
+    _buttonCellLineColor = [UIColor colorWithWhite:203 / 255.0 alpha:1.0];
+    _selectedButtonCellLineColor = _buttonCellLineColor;
     _lastOffsetX = 0.0;
     _clickedIndex = 0;
 }
@@ -137,15 +134,16 @@ static CGFloat animateDuration = 0.25;
         [arrowBtn addTarget:self action:@selector(showButtonListBox:) forControlEvents:UIControlEventTouchUpInside];
     }
     
-    _buttons = [[NSMutableArray alloc] init];
+    NSMutableArray *buttons = [[NSMutableArray alloc] init];
     for (NSInteger i = 0; i < _itemsCount; i++) {
         UIButton *button = [self.dataSource multiViewControl:self buttonAtIndex:i];
         [self.listBarScrollView addSubview:button];
-        [self.buttons addObject:button];
+        [buttons addObject:button];
         button.tag = 10000 + i;
         [button addTarget:self action:@selector(handleButtonClick:) forControlEvents:UIControlEventTouchUpInside];
     }
-    listBarScrollView.synScrollContentViews = self.buttons;
+    _buttons = buttons;
+    listBarScrollView.synScrollingContentViews = self.buttons;
     
     if (_selectedButtonBottomLineColor) {
         UIView *selectedButtonBottomLine = [[UIView alloc] init];
@@ -184,13 +182,17 @@ static CGFloat animateDuration = 0.25;
     listBarTableView.rowHeight = _buttonCellRowHeight;
     listBarTableView.separatorStyle = UITableViewCellSeparatorStyleNone;
     listBarTableView.showsVerticalScrollIndicator = NO;
-    _buttonCells = [[NSMutableArray alloc] init];
+    NSMutableArray *buttonCells = [[NSMutableArray alloc] init];
+    NSMutableArray *buttons = [[NSMutableArray alloc] init];
     for (NSInteger i = 0; i < _itemsCount; i++) {
         UIButton *button = [self.dataSource multiViewControl:self buttonAtIndex:i];
         button.tag = 10000 + i;
         [button addTarget:self action:@selector(handleButtonClick:) forControlEvents:UIControlEventTouchUpInside];
-        VerticalButtonCell *cell = [[VerticalButtonCell alloc] initWithTitleButton:button];
-        [self.buttonCells addObject:cell];
+        [buttons addObject:button];
+        BSMultiViewControlButtonCell *cell = [[BSMultiViewControlButtonCell alloc] initWithTitleButton:button];
+        cell.rightSeparatedLine.backgroundColor = self.buttonCellLineColor.CGColor;
+        cell.bottomSeparatedLine.backgroundColor = self.buttonCellLineColor.CGColor;
+        [buttonCells addObject:cell];
     }
     
     [self createMainContentView];
@@ -259,6 +261,7 @@ static CGFloat animateDuration = 0.25;
         }
         self.mainScrollView.frame = CGRectMake(0, _listBarHeight, CGRectGetWidth(self.bounds), CGRectGetHeight(self.bounds) - _listBarHeight);
         
+        UIButton *selectedBtn = nil;
         if (_style == BSMultiViewControlFixedSpace) {
             CGFloat totalWidth = _fixedSpace / 2;
             for (NSInteger i = 0; i < _itemsCount; i++) {
@@ -277,8 +280,7 @@ static CGFloat animateDuration = 0.25;
             CGSize contentSize = CGSizeMake(totalWidth, CGRectGetHeight(self.listBarScrollView.bounds));
             self.listBarScrollView.contentSize = contentSize.width > CGRectGetWidth(self.listBarScrollView.bounds) ? contentSize : self.listBarScrollView.bounds.size;
             
-            UIButton *selectedBtn = self.buttons[_selectedIndex];
-            self.selectedButtonBottomLine.frame = CGRectMake(selectedBtn.frame.origin.x + (CGRectGetWidth(selectedBtn.bounds) - CGRectGetWidth(selectedBtn.titleLabel.bounds)) / 2, CGRectGetHeight(self.listBarScrollView.bounds) - selectedButtonBottomLineHeight, CGRectGetWidth(selectedBtn.titleLabel.bounds), selectedButtonBottomLineHeight);
+            selectedBtn = self.buttons[_selectedIndex];
             
         }else if (_style == BSMultiViewControlFixedPageSize) {
             CGFloat width = CGRectGetWidth(self.listBarScrollView.bounds) / _fixedPageSize;
@@ -294,8 +296,7 @@ static CGFloat animateDuration = 0.25;
             CGSize contentSize = CGSizeMake(width * self.itemsCount, CGRectGetHeight(self.listBarScrollView.bounds));
             self.listBarScrollView.contentSize = contentSize.width > CGRectGetWidth(self.listBarScrollView.bounds) ? contentSize : self.listBarScrollView.bounds.size;
             
-            UIButton *selectedBtn = self.buttons[_selectedIndex];
-            self.selectedButtonBottomLine.frame = CGRectMake(selectedBtn.frame.origin.x, CGRectGetHeight(self.listBarScrollView.bounds) - selectedButtonBottomLineHeight, CGRectGetWidth(selectedBtn.bounds), selectedButtonBottomLineHeight);
+            selectedBtn = self.buttons[_selectedIndex];
         }
         
         CGFloat width = CGRectGetWidth(self.mainScrollView.bounds);
@@ -305,6 +306,16 @@ static CGFloat animateDuration = 0.25;
             vc.view.frame = CGRectMake(i * width, 0, width, height);
         }
         self.mainScrollView.contentSize = CGSizeMake(width * self.itemsCount, height);
+        [self.mainScrollView setContentOffset:CGPointMake(_selectedIndex * CGRectGetWidth(self.mainScrollView.bounds), 0)];
+        if (self.style == BSMultiViewControlFixedSpace) {
+            
+            self.selectedButtonBottomLine.frame = CGRectMake(selectedBtn.frame.origin.x + (CGRectGetWidth(selectedBtn.bounds) - CGRectGetWidth(selectedBtn.titleLabel.bounds)) / 2, CGRectGetHeight(self.listBarScrollView.bounds) - selectedButtonBottomLineHeight, CGRectGetWidth(selectedBtn.titleLabel.bounds), selectedButtonBottomLineHeight);
+            
+        }else if (self.style == BSMultiViewControlFixedPageSize) {
+            
+            self.selectedButtonBottomLine.frame = CGRectMake(selectedBtn.frame.origin.x, CGRectGetHeight(self.listBarScrollView.bounds) - selectedButtonBottomLineHeight, CGRectGetWidth(selectedBtn.bounds), selectedButtonBottomLineHeight);
+            
+        }
     }else {
         if (_listBarWidth == 0) _listBarWidth = 84.0;
         if (_listBarHeight == 0) _listBarHeight = CGRectGetHeight(self.bounds);
@@ -316,9 +327,8 @@ static CGFloat animateDuration = 0.25;
             UIViewController *vc = self.viewControllers[i];
             vc.view.frame = self.mainContentView.bounds;
         }
+        [self.listBarTableView scrollToRowAtIndexPath:[NSIndexPath indexPathForRow:_selectedIndex inSection:0] atScrollPosition:UITableViewScrollPositionTop animated:NO];
     }
-    
-    [self layoutIfNeeded];
     
     if (self.shouldLayoutSubViews) {
         self.shouldLayoutSubViews = NO;
@@ -335,12 +345,12 @@ static CGFloat animateDuration = 0.25;
     if (self.viewControllers.count > selectedIndex) {
         if (self.style != BSMultiViewControlVertical) {
             [self.mainScrollView setContentOffset:CGPointMake(selectedIndex * CGRectGetWidth(self.mainScrollView.bounds), 0)];
-            [self synSelectButtonAction:selectedIndex];
+            [self synSelectingAction:selectedIndex];
             if ([self.delegate respondsToSelector:@selector(multiViewControl:didSelectViewController:atIndex:)]) {
                 [self.delegate multiViewControl:self didSelectViewController:self.viewControllers[selectedIndex] atIndex:selectedIndex];
             }
         }else {
-            [self synSelectButtonAction:selectedIndex];
+            [self synSelectingAction:selectedIndex];
         }
     }
 }
@@ -369,6 +379,8 @@ static CGFloat animateDuration = 0.25;
     [self.viewControllers makeObjectsPerformSelector:@selector(removeFromParentViewController)];
     [self.subviews makeObjectsPerformSelector:@selector(removeFromSuperview)];
     _viewControllers = nil;
+    _buttonCells = nil;
+    _buttons = nil;
     _clickedIndex = 0;
     _itemsCount = [self.dataSource numberOfItemsInMultiViewControl:self];
     if (_itemsCount) {
@@ -379,6 +391,29 @@ static CGFloat animateDuration = 0.25;
         }
         
         _shouldLayoutSubViews = YES;
+    }
+}
+
+//更新视图
+- (void)performUpdatesWithAnimateDuration:(NSTimeInterval)duration updates:(void (^)(BSMultiViewControl *))updates completion:(void (^)())completion
+{
+    if (duration == 0) {
+        if (updates) {
+            updates(self);
+        }
+        if (completion) {
+            completion();
+        }
+    }else {
+        [UIView animateWithDuration:duration delay:0.0 options:UIViewAnimationOptionBeginFromCurrentState animations:^{
+            if (updates) {
+                updates(self);
+            }
+        } completion:^(BOOL finished) {
+            if (completion) {
+                completion();
+            }
+        }];
     }
 }
 
@@ -497,12 +532,12 @@ static CGFloat animateDuration = 0.25;
     if (self.style != BSMultiViewControlVertical) {
         [self.mainScrollView setContentOffset:CGPointMake(index * CGRectGetWidth(self.mainScrollView.bounds), 0) animated:YES];
     }else {
-        [self synSelectButtonAction:index];
+        [self synSelectingAction:index];
     }
 }
 
 //同步选中
-- (void)synSelectButtonAction:(NSInteger)index
+- (void)synSelectingAction:(NSInteger)index
 {
     if (self.style != BSMultiViewControlVertical) {
         
@@ -536,22 +571,28 @@ static CGFloat animateDuration = 0.25;
     }else {
         //取消选中
         for (NSInteger i = 0; i < self.itemsCount; i++) {
-            VerticalButtonCell *cell = self.buttonCells[i];
+            BSMultiViewControlButtonCell *cell = self.buttonCells[i];
+            cell.bottomSeparatedLine.backgroundColor = self.buttonCellLineColor.CGColor;
             if (cell.titleButton.isSelected) {
                 cell.titleButton.selected = NO;
-                cell.rightSeparatedLine.hidden = NO;
-                cell.backgroundColor = [UIColor clearColor];
+//                cell.rightSeparatedLine.hidden = NO;
+                cell.rightSeparatedLine.backgroundColor = self.buttonCellLineColor.CGColor;
                 UIViewController *vc = self.viewControllers[i];
                 [vc.view removeFromSuperview];
             }
         }
         
         //设置选中
-        VerticalButtonCell *selectedCell = self.buttonCells[index];
+        BSMultiViewControlButtonCell *selectedCell = self.buttonCells[index];
         selectedCell.titleButton.selected = YES;
-        selectedCell.rightSeparatedLine.hidden = YES;
-        if (self.selectedButtonCellBackgroundColor) {
-            selectedCell.backgroundColor = self.selectedButtonCellBackgroundColor;
+//        selectedCell.rightSeparatedLine.hidden = YES;
+        if (self.selectedButtonCellLineColor) {
+            selectedCell.rightSeparatedLine.backgroundColor = self.selectedButtonCellLineColor.CGColor;
+            selectedCell.bottomSeparatedLine.backgroundColor = self.selectedButtonCellLineColor.CGColor;
+            if (index > 0) {
+                BSMultiViewControlButtonCell *lastCell = self.buttonCells[index - 1];
+                lastCell.bottomSeparatedLine.backgroundColor = self.selectedButtonCellLineColor.CGColor;
+            }
         }
         UIViewController *vc = self.viewControllers[index];
         [self.mainContentView addSubview:vc.view];
@@ -616,7 +657,7 @@ static CGFloat animateDuration = 0.25;
 {
     if (scrollView == self.mainScrollView) {
         NSInteger page = scrollView.contentOffset.x / scrollView.bounds.size.width;
-        [self synSelectButtonAction:page];
+        [self synSelectingAction:page];
         if ([self.delegate respondsToSelector:@selector(multiViewControl:didSelectViewController:atIndex:)]) {
             [self.delegate multiViewControl:self didSelectViewController:self.viewControllers[page] atIndex:page];
         }
@@ -627,7 +668,7 @@ static CGFloat animateDuration = 0.25;
 {
     if (scrollView == self.mainScrollView) {
         NSInteger page = scrollView.contentOffset.x / scrollView.bounds.size.width;
-        [self synSelectButtonAction:page];
+        [self synSelectingAction:page];
         if ([self.delegate respondsToSelector:@selector(multiViewControl:didSelectViewController:atIndex:)]) {
             [self.delegate multiViewControl:self didSelectViewController:self.viewControllers[page] atIndex:page];
         }

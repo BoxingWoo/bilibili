@@ -9,6 +9,7 @@
 #import "DdVideoViewController.h"
 #import "DdVideoInfoViewController.h"
 #import "DdVideoReplyViewController.h"
+#import "DdDanmakuViewController.h"
 #import <IJKMediaFramework/IJKMediaFramework.h>
 #import "BSMultiViewControl.h"
 #import "DdMediaControl.h"
@@ -18,11 +19,17 @@
 #import "DdFormatter.h"
 
 @interface DdVideoViewController () <UITextFieldDelegate, BSMultiViewControlDataSource, BSMultiViewControlDelegate>
+{
+    NSString *_aid;  //视频标识
+    NSString *_cid;  //弹幕标识
+}
 
 /** 视频信息视图控制器 */
 @property (nonatomic, strong) DdVideoInfoViewController *ivc;
 /** 视频评论视图控制器 */
 @property (nonatomic, strong) DdVideoReplyViewController *rvc;
+/** 弹幕视图控制器 */
+@property (nonatomic, strong) DdDanmakuViewController *dvc;
 /** 预览图片视图 */
 @property (nonatomic, weak) UIImageView *previewImageView;
 /** 视频播放器 */
@@ -48,18 +55,18 @@
     [super viewDidLoad];
     
 #ifdef DEBUG
-    [IJKFFMoviePlayerController setLogReport:NO];
     [IJKFFMoviePlayerController setLogLevel:k_IJK_LOG_DEBUG];
-#else
     [IJKFFMoviePlayerController setLogReport:NO];
-    [IJKFFMoviePlayerController setLogLevel:k_IJK_LOG_INFO];
+#else
+    [IJKFFMoviePlayerController setLogLevel:k_IJK_LOG_ERROR];
+    [IJKFFMoviePlayerController setLogReport:NO];
 #endif
     
     [IJKFFMoviePlayerController checkIfFFmpegVersionMatch:YES];
     
     self.automaticallyAdjustsScrollViewInsets = NO;
-    
     self.view.backgroundColor = kBgColor;
+    _aid = [self.originUrl.path stringByReplacingOccurrencesOfString:@"/" withString:@""];
     
     [self createUI];
 }
@@ -104,6 +111,7 @@
 {
     UIImageView *previewImageView = [[UIImageView alloc] init];
     _previewImageView = previewImageView;
+    previewImageView.backgroundColor = [UIColor blackColor];
     [self.view addSubview:previewImageView];
     [previewImageView mas_makeConstraints:^(MASConstraintMaker *make) {
         make.top.left.right.equalTo(self.view);
@@ -117,31 +125,6 @@
     [previewImageView setImageWithURL:url placeholder:nil options:YYWebImageOptionIgnoreDiskCache completion:^(UIImage * _Nullable image, NSURL * _Nonnull url, YYWebImageFromType from, YYWebImageStage stage, NSError * _Nullable error) {
         self.previewImageView.image = [[image imageByResizeToSize:CGSizeMake(kScreenWidth * kScreenScale, kScreenWidth * 0.5625 * kScreenScale) contentMode:UIViewContentModeScaleAspectFill] imageByBlurRadius:15 tintColor:[UIColor colorWithWhite:1.0 alpha:0.3] tintMode:kCGBlendModeNormal saturation:1.8 maskImage:nil];
         [self performSelector:@selector(requestData) withObject:nil afterDelay:1.0];
-    }];
-}
-
-- (void)setContentURL:(NSURL *)contentURL
-{
-    _contentURL = contentURL;
-    [_player shutdown];
-    [_player.view removeFromSuperview];
-    
-    IJKFFOptions *options = [IJKFFOptions optionsByDefault];
-    IJKFFMoviePlayerController *player = [[IJKFFMoviePlayerController alloc] initWithContentURL:contentURL withOptions:options];
-    _player = player;
-    player.scalingMode = IJKMPMovieScalingModeAspectFit;
-    player.shouldAutoplay = NO;
-    [self.view insertSubview:player.view belowSubview:self.mediaControl];
-    [player.view mas_makeConstraints:^(MASConstraintMaker *make) {
-        make.left.right.top.bottom.equalTo(self.mediaControl);
-    }];
-    
-    UIView *overlayView = [[UIView alloc] init];
-    overlayView.userInteractionEnabled = NO;
-    overlayView.backgroundColor = [UIColor blackColor];
-    [self.view insertSubview:overlayView belowSubview:player.view];
-    [overlayView mas_makeConstraints:^(MASConstraintMaker *make) {
-        make.left.right.top.bottom.equalTo(player.view);
     }];
 }
 
@@ -164,11 +147,7 @@
             RACSignal *signal = [RACSignal createSignal:^RACDisposable *(id<RACSubscriber> subscriber) {
                 @strongify(self);
                 if (self.mediaControl.interfaceOrientationMask == UIInterfaceOrientationMaskLandscape) {
-                    [self.player.view mas_remakeConstraints:^(MASConstraintMaker *make) {
-                        make.top.left.right.equalTo(self.view);
-                        make.height.equalTo(self.player.view.mas_width).multipliedBy(0.5625);
                     self.mediaControl.interfaceOrientationMask = UIInterfaceOrientationMaskPortrait;
-                    }];
                 }else {
                     [self.navigationController popViewControllerAnimated:YES];
                 }
@@ -178,7 +157,28 @@
             }];
             return signal;
         }];
-  
+        
+#pragma mark Action - 屏幕切换
+        mediaControl.handleFullScreenCommand = [[RACCommand alloc] initWithSignalBlock:^RACSignal *(id input) {
+            RACSignal *signal = [RACSignal createSignal:^RACDisposable *(id<RACSubscriber> subscriber) {
+                @strongify(self);
+                [self.view endEditing:YES];
+                if (self.mediaControl.interfaceOrientationMask == UIInterfaceOrientationMaskPortrait) {
+                    
+                    self.mediaControl.interfaceOrientationMask = UIInterfaceOrientationMaskLandscapeRight;
+                    
+                }else if (self.mediaControl.interfaceOrientationMask == UIInterfaceOrientationMaskLandscape) {
+                    
+                    self.mediaControl.interfaceOrientationMask = UIInterfaceOrientationMaskPortrait;
+                    
+                }
+                
+                [subscriber sendCompleted];
+                return nil;
+            }];
+            return signal;
+        }];
+        
 #pragma mark Action - 显示/隐藏状态栏
         mediaControl.handleStatusBarHiddenCommand = [[RACCommand alloc] initWithSignalBlock:^RACSignal *(id input) {
             RACSignal *signal = [RACSignal createSignal:^RACDisposable *(id<RACSubscriber> subscriber) {
@@ -220,7 +220,7 @@
             UIImage *transformImage = [image imageByResizeToSize:CGSizeMake(faceWidth * kScreenScale, faceWidth * kScreenScale)];
             transformImage = [transformImage imageByRoundCornerRadius:transformImage.size.width / 2 borderWidth:2.0 borderColor:[UIColor whiteColor]];
             return transformImage;
-        
+            
         } completion:NULL];
         
         UITextField *danmakuTextField = [[UITextField alloc] init];
@@ -228,7 +228,7 @@
         danmakuTextField.borderStyle = UITextBorderStyleNone;
         danmakuTextField.backgroundColor = [UIColor darkGrayColor];
         danmakuTextField.tintColor = kThemeColor;
-        danmakuTextField.textColor = kTextColor;
+        danmakuTextField.textColor = [UIColor lightGrayColor];
         danmakuTextField.font = [UIFont systemFontOfSize:14];
         danmakuTextField.clearButtonMode = UITextFieldViewModeWhileEditing;
         danmakuTextField.returnKeyType = UIReturnKeySend;
@@ -289,11 +289,39 @@
         contentView.selectedIndex = 1;
         [self.view addSubview:contentView];
         [contentView mas_makeConstraints:^(MASConstraintMaker *make) {
-            make.left.right.bottom.equalTo(self.view);
+            make.left.right.equalTo(self.view);
             make.top.equalTo(self.danmakuEntryView.mas_bottom);
+            make.bottom.equalTo(self.view.mas_bottom).priorityLow();
         }];
     }
     return _contentView;
+}
+
+#pragma mark - Setter
+
+- (void)setContentURL:(NSURL *)contentURL
+{
+    _contentURL = contentURL;
+    [_player shutdown];
+    [_player.view removeFromSuperview];
+    
+    IJKFFOptions *options = [IJKFFOptions optionsByDefault];
+    IJKFFMoviePlayerController *player = [[IJKFFMoviePlayerController alloc] initWithContentURL:contentURL withOptions:options];
+    _player = player;
+    player.scalingMode = IJKMPMovieScalingModeAspectFit;
+    player.shouldAutoplay = NO;
+    [self.view insertSubview:player.view belowSubview:self.mediaControl];
+    [player.view mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.right.top.bottom.equalTo(self.mediaControl);
+    }];
+    
+    UIView *overlayView = [[UIView alloc] init];
+    overlayView.userInteractionEnabled = NO;
+    overlayView.backgroundColor = [UIColor blackColor];
+    [self.view insertSubview:overlayView belowSubview:player.view];
+    [overlayView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.right.top.bottom.equalTo(player.view);
+    }];
 }
 
 #pragma mark - MultiViewControl
@@ -312,7 +340,7 @@
     if (index == 0) {
         [button setTitle:@"简介" forState:UIControlStateNormal];
     }else if (index == 1) {
-        [button setTitle:[NSString stringWithFormat:@"评论（%@）", [DdFormatter stringForCount:[self.rvc.page[@"acount"] unsignedIntegerValue]]] forState:UIControlStateNormal];
+        [button setTitle:@"评论" forState:UIControlStateNormal];
     }
     return button;
 }
@@ -340,56 +368,79 @@
     [_previewImageView removeFromSuperview];
     [self.mediaControl refreshMediaControl];
     self.mediaControl.loadingDetail = @"正在获取视频信息...";
-    NSString *aid = [self.originUrl.path stringByReplacingOccurrencesOfString:@"/" withString:@""];
     
     self.ivc = [[DdVideoInfoViewController alloc] init];
-    RACSignal *infoSignal = [[DdVideoViewModel requestVideoInfoByAid:aid from:self.params[@"from"]] execute:nil];
+    self.ivc.aid = _aid;
+    self.ivc.from = self.params[@"from"];
+    RACSignal *infoSignal = [self.ivc requestData];
     [infoSignal subscribeNext:^(DdVideoModel *model) {
         
         self.mediaControl.loadingDetail = @"成功...\n正在获取视频地址...";
-        self.ivc.videoViewModel = [[DdVideoViewModel alloc] initWithModel:model];
-        [self requestVideoPath];
+        [self requestVideoURL];
         
     } error:^(NSError *error) {
         
         self.mediaControl.loadingDetail = @"失败...\n正在获取视频地址...";
-        [self requestVideoPath];
+        [self requestVideoURL];
         
     }];
     
     self.rvc = [[DdVideoReplyViewController alloc] init];
-    self.rvc.oid = aid;
+    self.rvc.oid = _aid;
     self.rvc.pageNum = 1;
     RACSignal *repliesSignal = [self.rvc requestData];
-    
-    [[RACSignal combineLatest:@[infoSignal, repliesSignal]] subscribeNext:^(id x) {
-        
-        self.danmakuEntryView.hidden = NO;
-        [self.contentView reloadData];
-        
-    } error:^(NSError *error) {
-        
-        self.danmakuEntryView.hidden = NO;
-        [self.contentView reloadData];
-        
+    [repliesSignal subscribeNext:^(RACTuple *tuple) {
+        [self.contentView performUpdatesWithAnimateDuration:0 updates:^(BSMultiViewControl *multiViewControl) {
+            NSDictionary *page = tuple.third;
+            UIButton *button = multiViewControl.buttons[1];
+            [button setTitle:[NSString stringWithFormat:@"评论（%@）", [DdFormatter stringForCount:[page[@"acount"] unsignedIntegerValue]]] forState:UIControlStateNormal];
+        } completion:NULL];
     }];
+    
+    self.danmakuEntryView.hidden = NO;
+    [self.contentView reloadData];
 }
 
 #pragma mark 请求视频播放链接
-- (void)requestVideoPath
+- (void)requestVideoURL
 {
-    NSString *aid = [self.originUrl.path stringByReplacingOccurrencesOfString:@"/" withString:@""];
-    [[[DdVideoViewModel requestVideoPathByAid:aid] execute:nil] subscribeNext:^(NSString *src) {
-        self.contentURL = [NSURL URLWithString:src];
-        self.ivc.videoViewModel.contentURL = self.contentURL;
+    [[[DdVideoViewModel requestVideoURLByAid:_aid] execute:nil] subscribeNext:^(NSDictionary *responseDict) {
+        _cid = responseDict[@"cid"];
+        NSDictionary *urlDict = [responseDict[@"durl"] firstObject];
+        self.contentURL = [NSURL URLWithString:urlDict[@"url"]];
         self.mediaControl.delegatePlayer = self.player;
-        self.mediaControl.loadingDetail = @"正在初始化设置...\n正在载入弹幕...\n载入视频中...";
+        self.mediaControl.loadingDetail = @"正在初始化设置...\n正在载入弹幕...";
+        [self requestVideoDanmaku];
+    } error:^(NSError *error) {
+        self.mediaControl.loadingDetail = @"失败...";
+    }];
+}
+
+#pragma mark 请求视频弹幕
+- (void)requestVideoDanmaku
+{
+    self.dvc = [[DdDanmakuViewController alloc] init];
+    self.dvc.cid = _cid;
+    [self.view insertSubview:self.dvc.view belowSubview:self.mediaControl];
+    [self.dvc.view mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.right.top.bottom.equalTo(self.mediaControl);
+    }];
+    [self addChildViewController:self.dvc];
+    RACSignal *danmakuSignal = [self.dvc requestData];
+    [danmakuSignal subscribeNext:^(id  _Nullable x) {
+        self.mediaControl.loadingDetail = @"成功...\n载入视频中...";
+        self.mediaControl.dvc = self.dvc;
+        self.dvc.delegatePlayer = self.player;
         [self.player prepareToPlay];
 #ifdef DEBUG
         [YPPlayerFPSLabel showWithPlayer:self.player];
 #endif
-    } error:^(NSError *error) {
-        self.mediaControl.loadingDetail = @"失败...";
+    } error:^(NSError * _Nullable error) {
+        self.mediaControl.loadingDetail = @"失败...\n载入视频中...";
+        [self.player prepareToPlay];
+#ifdef DEBUG
+        [YPPlayerFPSLabel showWithPlayer:self.player];
+#endif
     }];
 }
 
@@ -403,6 +454,7 @@
 
 - (BOOL)textFieldShouldEndEditing:(UITextField *)textField
 {
+    textField.text = nil;
     [self.overlayView removeFromSuperview];
     self.overlayView = nil;
     return YES;
@@ -410,7 +462,7 @@
 
 - (BOOL)textFieldShouldReturn:(UITextField *)textField
 {
-    textField.text = nil;
+    [self.dvc.renderer receive:[[DdDanmakuUserDefaults sharedInstance] preferredDanmakuDescriptorWithText:textField.text]];
     [textField resignFirstResponder];
     return YES;
 }
@@ -446,13 +498,13 @@
 }
 
 /*
-#pragma mark - Navigation
-
-// In a storyboard-based application, you will often want to do a little preparation before navigation
-- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
-    // Get the new view controller using [segue destinationViewController].
-    // Pass the selected object to the new view controller.
-}
-*/
+ #pragma mark - Navigation
+ 
+ // In a storyboard-based application, you will often want to do a little preparation before navigation
+ - (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
+ // Get the new view controller using [segue destinationViewController].
+ // Pass the selected object to the new view controller.
+ }
+ */
 
 @end
