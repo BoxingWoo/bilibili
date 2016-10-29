@@ -20,7 +20,6 @@
 #import "AllColor.h"  //颜色配置
 #import "AllFormat.h"  //格式化配置
 #import "AllKeyAndText.h"  //键值配置
-#import "AllAPI.h"  //数据接口
 
 #import "AppInfo.h"  //应用信息
 #import "DCURLRouter.h"  //路由

@@ -465,6 +465,7 @@
 }
 
 #pragma mark - YYTextKeyboardObserver
+
 - (void)keyboardChangedWithTransition:(YYTextKeyboardTransition)transition {
     CGRect toFrame = [[YYTextKeyboardManager defaultManager] convertRect:transition.toFrame toView:self.view];
     CGFloat offset = toFrame.origin.y - self.view.height;

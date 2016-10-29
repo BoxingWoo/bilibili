@@ -12,20 +12,20 @@
 
 + (void)initialize
 {
-    [SVProgressHUD setDefaultStyle:SVProgressHUDStyleLight];
-    [SVProgressHUD setMinimumDismissTimeInterval:2.0];
+    [SVProgressHUD setDefaultStyle:SVProgressHUDStyleDark];
+    [SVProgressHUD setMinimumDismissTimeInterval:3.0];
 }
 
 + (void)show
 {
-    [SVProgressHUD setDefaultMaskType:SVProgressHUDMaskTypeBlack];
+    [SVProgressHUD setDefaultMaskType:SVProgressHUDMaskTypeClear];
     [SVProgressHUD setDefaultAnimationType:SVProgressHUDAnimationTypeNative];
     [SVProgressHUD show];
 }
 
 + (void)showWithStatus:(NSString *)status
 {
-    [SVProgressHUD setDefaultMaskType:SVProgressHUDMaskTypeBlack];
+    [SVProgressHUD setDefaultMaskType:SVProgressHUDMaskTypeClear];
     [SVProgressHUD setDefaultAnimationType:SVProgressHUDAnimationTypeNative];
     [SVProgressHUD showWithStatus:status];
 }
@@ -33,28 +33,24 @@
 + (void)showInfoWithStatus:(NSString*)status
 {
     [SVProgressHUD setDefaultMaskType:SVProgressHUDMaskTypeClear];
-    [SVProgressHUD setDefaultAnimationType:SVProgressHUDAnimationTypeNative];
     [SVProgressHUD showInfoWithStatus:status];
 }
 
 + (void)showSuccessWithStatus:(NSString *)status
 {
     [SVProgressHUD setDefaultMaskType:SVProgressHUDMaskTypeClear];
-    [SVProgressHUD setDefaultAnimationType:SVProgressHUDAnimationTypeNative];
     [SVProgressHUD showSuccessWithStatus:status];
 }
 
 + (void)showErrorWithStatus:(NSString *)status
 {
     [SVProgressHUD setDefaultMaskType:SVProgressHUDMaskTypeClear];
-    [SVProgressHUD setDefaultAnimationType:SVProgressHUDAnimationTypeNative];
     [SVProgressHUD showErrorWithStatus:status];
 }
 
 + (void)showImage:(UIImage *)image status:(NSString *)status
 {
-    [SVProgressHUD setDefaultMaskType:SVProgressHUDMaskTypeClear];
-    [SVProgressHUD setDefaultAnimationType:SVProgressHUDAnimationTypeNative];
+    [SVProgressHUD setDefaultMaskType:SVProgressHUDMaskTypeNone];
     [SVProgressHUD showImage:image status:status];
 }
 

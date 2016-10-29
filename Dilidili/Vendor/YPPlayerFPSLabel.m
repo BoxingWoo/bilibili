@@ -35,6 +35,10 @@
 
 + (void)showWithPlayer:(id<IJKMediaPlayback>)player
 {
+    if (player == nil) {
+        return;
+    }
+    
     [self dismiss];
     
     UIWindow *fpswindow = [UIApplication sharedApplication].windows.firstObject;

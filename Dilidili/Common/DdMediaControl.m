@@ -163,7 +163,7 @@
 #pragma mark 加载描述
 - (void)setLoadingDetail:(NSString *)loadingDetail
 {
-    if ([_loadingDetail isNotBlank]) {
+    if (_loadingDetail) {
         _loadingDetail = [NSString stringWithFormat:@"%@\n%@", _loadingDetail, loadingDetail];
         self.detailLabel.text = _loadingDetail;
         [UIView animateWithDuration:0.25 animations:^{

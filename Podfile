@@ -10,7 +10,7 @@ target 'Dilidili’ do
     pod 'Masonry'
     pod 'AFNetworking'
     pod 'pop'
-    pod 'LFLiveKit'
+    pod 'GPUImage'
     pod 'UMengSocialCOM'
     pod 'BarrageRenderer'
 

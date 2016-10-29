@@ -10,8 +10,8 @@
 
 @class LiveViewModel;
 
-extern NSString *const LiveCollectionElementKindHeaderView;
-extern NSString *const LiveCollectionElementKindFooterView;
+extern NSString *const LiveCollectionElementKindHeaderView;  //直播集合视图头部视图标识
+extern NSString *const LiveCollectionElementKindFooterView;  //直播集合视图尾部视图标识
 
 /**
  直播列表流式布局

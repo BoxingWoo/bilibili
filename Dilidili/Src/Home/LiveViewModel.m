@@ -120,7 +120,7 @@
             NSMutableDictionary *parameters = [NSMutableDictionary dictionary];
             parameters[@"actionKey"] = [AppInfo actionKey];
             parameters[@"appkey"] = [AppInfo appkey];
-            parameters[@"build"] = [AppInfo build];
+            parameters[@"build"] = @"3870";
             parameters[@"buvid"] = [AppInfo buvid];
             parameters[@"device"] = [AppInfo device];
             parameters[@"mobi_app"] = [AppInfo mobi_app];

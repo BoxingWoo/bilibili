@@ -103,7 +103,7 @@ NSString *const LiveCollectionElementKindFooterView = @"LiveFooterView";
 
 - (NSArray<UICollectionViewLayoutAttributes *> *)layoutAttributesForElementsInRect:(CGRect)rect
 {
-    return self.layoutAttributes.copy;
+    return self.layoutAttributes;
 }
 
 - (UICollectionViewLayoutAttributes *)layoutAttributesForSupplementaryViewOfKind:(NSString *)elementKind atIndexPath:(NSIndexPath *)indexPath

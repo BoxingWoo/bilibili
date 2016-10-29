@@ -14,6 +14,7 @@
 #import "BSMultiViewControl.h"
 #import "DdMediaControl.h"
 #import "DdProgressHUD.h"
+#import "BSActionSheet.h"
 #import "YPPlayerFPSLabel.h"
 #import "DdImageManager.h"
 #import "DdFormatter.h"
@@ -189,6 +190,21 @@
             }];
             return signal;
         }];
+        
+#pragma mark Action - 更多
+        mediaControl.handleMoreCommand = [[RACCommand alloc] initWithSignalBlock:^RACSignal * _Nonnull(id  _Nullable input) {
+            RACSignal *signal = [RACSignal createSignal:^RACDisposable * _Nullable(id<RACSubscriber>  _Nonnull subscriber) {
+                BSActionSheet *actionSheet = [[BSActionSheet alloc] initWithTitle:nil cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@[@"举报"] onButtonTouchUpInside:^(BSActionSheet * _Nonnull actionSheet, NSInteger buttonIndex) {
+ 
+                }];
+                [actionSheet show];
+                
+                [subscriber sendCompleted];
+                return nil;
+            }];
+            return signal;
+        }];
+        
     }
     return _mediaControl;
 }
@@ -302,8 +318,6 @@
 - (void)setContentURL:(NSURL *)contentURL
 {
     _contentURL = contentURL;
-    [_player shutdown];
-    [_player.view removeFromSuperview];
     
     IJKFFOptions *options = [IJKFFOptions optionsByDefault];
     IJKFFMoviePlayerController *player = [[IJKFFMoviePlayerController alloc] initWithContentURL:contentURL withOptions:options];

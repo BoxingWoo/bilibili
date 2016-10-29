@@ -11,7 +11,7 @@
 		<key>bilibili://video</key>
 		<string>DdVideoViewController</string>
 		<key>bilibili://live</key>
-		<string></string>
+		<string>LiveVideoViewController</string>
 		<key>bilibili://bangumi</key>
 		<string></string>
 	</dict>

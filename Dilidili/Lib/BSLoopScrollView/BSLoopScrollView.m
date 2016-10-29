@@ -82,8 +82,6 @@
         contentView.frame = CGRectMake((i + 1) * width, 0, width, height);
     }
     
-    [self layoutIfNeeded];
-    
     if (_shouldLayoutSubviews) {
         _shouldLayoutSubviews = NO;
         if (_pageCount) {
@@ -228,11 +226,11 @@
 {
     CGFloat width = CGRectGetWidth(self.scrollView.bounds);
     CGFloat height = CGRectGetHeight(self.scrollView.bounds);
+    self.firstView.frame = CGRectMake(width, 0, width, height);
+    self.lastView.frame = CGRectMake(_pageCount * width, 0, width, height);
     if (self.scrollView.contentOffset.x == (_pageCount + 1) * width) {
-        self.firstView.frame = CGRectMake(width, 0, width, height);
         [self.scrollView scrollRectToVisible:self.firstView.frame animated:NO];
     }else if (self.scrollView.contentOffset.x == 0) {
-        self.lastView.frame = CGRectMake(_pageCount * width, 0, width, height);
         [self.scrollView scrollRectToVisible:self.lastView.frame animated:NO];
     }
     _currentPage = self.scrollView.contentOffset.x / self.scrollView.bounds.size.width - 1;
@@ -245,10 +243,23 @@
 {
     CGFloat width = CGRectGetWidth(scrollView.bounds);
     CGFloat height = CGRectGetHeight(scrollView.bounds);
-    if (scrollView.contentOffset.x < width) {
-        self.lastView.frame = CGRectMake(0, 0, width, height);
-    }else if (scrollView.contentOffset.x > _pageCount * width) {
-        self.firstView.frame = CGRectMake((_pageCount + 1) * width, 0, width, height);
+    if (_pageCount == 2) {
+        if (scrollView.contentOffset.x < width) {
+            self.lastView.frame = CGRectMake(0, 0, width, height);
+        }else {
+            self.lastView.frame = CGRectMake(_pageCount * width, 0, width, height);
+        }
+        if (scrollView.contentOffset.x > _pageCount * width) {
+            self.firstView.frame = CGRectMake((_pageCount + 1) * width, 0, width, height);
+        }else {
+            self.firstView.frame = CGRectMake(width, 0, width, height);
+        }
+    }else {
+        if (scrollView.contentOffset.x < width) {
+            self.lastView.frame = CGRectMake(0, 0, width, height);
+        }else if (scrollView.contentOffset.x > _pageCount * width) {
+            self.firstView.frame = CGRectMake((_pageCount + 1) * width, 0, width, height);
+        }
     }
 }
 
@@ -279,4 +290,3 @@
 }
 
 @end
-

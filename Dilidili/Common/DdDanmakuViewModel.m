@@ -211,9 +211,15 @@
             descriptor.params[@"duration"] = @(5.0);
         }
 //        descriptor.params[@"delay"] = @(model.delay);
-        descriptor.params[@"text"] = model.text;
-        descriptor.params[@"textColor"] = model.textColor;
-        descriptor.params[@"fontSize"] = @(model.fontSize);
+        NSMutableAttributedString *attributedText = [[NSMutableAttributedString alloc] initWithString:model.text];
+        [attributedText addAttribute:NSFontAttributeName value:[UIFont systemFontOfSize:model.fontSize] range:NSMakeRange(0, model.text.length)];
+        [attributedText addAttribute:NSForegroundColorAttributeName value:model.textColor range:NSMakeRange(0, model.text.length)];
+        CGFloat strokeWidth = [DdDanmakuUserDefaults sharedInstance].strokeWidth / kScreenScale;
+        NSShadow *shadow = [[NSShadow alloc] init];
+        shadow.shadowColor = [UIColor blackColor];
+        shadow.shadowOffset = CGSizeMake(strokeWidth, strokeWidth);
+        [attributedText addAttribute:NSShadowAttributeName value:shadow range:NSMakeRange(0, model.text.length)];
+        descriptor.params[@"attributedText"] = attributedText;
     }
     return self;
 }

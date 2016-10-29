@@ -33,7 +33,7 @@
         buttonView.alignment = UIStackViewAlignmentCenter;
         buttonView.distribution = UIStackViewDistributionFillEqually;
         for (NSInteger i = 0; i < buttonTitles.count; i++) {
-            BSCentralButton *button = [BSCentralButton buttonWithType:UIButtonTypeCustom andContentSpace:8.0];
+            BSCentralButton *button = [BSCentralButton buttonWithType:UIButtonTypeCustom andContentSpace:6.0];
             [button setImage:[UIImage imageNamed:buttonImages[i]] forState:UIControlStateNormal];
             button.titleLabel.font = [UIFont systemFontOfSize:11];
             [button setTitleColor:kTextColor forState:UIControlStateNormal];
@@ -48,8 +48,8 @@
         }
         [self addSubview:buttonView];
         [buttonView mas_makeConstraints:^(MASConstraintMaker *make) {
-            make.top.equalTo(loopScrollView.mas_bottom).offset(10.0);
-            make.bottom.equalTo(self.mas_bottom).offset(-20.0);
+            make.top.equalTo(loopScrollView.mas_bottom).offset(30.0);
+            make.bottom.equalTo(self.mas_bottom).offset(-22.0);
             make.left.equalTo(self.mas_left).offset(10.0);
             make.right.equalTo(self.mas_right).offset(-10.0);
         }];

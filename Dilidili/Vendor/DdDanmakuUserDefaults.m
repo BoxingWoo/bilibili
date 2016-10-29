@@ -58,6 +58,12 @@
             self.opacity = 0.8;
         }
         
+        if ([self.danmakuStorage itemExistsForKey:@"strokeWidth"]) {
+            _strokeWidth = [[NSKeyedUnarchiver unarchiveObjectWithData:[self.danmakuStorage getItemValueForKey:@"strokeWidth"]] doubleValue];
+        }else {
+            self.strokeWidth = 2.0;
+        }
+        
         if ([self.danmakuStorage itemExistsForKey:@"preferredFontSize"]) {
             _preferredFontSize = [[NSKeyedUnarchiver unarchiveObjectWithData:[self.danmakuStorage getItemValueForKey:@"preferredFontSize"]] integerValue];
         }else {
@@ -116,6 +122,14 @@
     if (_opacity != opacity) {
         _opacity = opacity;
         [self.danmakuStorage saveItemWithKey:@"opacity" value:[NSKeyedArchiver archivedDataWithRootObject:@(_opacity)]];
+    }
+}
+
+- (void)setStrokeWidth:(CGFloat)strokeWidth
+{
+    if (_strokeWidth != strokeWidth) {
+        _strokeWidth = strokeWidth;
+        [self.danmakuStorage saveItemWithKey:@"strokeWidth" value:[NSKeyedArchiver archivedDataWithRootObject:@(_strokeWidth)]];
     }
 }
 
@@ -225,9 +239,16 @@
             fontSize = 17;
             break;
     }
-    descriptor.params[@"fontSize"] = @(fontSize);
-    descriptor.params[@"textColor"] = _preferredTextColor;
-    descriptor.params[@"text"] = text;
+    
+    NSMutableAttributedString *attributedText = [[NSMutableAttributedString alloc] initWithString:text];
+    [attributedText addAttribute:NSFontAttributeName value:[UIFont systemFontOfSize:fontSize] range:NSMakeRange(0, text.length)];
+    [attributedText addAttribute:NSForegroundColorAttributeName value:_preferredTextColor range:NSMakeRange(0, text.length)];
+    CGFloat strokeWidth = _strokeWidth / kScreenScale;
+    NSShadow *shadow = [[NSShadow alloc] init];
+    shadow.shadowColor = [UIColor blackColor];
+    shadow.shadowOffset = CGSizeMake(strokeWidth, strokeWidth);
+    [attributedText addAttribute:NSShadowAttributeName value:shadow range:NSMakeRange(0, text.length)];
+    descriptor.params[@"attributedText"] = attributedText;
     descriptor.params[@"borderWidth"] = @(1.0);
     descriptor.params[@"borderColor"] = _preferredTextColor;
     

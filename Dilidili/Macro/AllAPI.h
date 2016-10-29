@@ -9,14 +9,6 @@
 #ifndef AllAPI_h
 #define AllAPI_h
 
-#define DdServer_App @"http://app.bilibili.com"
-#define DdServer_Api @"http://api.bilibili.com"
-#define DdServer_Bilibili @"http://www.bilibili.com"
-#define DdServer_Danmaku @"http://comment.bilibili.com"
-#define DdServer_live @"http://live.bilibili.com"
-#define DdServer_Bangumi @"http://bangumi.bilibili.com"
-#define DdServer_Umeng @"http://oc.umeng.com"
-
 //推荐列表接口 http://app.bilibili.com/x/v2/show?actionKey=appkey&appkey=27eb53fc9058f8c3&build=3600&channel=appstore&device=phone&mobi_app=iphone&plat=1&platform=ios&sign=207007525573941d525bb02b501243d3&ts=1472090858&warm=0
 #define DdRecommendListURL DdServer_App@"/x/v2/show"
 
@@ -54,8 +46,10 @@
 #define DdLiveRefreshURL DdServer_live@"/AppIndex/dynamic"
 
 //全部直播接口（最热：sort=hottest，最新：sort=latest） http://live.bilibili.com/mobile/rooms?actionKey=appkey&appkey=27eb53fc9058f8c3&area_id=0&build=3870&device=phone&mobi_app=iphone&page=1&platform=ios&sign=3ef31cf1ae047a52691d2fa7bc43b778&sort=hottest&ts=1475577110
-#define DdLiveAllURL DdServer_live@"mobile/rooms"
+#define DdLiveAllURL DdServer_live@"/mobile/rooms"
 
+//直播信息接口 http://live.bilibili.com/AppRoom/index?actionKey=appkey&appkey=27eb53fc9058f8c3&build=3940&buvid=E25A38CE-0436-44C9-AC81-7D82A7CDA6985936infoc&device=phone&jumpFrom=24000&mobi_app=iphone&platform=ios&room_id=335045&scale=2&sign=069e8c1f182d0978a4cceb1c9e4424e0&ts=1477277752
+#define DdLiveInfoURL DdServer_live@"/AppRoom/index"
 
 
 #endif /* AllAPI_h */

@@ -27,7 +27,7 @@
 - (instancetype)initWithModel:(DdVideoModel *)model;
 
 /**
- *  @brief 获取视频信息链接
+ *  @brief 获取视频信息
  *
  *  @param aid  视频标识
  *  @param from 分类标识

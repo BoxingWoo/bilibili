@@ -11,6 +11,7 @@
 #import "MyCustomLogFormatter.h"
 #import "LaunchViewController.h"
 #import "DdTabBarController.h"
+#import "BSAlertView.h"
 
 #import "AFNetworkReachabilityManager.h"
 
@@ -28,9 +29,6 @@
     
     //网络监测
     [self monitorNetwork];
-    
-    //配置全局UI
-    [self configUI];
     
     //加载
     [self handleLaunch:launchOptions];
@@ -93,12 +91,6 @@
     DDLogDebug(@"====================dilidili====================");
 }
 
-//配置全局UI
-- (void)configUI
-{
-    
-}
-
 #pragma mark - 加载
 
 //加载
@@ -120,7 +112,6 @@
         NSArray *versions = [newestVersion componentsSeparatedByString:@"."];
         shortVersion = [NSString stringWithFormat:@"%@.%@", versions[0], versions[1]];
         [USER_DEFAULTS setValue:shortVersion forKey:@"shortVersion"];
-        
         
     }
     
@@ -153,12 +144,8 @@
     [reachablityManager setReachabilityStatusChangeBlock:^(AFNetworkReachabilityStatus status) {
         DDLogDebug(@"当前网络状态: %@", AFStringFromNetworkReachabilityStatus(status));
         if (status == AFNetworkReachabilityStatusNotReachable) {
-            UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"提示" message:@"网络不可用，请检查网络设置！" preferredStyle:UIAlertControllerStyleAlert];
-            UIAlertAction *alertAction = [UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
-                [alertController dismissViewControllerAnimated:YES completion:NULL];
-            }];
-            [alertController addAction:alertAction];
-            [self.window.rootViewController presentViewController:alertController animated:YES completion:NULL];
+            BSAlertView *alertView = [[BSAlertView alloc] initWithTitle:@"提示" message:@"网络不可用，请检查网络设置！" cancelButtonTitle:@"取消" otherButtonTitles:@[@"确定"] onButtonTouchUpInside:NULL];
+            [alertView show];
         }
     }];
     [reachablityManager startMonitoring];

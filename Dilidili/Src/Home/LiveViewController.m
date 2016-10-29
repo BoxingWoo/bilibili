@@ -8,6 +8,8 @@
 
 #import "LiveViewController.h"
 #import <pop/POP.h>
+#import "LiveCenterViewController.h"
+#import "LiveVideoViewController.h"
 #import "UIScrollView+EmptyDataSet.h"
 #import "DdProgressHUD.h"
 #import "DdRefreshMainHeader.h"
@@ -24,6 +26,8 @@
 @property (nonatomic, weak) LiveFlowLayout *flowLayout;
 @property (nonatomic, strong) NSMutableArray <LiveViewModel *> *dataArr;
 @property (nonatomic, strong) NSMutableArray <LiveBannerModel *> *banners;
+
+@property (nonatomic, assign) BOOL shouldRefreshLoopScrollView;
 
 @end
 
@@ -134,14 +138,21 @@
         LiveHeaderView *headerView = [collectionView dequeueReusableSupplementaryViewOfKind:kind withReuseIdentifier:liveHeaderViewID forIndexPath:indexPath];
         headerView.loopScrollView.dataSource = self;
         headerView.loopScrollView.delegate = self;
-        if (headerView.loopScrollView.contentViews.count == 0) {
+        if (self.shouldRefreshLoopScrollView) {
+            self.shouldRefreshLoopScrollView = NO;
             [headerView.loopScrollView reloadData];
         }
 #pragma mark Action - 功能选项
         if (!headerView.actionSubject) {
             headerView.actionSubject = [RACSubject subject];
-            [headerView.actionSubject subscribeNext:^(UIButton *x) {
-                
+            @weakify(self);
+            [headerView.actionSubject subscribeNext:^(NSNumber *x) {
+                @strongify(self);
+                NSInteger index = x.integerValue;
+                if (index == 1) {  //直播中心
+                    LiveCenterViewController *cvc = [[LiveCenterViewController alloc] init];
+                    [self.navigationController pushViewController:cvc animated:YES];
+                }
             }];
         }
         return headerView;
@@ -174,7 +185,12 @@
 
 - (void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath
 {
-    
+    LiveViewModel *viewModel = self.dataArr[indexPath.section];
+    LiveModel *model = viewModel.model.lives[indexPath.item];
+    LiveVideoViewController *vvc = [[LiveVideoViewController alloc] init];
+    vvc.room_id = model.room_id;
+    vvc.playurl = model.playurl;
+    [self.navigationController pushViewController:vvc animated:YES];
 }
 
 #pragma mark - LoopScrollView
@@ -264,6 +280,7 @@
         }
         [self.banners addObjectsFromArray:banners];
         
+        self.shouldRefreshLoopScrollView = YES;
         self.flowLayout.viewModels = self.dataArr;
         [self.collectionView reloadData];
         

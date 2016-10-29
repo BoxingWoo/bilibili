@@ -55,13 +55,13 @@
 #pragma mark 版本号
 + (NSString *)appver
 {
-    return @"3870";
+    return @"3940";
 }
 
 #pragma mark 编译号
 + (NSString *)build
 {
-    return @"3870";
+    return @"3940";
 }
 
 #pragma mark 标识号

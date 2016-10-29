@@ -82,7 +82,7 @@
         [self.contentView addSubview:refreshBtn];
         [refreshBtn mas_makeConstraints:^(MASConstraintMaker *make) {
             make.right.equalTo(self.contentView.mas_right).offset(6.0);
-            make.bottom.equalTo(self.contentView.mas_bottom).offset(10.0);
+            make.bottom.equalTo(self.contentView.mas_bottom).offset(6.0);
             make.width.height.mas_equalTo(60.0);
         }];
         

@@ -11,6 +11,7 @@
 #import <IJKMediaFramework/IJKMediaFramework.h>
 #import "DdDanmakuViewController.h"
 #import "BSCentralButton.h"
+#import "BSAlertView.h"
 #import "DdBrightnessView.h"
 #import "DdForwardBackwardProgressHUD.h"
 #import "DdBufferProgressView.h"
@@ -220,11 +221,11 @@ NSInteger textColorValues[] = {DdDanmakuPurple, DdDanmakuBule, DdDanmakuMagenta,
         titleLabel.centerY = titleViewHeight / 2;
         [titleView addSubview:titleLabel];
         
+        @weakify(self);
         UIButton *moreBtn = [UIButton buttonWithType:UIButtonTypeCustom];
         moreBtn.adjustsImageWhenHighlighted = NO;
         [moreBtn setImage:[UIImage imageNamed:@"icmpv_more_light"] forState:UIControlStateNormal];
 #pragma mark Action - 显示更多视图
-        @weakify(self);
         [[moreBtn rac_signalForControlEvents:UIControlEventTouchUpInside] subscribeNext:^(id x) {
             @strongify(self);
             [self hide];
@@ -317,16 +318,10 @@ NSInteger textColorValues[] = {DdDanmakuPurple, DdDanmakuBule, DdDanmakuMagenta,
         [coinBtn setImage:[UIImage imageNamed:@"player_addcoin"] forState:UIControlStateNormal];
 #pragma mark Action - 投币
         [[coinBtn rac_signalForControlEvents:UIControlEventTouchUpInside] subscribeNext:^(id  _Nullable x) {
-            UIAlertController *alertController = [UIAlertController alertControllerWithTitle:nil message:@"这将会消耗您一枚硬币，继续么？" preferredStyle:UIAlertControllerStyleAlert];
-            UIAlertAction *cancelAction = [UIAlertAction actionWithTitle:@"取消" style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
-                [alertController dismissViewControllerAnimated:YES completion:NULL];
+            BSAlertView *alertView = [[BSAlertView alloc] initWithTitle:@"提示" message:@"这将会消耗您一枚硬币，继续么？" cancelButtonTitle:@"取消" otherButtonTitles:@[@"继续"] onButtonTouchUpInside:^(BSAlertView * _Nonnull alertView, NSInteger buttonIndex) {
+                
             }];
-            [alertController addAction:cancelAction];
-            UIAlertAction *continueAction = [UIAlertAction actionWithTitle:@"继续" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
-                [alertController dismissViewControllerAnimated:YES completion:NULL];
-            }];
-            [alertController addAction:continueAction];
-            [[DCURLRouter sharedDCURLRouter].currentViewController presentViewController:alertController animated:YES completion:NULL];
+            [alertView show];
         }];
         [topEffectView.contentView addSubview:coinBtn];
         [coinBtn mas_makeConstraints:^(MASConstraintMaker *make) {

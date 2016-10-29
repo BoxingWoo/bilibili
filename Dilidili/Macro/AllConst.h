@@ -15,6 +15,15 @@
 //iTunesURL
 #define kAppiTunesURL = @"https://itunes.apple.com/cn/app/bi-li-bi-li-dong-hua-dan-mu/id736536022?mt=8";
 
+//HostName
+#define DdServer_App @"http://app.bilibili.com"
+#define DdServer_Api @"http://api.bilibili.com"
+#define DdServer_Bilibili @"http://www.bilibili.com"
+#define DdServer_Danmaku @"http://comment.bilibili.com"
+#define DdServer_live @"http://live.bilibili.com"
+#define DdServer_Bangumi @"http://bangumi.bilibili.com"
+#define DdServer_Umeng @"http://oc.umeng.com"
+
 //UserDefaults
 #define USER_DEFAULTS [NSUserDefaults standardUserDefaults]
 //弱引用

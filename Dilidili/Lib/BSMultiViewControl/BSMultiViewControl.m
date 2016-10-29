@@ -194,6 +194,7 @@ static CGFloat animateDuration = 0.25;
         cell.bottomSeparatedLine.backgroundColor = self.buttonCellLineColor.CGColor;
         [buttonCells addObject:cell];
     }
+    _buttonCells = buttonCells;
     
     [self createMainContentView];
 }

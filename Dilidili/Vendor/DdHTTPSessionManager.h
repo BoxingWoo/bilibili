@@ -7,6 +7,7 @@
 //
 
 #import <AFNetworking/AFNetworking.h>
+#import "AllAPI.h"
 
 /**
  *  @brief 请求响应状态

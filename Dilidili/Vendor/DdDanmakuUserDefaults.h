@@ -101,6 +101,10 @@ typedef NS_ENUM(NSInteger, DdDanmakuShieldingOption) {
  弹幕透明度
  */
 @property (nonatomic, assign) CGFloat opacity;
+/**
+ 弹幕描边宽度
+ */
+@property (nonatomic, assign) CGFloat strokeWidth;
 
 /**
  弹幕偏好字体大小
