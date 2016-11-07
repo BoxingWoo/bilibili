@@ -37,6 +37,7 @@
 		881DA82C1DBEF170005B54D4 /* LiveMediaControl.m in Sources */ = {isa = PBXBuildFile; fileRef = 881DA82B1DBEF170005B54D4 /* LiveMediaControl.m */; };
 		881DA82F1DBEF33A005B54D4 /* LivePortraitMediaControl.m in Sources */ = {isa = PBXBuildFile; fileRef = 881DA82E1DBEF33A005B54D4 /* LivePortraitMediaControl.m */; };
 		881DA8321DBEF359005B54D4 /* LiveLandscapeMediaControl.m in Sources */ = {isa = PBXBuildFile; fileRef = 881DA8311DBEF359005B54D4 /* LiveLandscapeMediaControl.m */; };
+		882B1DD71DC6F9D6002C9000 /* LiveSuperCaptureViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 882B1DD61DC6F9D6002C9000 /* LiveSuperCaptureViewController.m */; };
 		88305EBD1DC0591600B5B1BF /* live_room_ico@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 88305EBB1DC0591600B5B1BF /* live_room_ico@2x.png */; };
 		88305EBE1DC0591600B5B1BF /* live_room_ico@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = 88305EBC1DC0591600B5B1BF /* live_room_ico@3x.png */; };
 		88305EC31DC05A6800B5B1BF /* live_online_ico@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 88305EBF1DC05A6800B5B1BF /* live_online_ico@2x.png */; };
@@ -862,6 +863,8 @@
 		881DA82E1DBEF33A005B54D4 /* LivePortraitMediaControl.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LivePortraitMediaControl.m; sourceTree = "<group>"; };
 		881DA8301DBEF359005B54D4 /* LiveLandscapeMediaControl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LiveLandscapeMediaControl.h; sourceTree = "<group>"; };
 		881DA8311DBEF359005B54D4 /* LiveLandscapeMediaControl.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LiveLandscapeMediaControl.m; sourceTree = "<group>"; };
+		882B1DD51DC6F9D6002C9000 /* LiveSuperCaptureViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LiveSuperCaptureViewController.h; sourceTree = "<group>"; };
+		882B1DD61DC6F9D6002C9000 /* LiveSuperCaptureViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LiveSuperCaptureViewController.m; sourceTree = "<group>"; };
 		88305EBB1DC0591600B5B1BF /* live_room_ico@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "live_room_ico@2x.png"; sourceTree = "<group>"; };
 		88305EBC1DC0591600B5B1BF /* live_room_ico@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "live_room_ico@3x.png"; sourceTree = "<group>"; };
 		88305EBF1DC05A6800B5B1BF /* live_online_ico@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "live_online_ico@2x.png"; sourceTree = "<group>"; };
@@ -1867,6 +1870,8 @@
 				8831A90E1DC43BF400DECA09 /* LiveCaptureViewController.m */,
 				8831A92A1DC482F300DECA09 /* LiveFilterCaptureViewController.h */,
 				8831A92B1DC482F300DECA09 /* LiveFilterCaptureViewController.m */,
+				882B1DD51DC6F9D6002C9000 /* LiveSuperCaptureViewController.h */,
+				882B1DD61DC6F9D6002C9000 /* LiveSuperCaptureViewController.m */,
 			);
 			name = ViewController;
 			sourceTree = "<group>";
@@ -4379,6 +4384,7 @@
 				88375D4F1D87D70C00B49D1B /* DdReplyViewModel.m in Sources */,
 				88FBE2871DC32C8400B7A220 /* LiveCenterCell.m in Sources */,
 				88E0B9361D6D420A0039EA6A /* MJRefreshBackGifFooter.m in Sources */,
+				882B1DD71DC6F9D6002C9000 /* LiveSuperCaptureViewController.m in Sources */,
 				88AF2EB81DBDBE02002FDBB1 /* LiveInfoModel.m in Sources */,
 				88E0B9351D6D420A0039EA6A /* MJRefreshAutoStateFooter.m in Sources */,
 				8838D07C1DBF0530000953E9 /* LiveSevenRankingViewController.m in Sources */,

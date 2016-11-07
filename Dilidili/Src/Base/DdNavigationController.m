@@ -130,7 +130,7 @@
 
 #pragma mark GestureRecognizerDelegate
 
-- (BOOL)gestureRecognizerShouldBegin:(UIPanGestureRecognizer *)gestureRecognizer
+- (BOOL)gestureRecognizerShouldBegin:(UIGestureRecognizer *)gestureRecognizer
 {
     // Ignore when no view controller is pushed into the navigation stack.
     if (self.viewControllers.count <= 1) {

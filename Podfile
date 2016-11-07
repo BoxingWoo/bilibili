@@ -11,6 +11,7 @@ target 'Dilidili’ do
     pod 'AFNetworking'
     pod 'pop'
     pod 'GPUImage'
+    pod 'LFLiveKit'
     pod 'UMengSocialCOM'
     pod 'BarrageRenderer'
 
