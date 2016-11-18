@@ -12,10 +12,10 @@
  *  @brief 循环滚动视图页面控制位置
  */
 typedef NS_ENUM(NSInteger, BSPageControlPosition) {
-    BSPageControlPositionNone = 0,  //不显示页面控制
-    BSPageControlPositionLeft = 1,  //左下
-    BSPageControlPositionMiddle = 2,  //中间
-    BSPageControlPositionRight = 3  //右下
+    BSPageControlPositionNone = 0,  // 不显示页面控制
+    BSPageControlPositionLeft = 1,  // 左下
+    BSPageControlPositionMiddle = 2,  // 中间
+    BSPageControlPositionRight = 3  // 右下
 };
 
 @protocol BSLoopScrollViewDataSource;
@@ -25,21 +25,21 @@ typedef NS_ENUM(NSInteger, BSPageControlPosition) {
  */
 @interface BSLoopScrollView : UIView
 
-//数据源
+/** 数据源 */
 @property (nonatomic, weak) IBOutlet id<BSLoopScrollViewDataSource> dataSource;
-//代理
+/** 代理 */
 @property (nonatomic, weak) IBOutlet id<BSLoopScrollViewDelegate> delegate;
-//内容视图数组
+/** 内容视图数组 */
 @property (nonatomic, copy, readonly) NSArray *contentViews;
-//页面控制位置，默认为BSPageControlPositionNone
+/** 页面控制位置，默认为BSPageControlPositionNone */
 @property (nonatomic, assign) IBInspectable NSInteger pageControlPosition;
-//页面控制指示点颜色
+/** 页面控制指示点颜色 */
 @property (nonatomic, strong) IBInspectable UIColor *pageIndicatorTintColor;
-//页面控制当前指示点颜色
+/** 页面控制当前指示点颜色 */
 @property (nonatomic, strong) IBInspectable UIColor *currentPageIndicatorTintColor;
-//自动滚动时间间隔，如果<=0或内容视图数量=1，不自动滚动，默认为0
+/** 自动滚动时间间隔，如果<=0或内容视图数量=1，不自动滚动，默认为0 */
 @property (nonatomic, assign) IBInspectable double autoScrollDuration;
-//内容视图是否响应触摸事件，默认为YES
+/** 内容视图是否响应触摸事件，默认为YES */
 @property (nonatomic, assign) IBInspectable BOOL shouldAllowTouch;
 
 

@@ -12,21 +12,26 @@
 #pragma mark - 循环滚动视图
 @interface BSLoopScrollView () <UIScrollViewDelegate>
 
+/** 滚动视图 */
 @property (nonatomic, weak) UIScrollView *scrollView;
+/** 页面控制 */
 @property (nonatomic, weak) UIPageControl *pageControl;
+/** 触摸手势 */
 @property (nonatomic, weak) UITapGestureRecognizer *tapGestureRecognizer;
+/** 第一个子视图 */
 @property (nonatomic, weak) UIView *firstView;
+/** 最后一个子视图 */
 @property (nonatomic, weak) UIView *lastView;
-@property (nonatomic, assign) BOOL shouldLayoutSubviews;
+/** 页数 */
 @property (nonatomic, assign) NSUInteger pageCount;
+/** 当前页 */
 @property (nonatomic, assign) NSInteger currentPage;
+/** 定时器 */
 @property (nonatomic, strong) NSTimer *autoScrollTimer;
 
 @end
 
 @implementation BSLoopScrollView
-
-#pragma mark - Initialization
 
 - (instancetype)initWithFrame:(CGRect)frame
 {
@@ -44,7 +49,12 @@
     return self;
 }
 
-//通用初始化
+- (void)dealloc
+{
+    [self.autoScrollTimer invalidate];
+}
+
+#pragma mark 通用初始化
 - (void)commonInit
 {
     _pageControlPosition = BSPageControlPositionNone;
@@ -52,7 +62,6 @@
     _currentPageIndicatorTintColor = [UIColor whiteColor];
     _shouldAllowTouch = YES;
     _autoScrollDuration = 0;
-    _shouldLayoutSubviews = NO;
     
     UIScrollView *scrollView = [[UIScrollView alloc] initWithFrame:self.bounds];
     _scrollView = scrollView;
@@ -70,11 +79,11 @@
     [scrollView addGestureRecognizer:tapGestureRecognizer];
 }
 
-//布局子视图
+#pragma mark 布局子视图
 - (void)layoutSubviews
 {
     [super layoutSubviews];
-    //布局内容视图
+    // 布局内容视图
     CGFloat width = CGRectGetWidth(self.scrollView.bounds);
     CGFloat height = CGRectGetHeight(self.scrollView.bounds);
     for (int i = 0; i < _pageCount; i++) {
@@ -82,16 +91,13 @@
         contentView.frame = CGRectMake((i + 1) * width, 0, width, height);
     }
     
-    if (_shouldLayoutSubviews) {
-        _shouldLayoutSubviews = NO;
-        if (_pageCount) {
-            self.scrollView.contentSize = CGSizeMake((_pageCount + 2) * width, height);
-            [self.scrollView scrollRectToVisible:CGRectMake(width, 0, width, height) animated:NO];
-        }
+    if (_pageCount) {
+        self.scrollView.contentSize = CGSizeMake((_pageCount + 2) * width, height);
+        [self.scrollView scrollRectToVisible:CGRectMake(width, 0, width, height) animated:NO];
     }
 }
 
-//刷新视图
+#pragma mark 刷新视图
 - (void)reloadData
 {
     if (self.dataSource == nil) {
@@ -106,7 +112,7 @@
     
     self.tapGestureRecognizer.enabled = _shouldAllowTouch;
     
-    //页面控制
+    // 页面控制
     if (_pageControlPosition != BSPageControlPositionNone) {
         self.pageControl.numberOfPages = _pageCount;
         self.pageControl.currentPage = _currentPage;
@@ -117,7 +123,7 @@
         [_pageControl removeFromSuperview];
     }
     
-    //添加内容视图
+    // 添加内容视图
     NSMutableArray *contentViews = [[NSMutableArray alloc] initWithCapacity:_pageCount];
     for (int i = 0; i < _pageCount; i++) {
         UIView *contentView = [self.dataSource loopScrollView:self contentViewAtIndex:i];
@@ -135,26 +141,23 @@
         [self.scrollView addSubview:contentView];
     }
     _contentViews = contentViews;
-    _shouldLayoutSubviews = YES;
     [self setNeedsLayout];
     
-    //手动滚动
+    // 手动滚动
     if (_pageCount > 1) {
         self.scrollView.scrollEnabled = YES;
     }else {
         self.scrollView.scrollEnabled = NO;
     }
     
-    //自动循环滚动
+    // 自动循环滚动
     if (_pageCount > 1 && _autoScrollDuration > 0) {
         self.autoScrollTimer = [NSTimer timerWithTimeInterval:_autoScrollDuration target:self selector:@selector(handleAutoScroll:) userInfo:nil repeats:YES];
         [[NSRunLoop currentRunLoop] addTimer:self.autoScrollTimer forMode:NSRunLoopCommonModes];
     }
 }
 
-#pragma mark - Getter
-
-//懒加载pageControl
+#pragma mark 懒加载pageControl
 - (UIPageControl *)pageControl
 {
     if (!_pageControl) {
@@ -178,9 +181,7 @@
     return _pageControl;
 }
 
-#pragma mark - HandleAction
-
-//自动循环滚动
+#pragma mark 自动循环滚动
 - (void)handleAutoScroll:(NSTimer *)timer
 {
     _currentPage = (_currentPage + 2) % (_pageCount + 2);
@@ -199,7 +200,7 @@
     }];
 }
 
-//页面控制响应事件
+#pragma mark 页面控制响应事件
 - (void)handlePageControlAction:(UIPageControl *)pageControl
 {
     [self.autoScrollTimer pause];
@@ -207,7 +208,7 @@
     [self.scrollView setContentOffset:CGPointMake((_currentPage + 1) * self.scrollView.bounds.size.width, 0) animated:YES];
 }
 
-//点击滚动内容视图响应事件
+#pragma mark 点击滚动内容视图响应事件
 - (void)handleTapAction:(UITapGestureRecognizer *)tap
 {
     NSInteger index = [tap locationInView:tap.view].x / tap.view.bounds.size.width - 1;
@@ -219,9 +220,7 @@
     }
 }
 
-#pragma mark - Utility
-
-//重置位置
+#pragma mark 重置内容视图位置
 - (void)resetPosition
 {
     CGFloat width = CGRectGetWidth(self.scrollView.bounds);
@@ -237,7 +236,7 @@
     _pageControl.currentPage = _currentPage;
 }
 
-#pragma mark - ScrollViewDelegate
+#pragma mark ScrollViewDelegate
 
 - (void)scrollViewDidScroll:(UIScrollView *)scrollView
 {

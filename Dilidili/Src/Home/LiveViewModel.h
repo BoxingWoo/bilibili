@@ -14,12 +14,12 @@
 #import "LiveSectionHeader.h"
 #import "LiveCell.h"
 
-static NSString *const liveHeaderViewID = @"LiveHeaderView";
-static NSString *const liveFooterViewID = @"LiveFooterView";
-static NSString *const liveSectionHeaderID = @"LiveSectionHeader";
-static NSString *const liveCellID = @"LiveCell";
-static NSString *const liveRefreshCellID = @"LiveRefreshCell";
-static NSString *const liveBannerCellID = @"LiveBannerCell";
+static NSString *const kliveHeaderViewID = @"LiveHeaderView";
+static NSString *const kliveFooterViewID = @"LiveFooterView";
+static NSString *const kliveSectionHeaderID = @"LiveSectionHeader";
+static NSString *const kliveCellID = @"LiveCell";
+static NSString *const kliveRefreshCellID = @"LiveRefreshCell";
+static NSString *const kliveBannerCellID = @"LiveBannerCell";
 
 /**
  直播视图模型

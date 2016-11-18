@@ -72,9 +72,9 @@
 {
     NSString *identifier = nil;
     if (!self.isSub) {
-        identifier = videoReplyCellID;
+        identifier = kvideoReplyCellID;
     }else {
-        identifier = videoReplySubCellID;
+        identifier = kvideoReplySubCellID;
     }
     return [tableView fd_heightForCellWithIdentifier:identifier cacheByIndexPath:indexPath configuration:^(id cell) {
         [self configureCell:cell atIndexPath:indexPath];

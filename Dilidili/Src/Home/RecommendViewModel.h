@@ -18,15 +18,15 @@
 
 #import <pop/POP.h>
 
-static NSString *const recommendSectionHeaderID = @"RecommendSectionHeader";
-static NSString *const recommendBannerSectionHeaderID = @"RecommendBannerSectionHeader";
-static NSString *const recommendSectionFooterID = @"RecommendSectionFooter";
-static NSString *const recommendBangumiFooterID = @"RecommendBangumiFooter";
-static NSString *const recommendCellID = @"RecommendCell";
-static NSString *const recommendRefreshCellID = @"RecommendRefreshCell";
-static NSString *const recommendLiveCellID = @"RecommendLiveCell";
-static NSString *const recommendBangumiCellID = @"RecommendBangumiCell";
-static NSString *const recommendScrollCellID = @"RecommendScrollCell";
+static NSString *const krecommendSectionHeaderID = @"RecommendSectionHeader";
+static NSString *const krecommendBannerSectionHeaderID = @"RecommendBannerSectionHeader";
+static NSString *const krecommendSectionFooterID = @"RecommendSectionFooter";
+static NSString *const krecommendBangumiFooterID = @"RecommendBangumiFooter";
+static NSString *const krecommendCellID = @"RecommendCell";
+static NSString *const krecommendRefreshCellID = @"RecommendRefreshCell";
+static NSString *const krecommendLiveCellID = @"RecommendLiveCell";
+static NSString *const krecommendBangumiCellID = @"RecommendBangumiCell";
+static NSString *const krecommendScrollCellID = @"RecommendScrollCell";
 
 /**
  *  @brief 推荐模块视图模型

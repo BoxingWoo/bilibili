@@ -36,8 +36,8 @@
 
 @implementation LiveFlowLayout
 
-NSString *const LiveCollectionElementKindHeaderView = @"LiveHeaderView";
-NSString *const LiveCollectionElementKindFooterView = @"LiveFooterView";
+NSString *const kLiveCollectionElementKindHeaderView = @"LiveHeaderView";
+NSString *const kLiveCollectionElementKindFooterView = @"LiveFooterView";
 
 - (instancetype)init
 {
@@ -66,10 +66,10 @@ NSString *const LiveCollectionElementKindFooterView = @"LiveFooterView";
     [super prepareLayout];
     [self.layoutAttributes removeAllObjects];
     if (self.viewModels.count) {
-        UICollectionViewLayoutAttributes *headerViewLayoutAttribute = [self layoutAttributesForSupplementaryViewOfKind:LiveCollectionElementKindHeaderView atIndexPath:[NSIndexPath indexPathForRow:0 inSection:0]];
+        UICollectionViewLayoutAttributes *headerViewLayoutAttribute = [self layoutAttributesForSupplementaryViewOfKind:kLiveCollectionElementKindHeaderView atIndexPath:[NSIndexPath indexPathForRow:0 inSection:0]];
         [self.layoutAttributes addObject:headerViewLayoutAttribute];
         
-        UICollectionViewLayoutAttributes *footerViewLayoutAttribute = [self layoutAttributesForSupplementaryViewOfKind:LiveCollectionElementKindFooterView atIndexPath:[NSIndexPath indexPathForRow:0 inSection:self.viewModels.count - 1]];
+        UICollectionViewLayoutAttributes *footerViewLayoutAttribute = [self layoutAttributesForSupplementaryViewOfKind:kLiveCollectionElementKindFooterView atIndexPath:[NSIndexPath indexPathForRow:0 inSection:self.viewModels.count - 1]];
         [self.layoutAttributes addObject:footerViewLayoutAttribute];
         
         for (NSInteger i = 0; i < self.viewModels.count; i++) {
@@ -110,11 +110,11 @@ NSString *const LiveCollectionElementKindFooterView = @"LiveFooterView";
 {
     UICollectionViewLayoutAttributes *layoutAttribute = [UICollectionViewLayoutAttributes layoutAttributesForSupplementaryViewOfKind:elementKind withIndexPath:indexPath];
     
-    if ([elementKind isEqualToString:LiveCollectionElementKindHeaderView]) {
+    if ([elementKind isEqualToString:kLiveCollectionElementKindHeaderView]) {
         
         layoutAttribute.frame = CGRectMake(0, 0, self.headerViewSize.width, self.headerViewSize.height);
         
-    }else if ([elementKind isEqualToString:LiveCollectionElementKindFooterView]) {
+    }else if ([elementKind isEqualToString:kLiveCollectionElementKindFooterView]) {
         
         CGFloat originY = self.headerViewSize.height + self.viewModels.count * (self.sectionHeaderSize.height + self.sectionInset.top + self.sectionInset.bottom);
         for (NSInteger i = 0; i < self.viewModels.count; i++) {

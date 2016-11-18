@@ -143,9 +143,9 @@
     if (!_tableView) {
         UITableView *tableView = [[UITableView alloc] initWithFrame:self.view.bounds style:UITableViewStylePlain];
         _tableView = tableView;
-        [tableView registerClass:[DdVideoReplyCell class] forCellReuseIdentifier:videoReplyCellID];
-        [tableView registerClass:[DdVideoReplySubCell class] forCellReuseIdentifier:videoReplySubCellID];
-        [tableView registerClass:[DdVideoReplySectionFooter class] forHeaderFooterViewReuseIdentifier:videoReplySectionFooterID];
+        [tableView registerClass:[DdVideoReplyCell class] forCellReuseIdentifier:kvideoReplyCellID];
+        [tableView registerClass:[DdVideoReplySubCell class] forCellReuseIdentifier:kvideoReplySubCellID];
+        [tableView registerClass:[DdVideoReplySectionFooter class] forHeaderFooterViewReuseIdentifier:kvideoReplySectionFooterID];
         tableView.dataSource = self;
         tableView.delegate = self;
         tableView.backgroundColor = [UIColor clearColor];
@@ -181,9 +181,9 @@
     if (!_tableHeaderView) {
         UITableView *tableHeaderView = [[UITableView alloc] initWithFrame:CGRectMake(0, 0, self.view.width, 0) style:UITableViewStylePlain];
         _tableHeaderView = tableHeaderView;
-        [tableHeaderView registerClass:[DdVideoReplyCell class] forCellReuseIdentifier:videoReplyCellID];
-        [tableHeaderView registerClass:[DdVideoReplySubCell class] forCellReuseIdentifier:videoReplySubCellID];
-        [tableHeaderView registerClass:[DdVideoReplySectionFooter class] forHeaderFooterViewReuseIdentifier:videoReplySectionFooterID];
+        [tableHeaderView registerClass:[DdVideoReplyCell class] forCellReuseIdentifier:kvideoReplyCellID];
+        [tableHeaderView registerClass:[DdVideoReplySubCell class] forCellReuseIdentifier:kvideoReplySubCellID];
+        [tableHeaderView registerClass:[DdVideoReplySectionFooter class] forHeaderFooterViewReuseIdentifier:kvideoReplySectionFooterID];
         tableHeaderView.backgroundColor = [UIColor clearColor];
         tableHeaderView.dataSource = self;
         tableHeaderView.delegate = self;
@@ -266,7 +266,7 @@
     UITableViewCell *cell = nil;
     @weakify(self);
     if (indexPath.row == 0) {
-        DdVideoReplyCell *replyCell = [tableView dequeueReusableCellWithIdentifier:videoReplyCellID];
+        DdVideoReplyCell *replyCell = [tableView dequeueReusableCellWithIdentifier:kvideoReplyCellID];
         if (!replyCell.moreSubject) {
             replyCell.moreSubject = [RACSubject subject];
             [replyCell.moreSubject subscribeNext:^(DdVideoReplyCell *x) {
@@ -300,7 +300,7 @@
         cell = replyCell;
     }else {
         viewModel = viewModel.replies[indexPath.row - 1];
-        DdVideoReplySubCell *subCell = [tableView dequeueReusableCellWithIdentifier:videoReplySubCellID];
+        DdVideoReplySubCell *subCell = [tableView dequeueReusableCellWithIdentifier:kvideoReplySubCellID];
         if (!subCell.moreSubject) {
             subCell.moreSubject = [RACSubject subject];
             [subCell.moreSubject subscribeNext:^(DdVideoReplySubCell *x) {
@@ -343,7 +343,7 @@
         return nil;
     }
     
-    DdVideoReplySectionFooter *sectionFooterView = [tableView dequeueReusableHeaderFooterViewWithIdentifier:videoReplySectionFooterID];
+    DdVideoReplySectionFooter *sectionFooterView = [tableView dequeueReusableHeaderFooterViewWithIdentifier:kvideoReplySectionFooterID];
     return sectionFooterView;
 }
 

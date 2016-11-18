@@ -41,16 +41,6 @@
             [alertController addAction:cancelAction];
         }
         
-        if (destructiveButtonTitle) {
-            UIAlertAction *destructiveAction = [UIAlertAction actionWithTitle:destructiveButtonTitle style:UIAlertActionStyleDestructive handler:^(UIAlertAction * _Nonnull action) {
-                if (onButtonTouchUpInsideBlock) {
-                    onButtonTouchUpInsideBlock(self, otherButtonTitles.count);
-                }
-                [alertController dismissViewControllerAnimated:YES completion:NULL];
-            }];
-            [alertController addAction:destructiveAction];
-        }
-        
         for (NSInteger i = 0; i < otherButtonTitles.count; i++) {
             UIAlertAction *alertAction = [UIAlertAction actionWithTitle:otherButtonTitles[i] style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
                 if (onButtonTouchUpInsideBlock) {
@@ -59,6 +49,16 @@
                 [alertController dismissViewControllerAnimated:YES completion:NULL];
             }];
             [alertController addAction:alertAction];
+        }
+        
+        if (destructiveButtonTitle) {
+            UIAlertAction *destructiveAction = [UIAlertAction actionWithTitle:destructiveButtonTitle style:UIAlertActionStyleDestructive handler:^(UIAlertAction * _Nonnull action) {
+                if (onButtonTouchUpInsideBlock) {
+                    onButtonTouchUpInsideBlock(self, otherButtonTitles.count);
+                }
+                [alertController dismissViewControllerAnimated:YES completion:NULL];
+            }];
+            [alertController addAction:destructiveAction];
         }
     }
     return self;

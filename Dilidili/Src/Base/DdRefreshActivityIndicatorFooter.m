@@ -71,6 +71,7 @@
     
     switch (state) {
         case MJRefreshStateIdle:
+            self.loading.hidden = NO;
             [self.loading stopAnimating];
             break;
         case MJRefreshStatePulling:
@@ -81,6 +82,7 @@
             break;
         case MJRefreshStateNoMoreData:
             [self.loading stopAnimating];
+            self.loading.hidden = YES;
         default:
             break;
     }

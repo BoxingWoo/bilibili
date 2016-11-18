@@ -63,7 +63,7 @@
     multiViewControl.fixedPageSize = 3;
     multiViewControl.bounces = NO;
     multiViewControl.showSeparatedLine = NO;
-//    multiViewControl.selectedIndex = 1;
+    multiViewControl.selectedIndex = 1;
     [self.view addSubview:multiViewControl];
     
     [multiViewControl reloadData];

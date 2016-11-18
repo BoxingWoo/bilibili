@@ -69,15 +69,15 @@
     collectionView.contentInset = UIEdgeInsetsMake(0, 0, kTabBarHeight, 0);
     collectionView.showsVerticalScrollIndicator = NO;
     
-    [collectionView registerClass:[RecommendCell class] forCellWithReuseIdentifier:recommendCellID];
-    [collectionView registerClass:[RecommendRefreshCell class] forCellWithReuseIdentifier:recommendRefreshCellID];
-    [collectionView registerClass:[RecommendLiveCell class] forCellWithReuseIdentifier:recommendLiveCellID];
-    [collectionView registerClass:[RecommendBangumiCell class] forCellWithReuseIdentifier:recommendBangumiCellID];
-    [collectionView registerClass:[RecommendScrollCell class] forCellWithReuseIdentifier:recommendScrollCellID];
-    [collectionView registerClass:[RecommendSectionHeader class] forSupplementaryViewOfKind:UICollectionElementKindSectionHeader withReuseIdentifier:recommendSectionHeaderID];
-    [collectionView registerClass:[RecommendBannerSectionHeader class] forSupplementaryViewOfKind:UICollectionElementKindSectionHeader withReuseIdentifier:recommendBannerSectionHeaderID];
-    [collectionView registerClass:[RecommendSectionFooter class] forSupplementaryViewOfKind:UICollectionElementKindSectionFooter withReuseIdentifier:recommendSectionFooterID];
-    [collectionView registerClass:[RecommendBangumiFooter class] forSupplementaryViewOfKind:UICollectionElementKindSectionFooter withReuseIdentifier:recommendBangumiFooterID];
+    [collectionView registerClass:[RecommendCell class] forCellWithReuseIdentifier:krecommendCellID];
+    [collectionView registerClass:[RecommendRefreshCell class] forCellWithReuseIdentifier:krecommendRefreshCellID];
+    [collectionView registerClass:[RecommendLiveCell class] forCellWithReuseIdentifier:krecommendLiveCellID];
+    [collectionView registerClass:[RecommendBangumiCell class] forCellWithReuseIdentifier:krecommendBangumiCellID];
+    [collectionView registerClass:[RecommendScrollCell class] forCellWithReuseIdentifier:krecommendScrollCellID];
+    [collectionView registerClass:[RecommendSectionHeader class] forSupplementaryViewOfKind:UICollectionElementKindSectionHeader withReuseIdentifier:krecommendSectionHeaderID];
+    [collectionView registerClass:[RecommendBannerSectionHeader class] forSupplementaryViewOfKind:UICollectionElementKindSectionHeader withReuseIdentifier:krecommendBannerSectionHeaderID];
+    [collectionView registerClass:[RecommendSectionFooter class] forSupplementaryViewOfKind:UICollectionElementKindSectionFooter withReuseIdentifier:krecommendSectionFooterID];
+    [collectionView registerClass:[RecommendBangumiFooter class] forSupplementaryViewOfKind:UICollectionElementKindSectionFooter withReuseIdentifier:krecommendBangumiFooterID];
     collectionView.mj_header = (MJRefreshHeader *)[DdRefreshMainHeader headerWithRefreshingBlock:^{
         [self requestData:YES];
     }];
@@ -107,7 +107,7 @@
     RecommendViewModel *viewModel = self.dataArr[indexPath.section];
     if ([viewModel.model.style isEqualToString:RecommendStyleSmall]) {
         
-        RecommendScrollCell *scrollCell = [collectionView dequeueReusableCellWithReuseIdentifier:recommendScrollCellID forIndexPath:indexPath];
+        RecommendScrollCell *scrollCell = [collectionView dequeueReusableCellWithReuseIdentifier:krecommendScrollCellID forIndexPath:indexPath];
         [viewModel configureCell:scrollCell atIndexPath:indexPath];
         for (RecommendScrollContentView *contentView in scrollCell.contentViews) {
             NSArray *actions = [contentView actionsForTarget:self forControlEvent:UIControlEventTouchUpInside];
@@ -121,25 +121,25 @@
         
         UICollectionViewCell *cell;
         if ([viewModel.model.type isEqualToString:RecommendTypeLive]) {
-            RecommendLiveCell *liveCell = [collectionView dequeueReusableCellWithReuseIdentifier:recommendLiveCellID forIndexPath:indexPath];
+            RecommendLiveCell *liveCell = [collectionView dequeueReusableCellWithReuseIdentifier:krecommendLiveCellID forIndexPath:indexPath];
             cell = liveCell;
             NSArray *actions = [liveCell.refreshBtn actionsForTarget:self forControlEvent:UIControlEventTouchUpInside];
             if (![actions containsObject:NSStringFromSelector(@selector(handleRefresh:))]) {
                 [liveCell.refreshBtn addTarget:self action:@selector(handleRefresh:) forControlEvents:UIControlEventTouchUpInside];
             }
         }else if ([viewModel.model.type isEqualToString:RecommendTypeBangumi]) {
-            RecommendBangumiCell *bangumiCell = [collectionView dequeueReusableCellWithReuseIdentifier:recommendBangumiCellID forIndexPath:indexPath];
+            RecommendBangumiCell *bangumiCell = [collectionView dequeueReusableCellWithReuseIdentifier:krecommendBangumiCellID forIndexPath:indexPath];
             cell = bangumiCell;
         }else {
             if (indexPath.item == viewModel.model.body.count - 1) {
-                RecommendRefreshCell *refreshCell = [collectionView dequeueReusableCellWithReuseIdentifier:recommendRefreshCellID forIndexPath:indexPath];
+                RecommendRefreshCell *refreshCell = [collectionView dequeueReusableCellWithReuseIdentifier:krecommendRefreshCellID forIndexPath:indexPath];
                 cell = refreshCell;
                 NSArray *actions = [refreshCell.refreshBtn actionsForTarget:self forControlEvent:UIControlEventTouchUpInside];
                 if (![actions containsObject:NSStringFromSelector(@selector(handleRefresh:))]) {
                     [refreshCell.refreshBtn addTarget:self action:@selector(handleRefresh:) forControlEvents:UIControlEventTouchUpInside];
                 }
             }else {
-                RecommendCell *normalCell = [collectionView dequeueReusableCellWithReuseIdentifier:recommendCellID forIndexPath:indexPath];
+                RecommendCell *normalCell = [collectionView dequeueReusableCellWithReuseIdentifier:krecommendCellID forIndexPath:indexPath];
                 cell = normalCell;
             }
         }
@@ -155,11 +155,11 @@
     if ([kind isEqualToString:UICollectionElementKindSectionHeader]) {
         RecommendSectionHeader *sectionHeader;
         if (viewModel.model.bannerTop.count > 0) {
-            sectionHeader = [collectionView dequeueReusableSupplementaryViewOfKind:kind withReuseIdentifier:recommendBannerSectionHeaderID forIndexPath:indexPath];
+            sectionHeader = [collectionView dequeueReusableSupplementaryViewOfKind:kind withReuseIdentifier:krecommendBannerSectionHeaderID forIndexPath:indexPath];
             RecommendBannerSectionHeader *bannerSectionHeader = (RecommendBannerSectionHeader *)sectionHeader;
             bannerSectionHeader.loopScrollView.delegate = self;
         }else {
-            sectionHeader = [collectionView dequeueReusableSupplementaryViewOfKind:kind withReuseIdentifier:recommendSectionHeaderID forIndexPath:indexPath];
+            sectionHeader = [collectionView dequeueReusableSupplementaryViewOfKind:kind withReuseIdentifier:krecommendSectionHeaderID forIndexPath:indexPath];
         }
         [viewModel configureSectionHeader:sectionHeader atIndex:indexPath.section];
         sectionHeader.moreBtn.tag = indexPath.section;
@@ -171,7 +171,7 @@
         
     }else if ([kind isEqualToString:UICollectionElementKindSectionFooter]) {
         if ([viewModel.model.type isEqualToString:RecommendTypeBangumi]) {
-            RecommendBangumiFooter *bangumiFooter = [collectionView dequeueReusableSupplementaryViewOfKind:kind withReuseIdentifier:recommendBangumiFooterID forIndexPath:indexPath];
+            RecommendBangumiFooter *bangumiFooter = [collectionView dequeueReusableSupplementaryViewOfKind:kind withReuseIdentifier:krecommendBangumiFooterID forIndexPath:indexPath];
             //Timeline
             bangumiFooter.timelineBtn.rac_command = [[RACCommand alloc] initWithSignalBlock:^RACSignal *(id input) {
                 RACSignal *signal = [RACSignal createSignal:^RACDisposable *(id<RACSubscriber> subscriber) {
@@ -193,7 +193,7 @@
             return bangumiFooter;
         }else {
             if (viewModel.model.bannerBottom.count > 0) {
-                RecommendSectionFooter *secionFooter = [collectionView dequeueReusableSupplementaryViewOfKind:kind withReuseIdentifier:recommendSectionFooterID forIndexPath:indexPath];
+                RecommendSectionFooter *secionFooter = [collectionView dequeueReusableSupplementaryViewOfKind:kind withReuseIdentifier:krecommendSectionFooterID forIndexPath:indexPath];
                 [viewModel configureSectionFooter:secionFooter atIndex:indexPath.section];
                 secionFooter.loopScrollView.delegate = self;
                 return secionFooter;

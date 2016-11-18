@@ -12,9 +12,9 @@
 #import "DdVideoReplySubCell.h"
 #import "DdVideoReplySectionFooter.h"
 
-static NSString *const videoReplyCellID = @"DdVideoReplyCell";
-static NSString *const videoReplySubCellID = @"DdVideoReplySubCell";
-static NSString *const videoReplySectionFooterID = @"DdVideoReplySectionFooter";
+static NSString *const kvideoReplyCellID = @"DdVideoReplyCell";
+static NSString *const kvideoReplySubCellID = @"DdVideoReplySubCell";
+static NSString *const kvideoReplySectionFooterID = @"DdVideoReplySectionFooter";
 
 /**
  *  @brief 评论视图模型

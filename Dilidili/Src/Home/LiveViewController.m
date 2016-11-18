@@ -85,11 +85,11 @@
     collectionView.contentInset = UIEdgeInsetsMake(0, 0, kTabBarHeight, 0);
     collectionView.showsVerticalScrollIndicator = NO;
     
-    [collectionView registerClass:[LiveCell class] forCellWithReuseIdentifier:liveCellID];
-    [collectionView registerClass:[LiveRefreshCell class] forCellWithReuseIdentifier:liveRefreshCellID];
-    [collectionView registerClass:[LiveSectionHeader class] forSupplementaryViewOfKind:UICollectionElementKindSectionHeader withReuseIdentifier:liveSectionHeaderID];
-    [collectionView registerClass:[LiveHeaderView class] forSupplementaryViewOfKind:LiveCollectionElementKindHeaderView withReuseIdentifier:liveHeaderViewID];
-    [collectionView registerClass:[LiveFooterView class] forSupplementaryViewOfKind:LiveCollectionElementKindFooterView withReuseIdentifier:liveFooterViewID];
+    [collectionView registerClass:[LiveCell class] forCellWithReuseIdentifier:kliveCellID];
+    [collectionView registerClass:[LiveRefreshCell class] forCellWithReuseIdentifier:kliveRefreshCellID];
+    [collectionView registerClass:[LiveSectionHeader class] forSupplementaryViewOfKind:UICollectionElementKindSectionHeader withReuseIdentifier:kliveSectionHeaderID];
+    [collectionView registerClass:[LiveHeaderView class] forSupplementaryViewOfKind:kLiveCollectionElementKindHeaderView withReuseIdentifier:kliveHeaderViewID];
+    [collectionView registerClass:[LiveFooterView class] forSupplementaryViewOfKind:kLiveCollectionElementKindFooterView withReuseIdentifier:kliveFooterViewID];
     collectionView.mj_header = (MJRefreshHeader *)[DdRefreshMainHeader headerWithRefreshingBlock:^{
         [self requestData:YES];
     }];
@@ -119,14 +119,14 @@
     LiveViewModel *viewModel = self.dataArr[indexPath.section];
     LiveCell *cell = nil;
     if (indexPath.item == [self collectionView:collectionView numberOfItemsInSection:indexPath.section] - 1) {
-        LiveRefreshCell *refreshCell = [collectionView dequeueReusableCellWithReuseIdentifier:liveRefreshCellID forIndexPath:indexPath];
+        LiveRefreshCell *refreshCell = [collectionView dequeueReusableCellWithReuseIdentifier:kliveRefreshCellID forIndexPath:indexPath];
         cell = refreshCell;
         NSArray *actions = [refreshCell.refreshBtn actionsForTarget:self forControlEvent:UIControlEventTouchUpInside];
         if (![actions containsObject:NSStringFromSelector(@selector(handleRefresh:))]) {
             [refreshCell.refreshBtn addTarget:self action:@selector(handleRefresh:) forControlEvents:UIControlEventTouchUpInside];
         }
     }else {
-        cell = [collectionView dequeueReusableCellWithReuseIdentifier:liveCellID forIndexPath:indexPath];
+        cell = [collectionView dequeueReusableCellWithReuseIdentifier:kliveCellID forIndexPath:indexPath];
     }
     [viewModel configureCell:cell atIndexPath:indexPath];
     return cell;
@@ -134,8 +134,8 @@
 
 - (UICollectionReusableView *)collectionView:(UICollectionView *)collectionView viewForSupplementaryElementOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath
 {
-    if ([kind isEqualToString:LiveCollectionElementKindHeaderView]) {
-        LiveHeaderView *headerView = [collectionView dequeueReusableSupplementaryViewOfKind:kind withReuseIdentifier:liveHeaderViewID forIndexPath:indexPath];
+    if ([kind isEqualToString:kLiveCollectionElementKindHeaderView]) {
+        LiveHeaderView *headerView = [collectionView dequeueReusableSupplementaryViewOfKind:kind withReuseIdentifier:kliveHeaderViewID forIndexPath:indexPath];
         headerView.loopScrollView.dataSource = self;
         headerView.loopScrollView.delegate = self;
         if (self.shouldRefreshLoopScrollView) {
@@ -158,8 +158,8 @@
         return headerView;
     }
     
-    if ([kind isEqualToString:LiveCollectionElementKindFooterView]) {
-        LiveFooterView *footerView = [collectionView dequeueReusableSupplementaryViewOfKind:kind withReuseIdentifier:liveFooterViewID forIndexPath:indexPath];
+    if ([kind isEqualToString:kLiveCollectionElementKindFooterView]) {
+        LiveFooterView *footerView = [collectionView dequeueReusableSupplementaryViewOfKind:kind withReuseIdentifier:kliveFooterViewID forIndexPath:indexPath];
         NSArray *actions = [footerView.allBtn actionsForTarget:self forControlEvent:UIControlEventTouchUpInside];
         if (![actions containsObject:NSStringFromSelector(@selector(handleAll))]) {
             [footerView.allBtn addTarget:self action:@selector(handleAll) forControlEvents:UIControlEventTouchUpInside];
@@ -169,7 +169,7 @@
     
     if ([kind isEqualToString:UICollectionElementKindSectionHeader]) {
         LiveViewModel *viewModel = self.dataArr[indexPath.section];
-        LiveSectionHeader *sectionHeader = [collectionView dequeueReusableSupplementaryViewOfKind:kind withReuseIdentifier:liveSectionHeaderID forIndexPath:indexPath];
+        LiveSectionHeader *sectionHeader = [collectionView dequeueReusableSupplementaryViewOfKind:kind withReuseIdentifier:kliveSectionHeaderID forIndexPath:indexPath];
         [viewModel configureSectionHeader:sectionHeader atIndex:indexPath.section];
         NSArray *actions = [sectionHeader.moreBtn actionsForTarget:self forControlEvent:UIControlEventTouchUpInside];
         if (![actions containsObject:NSStringFromSelector(@selector(handleMore:))]) {
