@@ -23,14 +23,12 @@ PODS:
     - CocoaLumberjack/Core
   - CocoaLumberjack/Extensions (3.0.0):
     - CocoaLumberjack/Default
-  - GPUImage (0.1.7)
-  - LFLiveKit (2.3)
+  - LFLiveKit (2.5)
   - Masonry (1.0.2)
   - pop (1.0.9)
   - ReactiveCocoa (4.2.2):
     - Result (~> 2.0)
   - Result (2.1.3)
-  - UMengSocialCOM (5.2.1)
   - YYKit (1.0.9):
     - YYKit/no-arc (= 1.0.9)
   - YYKit/no-arc (1.0.9)
@@ -39,27 +37,23 @@ DEPENDENCIES:
   - AFNetworking
   - BarrageRenderer
   - CocoaLumberjack
-  - GPUImage
   - LFLiveKit
   - Masonry
   - pop
   - ReactiveCocoa
-  - UMengSocialCOM
   - YYKit
 
 SPEC CHECKSUMS:
   AFNetworking: 5e0e199f73d8626b11e79750991f5d173d1f8b67
   BarrageRenderer: a5b54aef34eed1eab48f35ed594082ae446947c9
   CocoaLumberjack: c823149bccc5519a9447aeb433be7b1212a7d6a5
-  GPUImage: 733a5f0fab92df9de1c37ba9df520a833ccb406d
-  LFLiveKit: 76a5cb34509f8cbe25e3a95824cf80f36d36679b
+  LFLiveKit: 4361bd588ae0c9244589119ccdb1c30d14686414
   Masonry: 7c429b56da9d4ee0bbb3ed77a5ea710d6a5df39e
   pop: f667631a5108a2e60d9e8797c9b32ddaf2080bce
   ReactiveCocoa: 72263e7ac0770c274617ccd345e01049d0ca38ae
   Result: 18e1a7597fbcca5923c565b40a25a98afafdee02
-  UMengSocialCOM: 074c135ce349aa4c8848d3fb8458757bcb6ffb67
   YYKit: 7cda43304a8dc3696c449041e2cb3107b4e236e7
 
-PODFILE CHECKSUM: 8a0611214304fbace632621f08cd7b3324e1e14c
+PODFILE CHECKSUM: c7bb4665dc5e56b177be8b7d1084374cedc3946b
 
 COCOAPODS: 1.0.1

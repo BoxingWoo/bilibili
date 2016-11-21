@@ -65,12 +65,13 @@
     return [[RACCommand alloc] initWithSignalBlock:^RACSignal *(id input) {
         RACSignal *signal = [RACSignal createSignal:^RACDisposable *(id<RACSubscriber> subscriber) {
             NSMutableDictionary *parameters = [NSMutableDictionary dictionary];
-            parameters[@"callback"] = @"jQuery172024158705611356257_1475488753004";
+            parameters[@"callback"] = @"jQuery17209494781185433222_1479709396179";
             parameters[@"page"] = @1;
             parameters[@"platform"] = @"html5";
             parameters[@"quality"] = @1;
             parameters[@"vtype"] = @"mp4";
             parameters[@"type"] = @"jsonp";
+            parameters[@"token"] = @"d41d8cd98f00b204e9800998ecf8427e";
             parameters[@"_"] = @([AppInfo ts]);
             parameters[@"aid"] = aid;
             AFHTTPSessionManager *manager = [AFHTTPSessionManager manager];
@@ -81,7 +82,12 @@
                 NSArray *array = [responseString componentsSeparatedByCharactersInSet:[NSCharacterSet characterSetWithCharactersInString:@"()"]];
                 NSString *string = array[1];
                 NSDictionary *dict = [NSJSONSerialization JSONObjectWithData:[string dataUsingEncoding:NSUTF8StringEncoding] options:NSJSONReadingAllowFragments error:nil];
-                [subscriber sendNext:dict];
+                
+                if ([dict[kResponseCodeKey] integerValue] == 0) {
+                    [subscriber sendNext:dict];
+                }else {
+                    [subscriber sendError:nil];
+                }
                 [subscriber sendCompleted];
                 
             } failure:^(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error) {

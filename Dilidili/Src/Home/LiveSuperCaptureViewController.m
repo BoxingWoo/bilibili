@@ -192,7 +192,7 @@
     }
     
     /*** 视频：分辨率： 540 *960 帧数：24 码率：800Kps  音频：高音频质量 audio sample rate: 48MHz, audio bitrate: 128Kbps  方向竖屏 ***/
-    _session = [[LFLiveSession alloc] initWithAudioConfiguration:[LFLiveAudioConfiguration defaultConfiguration] videoConfiguration:[LFLiveVideoConfiguration defaultConfigurationForQuality:LFLiveVideoQuality_Medium2]];
+    _session = [[LFLiveSession alloc] initWithAudioConfiguration:[LFLiveAudioConfiguration defaultConfigurationForQuality:LFLiveAudioQuality_Medium] videoConfiguration:[LFLiveVideoConfiguration defaultConfigurationForQuality:LFLiveVideoQuality_Medium2]];
     
     /**    自己定制高质量音频128K 分辨率设置为720*1280 方向竖屏 */
     /*

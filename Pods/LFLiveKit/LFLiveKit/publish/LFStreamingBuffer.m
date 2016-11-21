@@ -2,14 +2,14 @@
 //  LFStreamingBuffer.m
 //  LFLiveKit
 //
-//  Created by 倾慕 on 16/5/2.
-//  Copyright © 2016年 倾慕. All rights reserved.
+//  Created by LaiFeng on 16/5/20.
+//  Copyright © 2016年 LaiFeng All rights reserved.
 //
 
 #import "LFStreamingBuffer.h"
 #import "NSMutableArray+LFAdd.h"
 
-static const NSUInteger defaultSortBufferMaxCount = 10;///< 排序10个内
+static const NSUInteger defaultSortBufferMaxCount = 5;///< 排序10个内
 static const NSUInteger defaultUpdateInterval = 1;///< 更新频率为1s
 static const NSUInteger defaultCallBackInterval = 5;///< 5s计时一次
 static const NSUInteger defaultSendBufferMaxCount = 600;///< 最大缓冲区为600

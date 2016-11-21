@@ -2,8 +2,8 @@
 //  LFVideoCapture.m
 //  LFLiveKit
 //
-//  Created by 倾慕 on 16/5/1.
-//  Copyright © 2016年 倾慕. All rights reserved.
+//  Created by LaiFeng on 16/5/20.
+//  Copyright © 2016年 LaiFeng All rights reserved.
 //
 
 #import "LFVideoCapture.h"
@@ -31,6 +31,8 @@
 @property (nonatomic, strong) GPUImageAlphaBlendFilter *blendFilter;
 @property (nonatomic, strong) GPUImageUIElement *uiElementInput;
 @property (nonatomic, strong) UIView *waterMarkContentView;
+
+@property (nonatomic, strong) GPUImageMovieWriter *movieWriter;
 
 @end
 
@@ -88,10 +90,12 @@
     if (!_running) {
         [UIApplication sharedApplication].idleTimerDisabled = NO;
         [self.videoCamera stopCameraCapture];
+        if(self.saveLocalVideo) [self.movieWriter finishRecording];
     } else {
         [UIApplication sharedApplication].idleTimerDisabled = YES;
         [self reloadFilter];
         [self.videoCamera startCameraCapture];
+        if(self.saveLocalVideo) [self.movieWriter startRecording];
     }
 }
 
@@ -252,6 +256,16 @@
     return nil;
 }
 
+- (GPUImageMovieWriter*)movieWriter{
+    if(!_movieWriter){
+        _movieWriter = [[GPUImageMovieWriter alloc] initWithMovieURL:self.saveLocalVideoPath size:self.configuration.videoSize];
+        _movieWriter.encodingLiveVideo = YES;
+        _movieWriter.shouldPassthroughAudio = YES;
+        self.videoCamera.audioEncodingTarget = self.movieWriter;
+    }
+    return _movieWriter;
+}
+
 #pragma mark -- Custom Method
 - (void)processVideo:(GPUImageOutput *)output {
     __weak typeof(self) _self = self;
@@ -300,11 +314,13 @@
         [self.filter addTarget:self.blendFilter];
         [self.uiElementInput addTarget:self.blendFilter];
         [self.blendFilter addTarget:self.gpuImageView];
+        if(self.saveLocalVideo) [self.blendFilter addTarget:self.movieWriter];
         [self.filter addTarget:self.output];
         [self.uiElementInput update];
     }else{
         [self.filter addTarget:self.output];
         [self.output addTarget:self.gpuImageView];
+        if(self.saveLocalVideo) [self.output addTarget:self.movieWriter];
     }
     
     [self.filter forceProcessingAtSize:self.configuration.videoSize];
@@ -323,9 +339,9 @@
 
 - (void)reloadMirror{
     if(self.mirror && self.captureDevicePosition == AVCaptureDevicePositionFront){
-        [self.gpuImageView setInputRotation:kGPUImageFlipHorizonal atIndex:0];
+        self.videoCamera.horizontallyMirrorFrontFacingCamera = YES;
     }else{
-        [self.gpuImageView setInputRotation:kGPUImageNoRotation atIndex:0];
+        self.videoCamera.horizontallyMirrorFrontFacingCamera = NO;
     }
 }
 

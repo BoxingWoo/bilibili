@@ -2,21 +2,19 @@
 //  LFStreamRTMPSocket.m
 //  LFLiveKit
 //
-//  Created by admin on 16/5/18.
-//  Copyright © 2016年 live Interactive. All rights reserved.
+//  Created by LaiFeng on 16/5/20.
+//  Copyright © 2016年 LaiFeng All rights reserved.
 //
 
 #import "LFStreamRTMPSocket.h"
 
 #if __has_include(<pili-librtmp/rtmp.h>)
 #import <pili-librtmp/rtmp.h>
-#elif __has_include("pili-librtmp/rtmp.h")
-#import "pili-librtmp/rtmp.h"
 #else
 #import "rtmp.h"
 #endif
 
-static const NSInteger RetryTimesBreaken = 20;  ///<  重连1分钟  3秒一次 一共20次
+static const NSInteger RetryTimesBreaken = 5;  ///<  重连1分钟  3秒一次 一共20次
 static const NSInteger RetryTimesMargin = 3;
 
 
@@ -28,7 +26,7 @@ static const NSInteger RetryTimesMargin = 3;
 #define SAVC(x)    static const AVal av_ ## x = AVC(#x)
 
 static const AVal av_setDataFrame = AVC("@setDataFrame");
-static const AVal av_SDKVersion = AVC("LFLiveKit 1.8.0");
+static const AVal av_SDKVersion = AVC("LFLiveKit 2.4.0");
 SAVC(onMetaData);
 SAVC(duration);
 SAVC(width);
@@ -112,12 +110,24 @@ SAVC(mp4a);
     self.debugInfo.streamId = self.stream.streamId;
     self.debugInfo.uploadUrl = self.stream.url;
     self.debugInfo.isRtmp = YES;
+    if (_isConnecting) return;
+    
+    _isConnecting = YES;
+    if (self.delegate && [self.delegate respondsToSelector:@selector(socketStatus:status:)]) {
+        [self.delegate socketStatus:self status:LFLivePending];
+    }
+    
+    if (_rtmp != NULL) {
+        PILI_RTMP_Close(_rtmp, &_error);
+        PILI_RTMP_Free(_rtmp);
+    }
     [self RTMP264_Connect:(char *)[_stream.url cStringUsingEncoding:NSASCIIStringEncoding]];
 }
 
 - (void)stop {
     dispatch_async(self.rtmpSendQueue, ^{
         [self _stop];
+        [NSObject cancelPreviousPerformRequestsWithTarget:self];
     });
 }
 
@@ -131,12 +141,12 @@ SAVC(mp4a);
         _rtmp = NULL;
     }
     [self clean];
-    [NSObject cancelPreviousPerformRequestsWithTarget:self];
 }
 
 - (void)sendFrame:(LFFrame *)frame {
     if (!frame) return;
     [self.buffer appendObject:frame];
+    
     if(!self.isSending){
         [self sendFrame];
     }
@@ -148,74 +158,75 @@ SAVC(mp4a);
 
 #pragma mark -- CustomMethod
 - (void)sendFrame {
+    __weak typeof(self) _self = self;
      dispatch_async(self.rtmpSendQueue, ^{
-        if (!self.isSending && self.buffer.list.count > 0) {
-            self.isSending = YES;
+        if (!_self.isSending && _self.buffer.list.count > 0) {
+            _self.isSending = YES;
 
-            if (!_isConnected || _isReconnecting || _isConnecting || !_rtmp){
-                self.isSending = NO;
+            if (!_self.isConnected || _self.isReconnecting || _self.isConnecting || !_rtmp){
+                _self.isSending = NO;
                 return;
             }
 
             // 调用发送接口
-            LFFrame *frame = [self.buffer popFirstObject];
+            LFFrame *frame = [_self.buffer popFirstObject];
             if ([frame isKindOfClass:[LFVideoFrame class]]) {
-                if (!self.sendVideoHead) {
-                    self.sendVideoHead = YES;
+                if (!_self.sendVideoHead) {
+                    _self.sendVideoHead = YES;
                     if(!((LFVideoFrame*)frame).sps || !((LFVideoFrame*)frame).pps){
-                        self.isSending = NO;
+                        _self.isSending = NO;
                         return;
                     }
-                    [self sendVideoHeader:(LFVideoFrame *)frame];
+                    [_self sendVideoHeader:(LFVideoFrame *)frame];
                 } else {
-                    [self sendVideo:(LFVideoFrame *)frame];
+                    [_self sendVideo:(LFVideoFrame *)frame];
                 }
             } else {
-                if (!self.sendAudioHead) {
-                    self.sendAudioHead = YES;
+                if (!_self.sendAudioHead) {
+                    _self.sendAudioHead = YES;
                     if(!((LFAudioFrame*)frame).audioInfo){
-                        self.isSending = NO;
+                        _self.isSending = NO;
                         return;
                     }
-                    [self sendAudioHeader:(LFAudioFrame *)frame];
+                    [_self sendAudioHeader:(LFAudioFrame *)frame];
                 } else {
-                    [self sendAudio:frame];
+                    [_self sendAudio:frame];
                 }
             }
 
             //debug更新
-            self.debugInfo.totalFrame++;
-            self.debugInfo.dropFrame += self.buffer.lastDropFrames;
-            self.buffer.lastDropFrames = 0;
+            _self.debugInfo.totalFrame++;
+            _self.debugInfo.dropFrame += _self.buffer.lastDropFrames;
+            _self.buffer.lastDropFrames = 0;
 
-            self.debugInfo.dataFlow += frame.data.length;
-            self.debugInfo.elapsedMilli = CACurrentMediaTime() * 1000 - self.debugInfo.timeStamp;
-            if (self.debugInfo.elapsedMilli < 1000) {
-                self.debugInfo.bandwidth += frame.data.length;
+            _self.debugInfo.dataFlow += frame.data.length;
+            _self.debugInfo.elapsedMilli = CACurrentMediaTime() * 1000 - _self.debugInfo.timeStamp;
+            if (_self.debugInfo.elapsedMilli < 1000) {
+                _self.debugInfo.bandwidth += frame.data.length;
                 if ([frame isKindOfClass:[LFAudioFrame class]]) {
-                    self.debugInfo.capturedAudioCount++;
+                    _self.debugInfo.capturedAudioCount++;
                 } else {
-                    self.debugInfo.capturedVideoCount++;
+                    _self.debugInfo.capturedVideoCount++;
                 }
 
-                self.debugInfo.unSendCount = self.buffer.list.count;
+                _self.debugInfo.unSendCount = _self.buffer.list.count;
             } else {
-                self.debugInfo.currentBandwidth = self.debugInfo.bandwidth;
-                self.debugInfo.currentCapturedAudioCount = self.debugInfo.capturedAudioCount;
-                self.debugInfo.currentCapturedVideoCount = self.debugInfo.capturedVideoCount;
-                if (self.delegate && [self.delegate respondsToSelector:@selector(socketDebug:debugInfo:)]) {
-                    [self.delegate socketDebug:self debugInfo:self.debugInfo];
+                _self.debugInfo.currentBandwidth = _self.debugInfo.bandwidth;
+                _self.debugInfo.currentCapturedAudioCount = _self.debugInfo.capturedAudioCount;
+                _self.debugInfo.currentCapturedVideoCount = _self.debugInfo.capturedVideoCount;
+                if (_self.delegate && [_self.delegate respondsToSelector:@selector(socketDebug:debugInfo:)]) {
+                    [_self.delegate socketDebug:_self debugInfo:_self.debugInfo];
                 }
-                self.debugInfo.bandwidth = 0;
-                self.debugInfo.capturedAudioCount = 0;
-                self.debugInfo.capturedVideoCount = 0;
-                self.debugInfo.timeStamp = CACurrentMediaTime() * 1000;
+                _self.debugInfo.bandwidth = 0;
+                _self.debugInfo.capturedAudioCount = 0;
+                _self.debugInfo.capturedVideoCount = 0;
+                _self.debugInfo.timeStamp = CACurrentMediaTime() * 1000;
             }
             
             //修改发送状态
-            dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
                 //< 这里只为了不循环调用sendFrame方法 调用栈是保证先出栈再进栈
-                self.isSending = NO;
+                _self.isSending = NO;
             });
             
         }
@@ -237,18 +248,6 @@ SAVC(mp4a);
 - (NSInteger)RTMP264_Connect:(char *)push_url {
     //由于摄像头的timestamp是一直在累加，需要每次得到相对时间戳
     //分配与初始化
-    if (_isConnecting) return -1;
-
-    _isConnecting = YES;
-    if (self.delegate && [self.delegate respondsToSelector:@selector(socketStatus:status:)]) {
-        [self.delegate socketStatus:self status:LFLivePending];
-    }
-
-    if (_rtmp != NULL) {
-        PILI_RTMP_Close(_rtmp, &_error);
-        PILI_RTMP_Free(_rtmp);
-    }
-
     _rtmp = PILI_RTMP_Alloc();
     PILI_RTMP_Init(_rtmp);
 
@@ -287,19 +286,13 @@ SAVC(mp4a);
     _isConnecting = NO;
     _isReconnecting = NO;
     _isSending = NO;
-    _retryTimes4netWorkBreaken = 0;
     return 0;
 
 Failed:
     PILI_RTMP_Close(_rtmp, &_error);
     PILI_RTMP_Free(_rtmp);
     _rtmp = NULL;
-    if (self.delegate && [self.delegate respondsToSelector:@selector(socketDidError:errorCode:)]) {
-        [self.delegate socketDidError:self errorCode:LFLiveSocketError_ConnectSocket];
-    }
-    if (self.delegate && [self.delegate respondsToSelector:@selector(socketStatus:status:)]) {
-        [self.delegate socketStatus:self status:LFLiveError];
-    }
+    [self reconnect];
     return -1;
 }
 
@@ -491,36 +484,61 @@ Failed:
 // 断线重连
 - (void)reconnect {
     dispatch_async(self.rtmpSendQueue, ^{
-        _isReconnecting = NO;
-        if (_isConnected) return;
-
-        [self _stop];
-        [self _start];
+        if (self.retryTimes4netWorkBreaken++ < self.reconnectCount && !self.isReconnecting) {
+            self.isConnected = NO;
+            self.isConnecting = NO;
+            self.isReconnecting = YES;
+            dispatch_async(dispatch_get_main_queue(), ^{
+                 [self performSelector:@selector(_reconnect) withObject:nil afterDelay:self.reconnectInterval];
+            });
+           
+        } else if (self.retryTimes4netWorkBreaken >= self.reconnectCount) {
+            if (self.delegate && [self.delegate respondsToSelector:@selector(socketStatus:status:)]) {
+                [self.delegate socketStatus:self status:LFLiveError];
+            }
+            if (self.delegate && [self.delegate respondsToSelector:@selector(socketDidError:errorCode:)]) {
+                [self.delegate socketDidError:self errorCode:LFLiveSocketError_ReConnectTimeOut];
+            }
+        }
     });
+}
+
+- (void)_reconnect{
+    [NSObject cancelPreviousPerformRequestsWithTarget:self];
+    
+    _isReconnecting = NO;
+    if(_isConnected) return;
+    
+    _isReconnecting = NO;
+    if (_isConnected) return;
+    if (_rtmp != NULL) {
+        PILI_RTMP_Close(_rtmp, &_error);
+        PILI_RTMP_Free(_rtmp);
+        _rtmp = NULL;
+    }
+    _sendAudioHead = NO;
+    _sendVideoHead = NO;
+    
+    if (self.delegate && [self.delegate respondsToSelector:@selector(socketStatus:status:)]) {
+        [self.delegate socketStatus:self status:LFLiveRefresh];
+    }
+    
+    if (_rtmp != NULL) {
+        PILI_RTMP_Close(_rtmp, &_error);
+        PILI_RTMP_Free(_rtmp);
+    }
+    [self RTMP264_Connect:(char *)[_stream.url cStringUsingEncoding:NSASCIIStringEncoding]];
 }
 
 #pragma mark -- CallBack
 void RTMPErrorCallback(RTMPError *error, void *userData) {
     LFStreamRTMPSocket *socket = (__bridge LFStreamRTMPSocket *)userData;
     if (error->code < 0) {
-        if (socket.retryTimes4netWorkBreaken++ < socket.reconnectCount && !socket.isReconnecting) {
-            socket.isConnected = NO;
-            socket.isConnecting = NO;
-            socket.isReconnecting = YES;
-            [socket performSelectorOnMainThread:@selector(reconnect) withObject:nil waitUntilDone:socket.reconnectInterval];
-        } else if (socket.retryTimes4netWorkBreaken >= socket.reconnectCount) {
-            if (socket.delegate && [socket.delegate respondsToSelector:@selector(socketStatus:status:)]) {
-                [socket.delegate socketStatus:socket status:LFLiveError];
-            }
-            if (socket.delegate && [socket.delegate respondsToSelector:@selector(socketDidError:errorCode:)]) {
-                [socket.delegate socketDidError:socket errorCode:LFLiveSocketError_ReConnectTimeOut];
-            }
-        }
+        [socket reconnect];
     }
 }
 
 void ConnectionTimeCallback(PILI_CONNECTION_TIME *conn_time, void *userData) {
-    //LFStreamRTMPSocket *socket = (__bridge LFStreamRTMPSocket*)userData;
 }
 
 #pragma mark -- LFStreamingBufferDelegate

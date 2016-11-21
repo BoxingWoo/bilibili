@@ -19,11 +19,6 @@
 			<key>isShown</key>
 			<false/>
 		</dict>
-		<key>GPUImage.xcscheme</key>
-		<dict>
-			<key>isShown</key>
-			<false/>
-		</dict>
 		<key>LFLiveKit.xcscheme</key>
 		<dict>
 			<key>isShown</key>
@@ -62,7 +57,12 @@
 			<key>primary</key>
 			<true/>
 		</dict>
-		<key>21A83E1BCC418094220C3B869B5F2061</key>
+		<key>2347E298F0D5097B41D6072CD20E59CB</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>3C62D3C6E105B9EA31384863CD22A94C</key>
 		<dict>
 			<key>primary</key>
 			<true/>
@@ -72,12 +72,12 @@
 			<key>primary</key>
 			<true/>
 		</dict>
-		<key>56C7B03D06F869D87528524D692079AC</key>
+		<key>5067E110F6A868F433D06317DBDBFDFC</key>
 		<dict>
 			<key>primary</key>
 			<true/>
 		</dict>
-		<key>634FB0428D4B45C3FD5238AF7046D067</key>
+		<key>8B23D7B8ED1ABEE3CC09CAAD2EFABD33</key>
 		<dict>
 			<key>primary</key>
 			<true/>
@@ -92,17 +92,7 @@
 			<key>primary</key>
 			<true/>
 		</dict>
-		<key>D98A8331D1A8F3656751C5A7AA27BEFA</key>
-		<dict>
-			<key>primary</key>
-			<true/>
-		</dict>
-		<key>DA8BAA42D4F65B67B9E3DD9528BA08EF</key>
-		<dict>
-			<key>primary</key>
-			<true/>
-		</dict>
-		<key>EA0DD8ED489933744D70DD4A9719ED01</key>
+		<key>C03D727E171DF75D5E7BF29192E9D6EF</key>
 		<dict>
 			<key>primary</key>
 			<true/>

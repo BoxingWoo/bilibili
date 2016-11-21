@@ -2,21 +2,14 @@
 //  LFStreamSocket.h
 //  LFLiveKit
 //
-//  Created by admin on 16/5/3.
-//  Copyright © 2016年 倾慕. All rights reserved.
+//  Created by LaiFeng on 16/5/20.
+//  Copyright © 2016年 LaiFeng All rights reserved.
 //
 
 #import <Foundation/Foundation.h>
-
-#if __has_include(<LFLiveKit/LFLiveKit.h>)
-#import <LFLiveKit/LFLiveStreamInfo.h>
-#import <LFLiveKit/LFStreamingBuffer.h>
-#import <LFLiveKit/LFLiveDebug.h>
-#else
 #import "LFLiveStreamInfo.h"
 #import "LFStreamingBuffer.h"
 #import "LFLiveDebug.h"
-#endif
 
 
 

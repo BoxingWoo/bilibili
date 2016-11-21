@@ -2,10 +2,9 @@
 //  LFHardwareVideoEncoder.m
 //  LFLiveKit
 //
-//  Created by 倾慕 on 16/5/2.
-//  Copyright © 2016年 倾慕. All rights reserved.
+//  Created by LaiFeng on 16/5/20.
+//  Copyright © 2016年 LaiFeng All rights reserved.
 //
-
 #import "LFHardwareVideoEncoder.h"
 #import <VideoToolbox/VideoToolbox.h>
 
@@ -20,8 +19,8 @@
 
 @property (nonatomic, strong) LFLiveVideoConfiguration *configuration;
 @property (nonatomic, weak) id<LFVideoEncodingDelegate> h264Delegate;
-@property (nonatomic) BOOL isBackGround;
 @property (nonatomic) NSInteger currentVideoBitRate;
+@property (nonatomic) BOOL isBackGround;
 
 @end
 
@@ -32,20 +31,19 @@
     if (self = [super init]) {
         NSLog(@"USE LFHardwareVideoEncoder");
         _configuration = configuration;
-        [self initCompressionSession];
-
+        [self resetCompressionSession];
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(willEnterBackground:) name:UIApplicationWillResignActiveNotification object:nil];
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(willEnterForeground:) name:UIApplicationDidBecomeActiveNotification object:nil];
 #ifdef DEBUG
         enabledWriteVideoFile = NO;
         [self initForFilePath];
 #endif
-
-        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(willEnterBackground:) name:UIApplicationWillResignActiveNotification object:nil];
-        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(willEnterForeground:) name:UIApplicationDidBecomeActiveNotification object:nil];
+        
     }
     return self;
 }
 
-- (void)initCompressionSession {
+- (void)resetCompressionSession {
     if (compressionSession) {
         VTCompressionSessionCompleteFrames(compressionSession, kCMTimeInvalid);
 
@@ -61,7 +59,7 @@
 
     _currentVideoBitRate = _configuration.videoBitRate;
     VTSessionSetProperty(compressionSession, kVTCompressionPropertyKey_MaxKeyFrameInterval, (__bridge CFTypeRef)@(_configuration.videoMaxKeyframeInterval));
-    VTSessionSetProperty(compressionSession, kVTCompressionPropertyKey_MaxKeyFrameIntervalDuration, (__bridge CFTypeRef)@(_configuration.videoMaxKeyframeInterval));
+    VTSessionSetProperty(compressionSession, kVTCompressionPropertyKey_MaxKeyFrameIntervalDuration, (__bridge CFTypeRef)@(_configuration.videoMaxKeyframeInterval/_configuration.videoFrameRate));
     VTSessionSetProperty(compressionSession, kVTCompressionPropertyKey_ExpectedFrameRate, (__bridge CFTypeRef)@(_configuration.videoFrameRate));
     VTSessionSetProperty(compressionSession, kVTCompressionPropertyKey_AverageBitRate, (__bridge CFTypeRef)@(_configuration.videoBitRate));
     NSArray *limit = @[@(_configuration.videoBitRate * 1.5/8), @(1)];
@@ -75,7 +73,7 @@
 }
 
 - (void)setVideoBitRate:(NSInteger)videoBitRate {
-    if (_isBackGround) return;
+    if(_isBackGround) return;
     VTSessionSetProperty(compressionSession, kVTCompressionPropertyKey_AverageBitRate, (__bridge CFTypeRef)@(videoBitRate));
     NSArray *limit = @[@(videoBitRate * 1.5/8), @(1)];
     VTSessionSetProperty(compressionSession, kVTCompressionPropertyKey_DataRateLimits, (__bridge CFArrayRef)limit);
@@ -99,8 +97,7 @@
 
 #pragma mark -- LFVideoEncoder
 - (void)encodeVideoData:(CVPixelBufferRef)pixelBuffer timeStamp:(uint64_t)timeStamp {
-    if (_isBackGround) return;
-
+    if(_isBackGround) return;
     frameCount++;
     CMTime presentationTimeStamp = CMTimeMake(frameCount, (int32_t)_configuration.videoFrameRate);
     VTEncodeInfoFlags flags;
@@ -112,7 +109,10 @@
     }
     NSNumber *timeNumber = @(timeStamp);
 
-    VTCompressionSessionEncodeFrame(compressionSession, pixelBuffer, presentationTimeStamp, duration, (__bridge CFDictionaryRef)properties, (__bridge_retained void *)timeNumber, &flags);
+    OSStatus status = VTCompressionSessionEncodeFrame(compressionSession, pixelBuffer, presentationTimeStamp, duration, (__bridge CFDictionaryRef)properties, (__bridge_retained void *)timeNumber, &flags);
+    if(status != noErr){
+        [self resetCompressionSession];
+    }
 }
 
 - (void)stopEncoder {
@@ -123,13 +123,13 @@
     _h264Delegate = delegate;
 }
 
-#pragma mark -- NSNotification
-- (void)willEnterBackground:(NSNotification *)notification {
+#pragma mark -- Notification
+- (void)willEnterBackground:(NSNotification*)notification{
     _isBackGround = YES;
 }
 
-- (void)willEnterForeground:(NSNotification *)notification {
-    [self initCompressionSession];
+- (void)willEnterForeground:(NSNotification*)notification{
+    [self resetCompressionSession];
     _isBackGround = NO;
 }
 

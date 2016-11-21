@@ -27,7 +27,7 @@
 // 视频评论接口 http://api.bilibili.com/x/reply?_device=iphone&_hwid=2e771212f4b4dc67&_ulv=0&access_key=&appkey=27eb53fc9058f8c3&appver=3710&build=3710&oid=6206361&platform=ios&pn=1&ps=20&sign=fd4c5da7003bf1ea7a62165b4e68cb73&sort=0&type=1
 #define DdVideoReplyURL DdServer_Api@"/x/reply"
 
-// 获取视频播放链接接口(html5) http://api.bilibili.com/playurl?callback=jQuery172024158705611356257_1475488753004&aid=6206361&page=1&platform=html5&quality=1&vtype=mp4&type=jsonp&_=1475488753070
+// 获取视频播放链接接口(html5) http://api.bilibili.com/playurl?callback=jQuery17209494781185433222_1479709396179&aid=7154415&page=1&platform=html5&quality=1&vtype=mp4&type=jsonp&token=d41d8cd98f00b204e9800998ecf8427e&_=1479709396573
 #define DdVideoPathURL DdServer_Api@"/playurl"
 
 // 弹幕接口 http://comment.bilibili.com/10080432.xml

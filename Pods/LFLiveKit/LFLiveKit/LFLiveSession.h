@@ -2,28 +2,19 @@
 //  LFLiveSession.h
 //  LFLiveKit
 //
-//  Created by 倾慕 on 16/5/2.
-//  Copyright © 2016年 倾慕. All rights reserved.
+//
+//  Created by LaiFeng on 16/5/20.
+//  Copyright © 2016年 LaiFeng All rights reserved.
 //
 
 #import <Foundation/Foundation.h>
 #import <AVFoundation/AVFoundation.h>
-#if __has_include(<LFLiveKit/LFLiveKit.h>)
-#import <LFLiveKit/LFLiveStreamInfo.h>
-#import <LFLiveKit/LFAudioFrame.h>
-#import <LFLiveKit/LFVideoFrame.h>
-#import <LFLiveKit/LFLiveAudioConfiguration.h>
-#import <LFLiveKit/LFLiveVideoConfiguration.h>
-#import <LFLiveKit/LFLiveDebug.h>
-#else
 #import "LFLiveStreamInfo.h"
 #import "LFAudioFrame.h"
 #import "LFVideoFrame.h"
 #import "LFLiveAudioConfiguration.h"
 #import "LFLiveVideoConfiguration.h"
 #import "LFLiveDebug.h"
-
-#endif
 
 
 
@@ -127,7 +118,15 @@ typedef NS_ENUM(NSInteger,LFLiveCaptureTypeMask) {
  *.*/
 @property (nonatomic, strong, nullable) UIView *warterMarkView;
 
+/* The currentImage is videoCapture shot */
 @property (nonatomic, strong,readonly ,nullable) UIImage *currentImage;
+
+/* The saveLocalVideo is save the local video */
+@property (nonatomic, assign) BOOL saveLocalVideo;
+
+/* The saveLocalVideoPath is save the local video  path */
+@property (nonatomic, strong, nullable) NSURL *saveLocalVideoPath;
+
 #pragma mark - Initializer
 ///=============================================================================
 /// @name Initializer

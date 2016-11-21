@@ -7,8 +7,6 @@
 //
 
 #import "LiveCenterViewController.h"
-#import "LiveCaptureViewController.h"
-#import "LiveFilterCaptureViewController.h"
 #import "LiveSuperCaptureViewController.h"
 #import "LiveCenterCell.h"
 #import "LiveCenterSectionHeader.h"
@@ -182,8 +180,6 @@ static NSString *const kliveCenterSectionHeaderID = @"LiveCenterSectionHeader";
             NSInteger index = y.integerValue;
             if (section == 0) {
                 if (index == 0) {  //我的直播间
-//                    LiveCaptureViewController *cvc = [[LiveCaptureViewController alloc] init];
-//                    LiveFilterCaptureViewController *cvc = [[LiveFilterCaptureViewController alloc] init];
                     LiveSuperCaptureViewController *cvc = [[LiveSuperCaptureViewController alloc] init];
                     [self.navigationController pushViewController:cvc animated:YES];
                 }
