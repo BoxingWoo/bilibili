@@ -8,6 +8,9 @@
 
 #import <UIKit/UIKit.h>
 
+/**
+ 番剧视图控制器
+ */
 @interface BangumiViewController : UIViewController
 
 @end

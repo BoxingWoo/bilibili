@@ -15,6 +15,7 @@
 
 @interface HomeViewController () <BSMultiViewControlDataSource, BSMultiViewControlDelegate>
 
+/** 复合视图控制器 */
 @property (nonatomic, weak) BSMultiViewControl *multiViewControl;
 
 @end
@@ -112,11 +113,6 @@
         vc = bvc;
     }
     return vc;
-}
-
-- (void)multiViewControl:(BSMultiViewControl *)multiViewControl didSelectViewController:(UIViewController *)vc atIndex:(NSUInteger)index
-{
-    
 }
 
 #pragma mark - Others

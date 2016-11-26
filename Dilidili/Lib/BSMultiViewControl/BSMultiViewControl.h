@@ -9,7 +9,7 @@
 #import "BSMultiViewControlButtonCell.h"
 
 /**
- *  @brief 多视图控制器样式
+ *  @brief 复合视图控制器样式
  */
 typedef NS_ENUM(NSInteger, BSMultiViewControlStyle) {
     BSMultiViewControlFixedSpace = 0,  //横向固定按钮间距式
@@ -20,7 +20,7 @@ typedef NS_ENUM(NSInteger, BSMultiViewControlStyle) {
 @protocol BSMultiViewControlDataSource;
 @protocol BSMultiViewControlDelegate;
 /**
- *  @brief 多视图控制器
+ *  @brief 复合视图控制器
  */
 @interface BSMultiViewControl : UIView
 
@@ -39,7 +39,7 @@ typedef NS_ENUM(NSInteger, BSMultiViewControlStyle) {
 /** 标题按钮数组 */
 @property (nonatomic, copy, readonly) NSArray <UIButton *> *buttons;
 
-/** 多视图控制器样式 */
+/** 复合视图控制器样式 */
 @property (nonatomic, assign) IBInspectable NSInteger style;
 
 /** 标题选中态索引 */
@@ -96,7 +96,7 @@ typedef NS_ENUM(NSInteger, BSMultiViewControlStyle) {
  *  @brief 构造方法
  *
  *  @param frame                位置与大小
- *  @param style                多视图控制器样式
+ *  @param style                复合视图控制器样式
  *  @param parentViewController 父视图控制器
  */
 - (instancetype)initWithFrame:(CGRect)frame andStyle:(BSMultiViewControlStyle)style owner:(UIViewController *)parentViewController;
@@ -126,7 +126,7 @@ typedef NS_ENUM(NSInteger, BSMultiViewControlStyle) {
 /**
  *  @brief 子视图控制器数量
  *
- *  @param multiViewControl 多视图控制器
+ *  @param multiViewControl 复合视图控制器
  *
  *  @return 子视图控制器数量
  */
@@ -135,7 +135,7 @@ typedef NS_ENUM(NSInteger, BSMultiViewControlStyle) {
 /**
  *  @brief 标题按钮
  *
- *  @param multiViewControl 多视图控制器
+ *  @param multiViewControl 复合视图控制器
  *  @param index            索引
  *
  *  @return 标题按钮
@@ -145,7 +145,7 @@ typedef NS_ENUM(NSInteger, BSMultiViewControlStyle) {
 /**
  *  @brief 子视图控制器
  *
- *  @param multiViewControl 多视图控制器
+ *  @param multiViewControl 复合视图控制器
  *  @param index            索引
  *
  *  @return 子视图控制器
@@ -163,7 +163,7 @@ typedef NS_ENUM(NSInteger, BSMultiViewControlStyle) {
 /**
  *  @brief 选中子视图控制器代理方法，子视图控制器可在此方法中进行数据请求操作
  *
- *  @param multiViewControl 多视图控制器
+ *  @param multiViewControl 复合视图控制器
  *  @param vc               子视图控制器
  *  @param index            索引
  */

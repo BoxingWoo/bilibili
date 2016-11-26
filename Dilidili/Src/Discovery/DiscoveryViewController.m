@@ -13,9 +13,12 @@
 
 @interface DiscoveryViewController ()
 
+/** 标签视图 */
 @property (weak, nonatomic) IBOutlet SKTagView *tagView;
+/** 滚动视图 */
 @property (weak, nonatomic) IBOutlet UIScrollView *scrollView;
 
+/** 数据数组 */
 @property (nonatomic, strong) NSMutableArray *dataArr;
 
 @end
@@ -69,7 +72,7 @@
 }
 
 #pragma mark - Utility
-
+#pragma mark 请求数据
 - (void)requestData
 {
     [self.dataArr addObjectsFromArray:@[@"法医秦明", @"吃货木下", @"暴走大事件", @"极乐净土", @"哔哩哔哩篮球队", @"校对女孩河野悦子", @"心里的声音"]];

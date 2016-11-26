@@ -9,6 +9,9 @@
 #import <UIKit/UIKit.h>
 #import "BSLoopScrollView.h"
 
+/**
+ 推荐节头
+ */
 @interface RecommendSectionHeader : UICollectionReusableView
 
 @property (nonatomic, weak) UIImageView *iconImageView;
@@ -18,7 +21,9 @@
 
 @end
 
-
+/**
+ 推荐横幅广告节头
+ */
 @interface RecommendBannerSectionHeader : RecommendSectionHeader
 
 @property (nonatomic, weak) BSLoopScrollView *loopScrollView;

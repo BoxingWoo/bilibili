@@ -13,12 +13,19 @@
 
 @interface MineViewController ()
 
+/** 滚动视图 */
 @property (weak, nonatomic) IBOutlet UIScrollView *scrollView;
+/** 头像视图 */
 @property (weak, nonatomic) IBOutlet UIImageView *faceImageView;
+/** 姓名标签 */
 @property (weak, nonatomic) IBOutlet UILabel *nameLabel;
+/** 等级图片 */
 @property (weak, nonatomic) IBOutlet UIImageView *levelImageView;
+/** 性别图片 */
 @property (weak, nonatomic) IBOutlet UIImageView *sexImageView;
+/** 会员类型标签 */
 @property (weak, nonatomic) IBOutlet UILabel *vipTypeLabel;
+/** 硬币标签 */
 @property (weak, nonatomic) IBOutlet UILabel *coinLabel;
 
 @end

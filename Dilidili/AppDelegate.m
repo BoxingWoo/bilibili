@@ -24,13 +24,13 @@
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     
-    //日志输出
+    // 日志输出
     [self configLogger];
     
-    //网络监测
+    // 网络监测
     [self monitorNetwork];
     
-    //加载
+    // 加载
     [self handleLaunch:launchOptions];
     
     return YES;
@@ -60,20 +60,20 @@
 
 #pragma mark - 配置
 
-//日志输出
+// 日志输出
 - (void)configLogger
 {
-    //配置调试日志输出
+    // 配置调试日志输出
 #ifdef DEBUG
     
-//    //控制台输出染色
-//    //ERROR(错误) > 红色
-//    //WARN(警告) > 黄色
-//    //INFO(信息) > 蓝色
-//    //DEBUG(调试）> 黑色
+//    // 控制台输出染色
+//    // ERROR(错误) > 红色
+//    // WARN(警告) > 黄色
+//    // INFO(信息) > 蓝色
+//    // DEBUG(调试）> 黑色
 //    setenv("XcodeColors", "YES", 0);
     
-    //Xcode console
+    // Xcode console
     [DDTTYLogger sharedInstance].logFormatter = [[MyCustomLogFormatter alloc] init];
     [DDLog addLogger:[DDTTYLogger sharedInstance]];
     
@@ -82,7 +82,7 @@
     
 #else
     
-    //Apple System Logs
+    // Apple System Logs
     [DDASLLogger sharedInstance].logFormatter = [[MyCustomLogFormatter alloc] init];
     [DDLog addLogger:[DDASLLogger sharedInstance]];
     
@@ -93,7 +93,7 @@
 
 #pragma mark - 加载
 
-//加载
+// 加载
 - (void)handleLaunch:(NSDictionary *)launchOptions
 {
     NSString *newestVersion = [AppInfo appVersion];
@@ -101,12 +101,12 @@
     if (![newestVersion isEqualToString:appVersion]) {
         [USER_DEFAULTS setValue:newestVersion forKey:@"appVersion"];
         
-        //清除缓存
+        // 清除缓存
         YYImageCache *imageCache = [YYImageCache sharedCache];
         [imageCache.diskCache removeAllObjects];
     }
     
-    //如果是第一次启动，使用UserGuideViewController (用户引导页面) 作为根视图
+    // 如果是第一次启动，使用UserGuideViewController (用户引导页面) 作为根视图
     NSString *shortVersion = [USER_DEFAULTS valueForKey:@"shortVersion"];
     if (!shortVersion || ![newestVersion hasPrefix:shortVersion]) {
         NSArray *versions = [newestVersion componentsSeparatedByString:@"."];
@@ -115,13 +115,13 @@
         
     }
     
-    //记录启动次数
+    // 记录启动次数
     NSInteger launchCount = [USER_DEFAULTS integerForKey:@"launchCount"];
     launchCount++;
     DDLogDebug(@"启动次数: %li", launchCount);
     [USER_DEFAULTS setInteger:launchCount forKey:@"launchCount"];
     
-    //加载视图
+    // 加载视图
     self.window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
     self.window.backgroundColor = kBgColor;
     
@@ -137,7 +137,7 @@
 
 #pragma mark - 其它
 
-//网络监测
+// 网络监测
 - (void)monitorNetwork
 {
     AFNetworkReachabilityManager *reachablityManager = [AFNetworkReachabilityManager sharedManager];

@@ -8,6 +8,9 @@
 
 #import "MJRefreshGifHeader.h"
 
+/**
+ dilidili刷新头部
+ */
 @interface DdRefreshHeader : MJRefreshGifHeader
 
 @end

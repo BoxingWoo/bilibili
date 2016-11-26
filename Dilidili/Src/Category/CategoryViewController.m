@@ -11,7 +11,9 @@
 
 @interface CategoryViewController () <UICollectionViewDataSource, UICollectionViewDelegateFlowLayout>
 
+/** 集合视图 */
 @property (nonatomic, weak) UICollectionView *collectionView;
+/** 数据数组 */
 @property (nonatomic, copy) NSArray *dataArr;
 
 @end

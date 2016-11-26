@@ -8,6 +8,9 @@
 
 #import <UIKit/UIKit.h>
 
+/**
+ dilidili标签视图控制器
+ */
 @interface DdTabBarController : UITabBarController
 
 @end

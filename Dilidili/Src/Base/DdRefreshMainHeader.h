@@ -8,6 +8,9 @@
 
 #import "MJRefreshHeader.h"
 
+/**
+ dilidili主要刷新头部
+ */
 @interface DdRefreshMainHeader : MJRefreshComponent
 
 /** 创建header */

@@ -9,19 +9,19 @@
 #ifndef PrefixHeader_pch
 #define PrefixHeader_pch
 
-#import "CocoaLumberjack.h"  //一个优秀的第三方调试日志输出库
-#import <ReactiveCocoa/ReactiveCocoa.h>  //ReactiveCocoa
-#import <Masonry/Masonry.h>  //一个优秀的第三方自动布局库
-#import "BSScreenAdaptation.h"  //一些等比缩放函数
-#import <YYKit/YYKit.h>  //拓展Foundation与UIKit
+#import "CocoaLumberjack.h"  // 一个优秀的第三方调试日志输出库
+#import <ReactiveCocoa/ReactiveCocoa.h>  // ReactiveCocoa
+#import <Masonry/Masonry.h>  // 一个优秀的第三方自动布局库
+#import "BSScreenAdaptation.h"  // 一些等比缩放函数
+#import <YYKit/YYKit.h>  // 拓展Foundation与UIKit
 
-#import "AllConst.h"  //常量配置
-#import "AllSize.h"  //尺寸配置
-#import "AllColor.h"  //颜色配置
-#import "AllFormat.h"  //格式化配置
-#import "AllKeyAndText.h"  //键值配置
+#import "AllConst.h"  // 常量配置
+#import "AllSize.h"  // 尺寸配置
+#import "AllColor.h"  // 颜色配置
+#import "AllFormat.h"  // 格式化配置
+#import "AllKeyAndText.h"  // 键值配置
 
-#import "AppInfo.h"  //应用信息
-#import "DCURLRouter.h"  //路由
+#import "AppInfo.h"  // 应用信息
+#import "DCURLRouter.h"  // 路由
 
 #endif /* PrefixHeader_pch */

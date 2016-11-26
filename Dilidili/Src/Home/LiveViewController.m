@@ -19,14 +19,19 @@
 
 @interface LiveViewController () <UICollectionViewDataSource, UICollectionViewDelegate, BSLoopScrollViewDataSource, BSLoopScrollViewDelegate, DZNEmptyDataSetSource, DZNEmptyDataSetDelegate>
 {
-    BOOL _isNoData;
+    BOOL _isNoData;  // 没有数据
 }
 
+/** 集合视图 */
 @property (nonatomic, weak) UICollectionView *collectionView;
+/** 自定义流式布局 */
 @property (nonatomic, weak) LiveFlowLayout *flowLayout;
+/** 直播视图模型数组 */
 @property (nonatomic, strong) NSMutableArray <LiveViewModel *> *dataArr;
+/** 直播横幅广告数组 */
 @property (nonatomic, strong) NSMutableArray <LiveBannerModel *> *banners;
 
+/** 是否需要重载循环滚动视图 */
 @property (nonatomic, assign) BOOL shouldRefreshLoopScrollView;
 
 @end
@@ -149,7 +154,7 @@
             [headerView.actionSubject subscribeNext:^(NSNumber *x) {
                 @strongify(self);
                 NSInteger index = x.integerValue;
-                if (index == 1) {  //直播中心
+                if (index == 1) {  // 直播中心
                     LiveCenterViewController *cvc = [[LiveCenterViewController alloc] init];
                     [self.navigationController pushViewController:cvc animated:YES];
                 }
@@ -258,7 +263,7 @@
 }
 
 #pragma mark - Utility
-
+#pragma mark 请求数据
 - (void)requestData:(BOOL)forceReload
 {
     _isNoData = NO;

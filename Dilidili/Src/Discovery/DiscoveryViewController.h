@@ -8,6 +8,9 @@
 
 #import <UIKit/UIKit.h>
 
+/**
+ 发现视图控制器
+ */
 @interface DiscoveryViewController : UIViewController
 
 @end

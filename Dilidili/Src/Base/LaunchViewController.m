@@ -11,6 +11,7 @@
 
 @interface LaunchViewController ()
 
+/** 溅起图片视图 */
 @property (nonatomic, weak) UIImageView *splashImageView;
 
 @end
@@ -52,7 +53,7 @@
 }
 
 #pragma mark - Utility
-
+#pragma mark 动画加载
 - (void)launchWithAnimate
 {
     self.splashImageView.transform = CGAffineTransformMakeScale(0.0, 0.0);

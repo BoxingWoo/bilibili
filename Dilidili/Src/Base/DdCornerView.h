@@ -8,6 +8,9 @@
 
 #import <UIKit/UIKit.h>
 
+/**
+ dilidili圆角视图
+ */
 @interface DdCornerView : UIView
 
 @end

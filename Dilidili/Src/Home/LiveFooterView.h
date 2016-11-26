@@ -8,8 +8,12 @@
 
 #import <UIKit/UIKit.h>
 
+/**
+ 直播尾部视图
+ */
 @interface LiveFooterView : UICollectionReusableView
 
+/** 全部按钮 */
 @property (nonatomic, weak) UIButton *allBtn;
 
 @end

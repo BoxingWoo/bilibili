@@ -14,10 +14,12 @@
 
 @interface RecommendViewController () <UICollectionViewDataSource, UICollectionViewDelegate, UICollectionViewDelegateFlowLayout, BSLoopScrollViewDelegate, DZNEmptyDataSetSource, DZNEmptyDataSetDelegate>
 {
-    BOOL _isNoData;
+    BOOL _isNoData;  // 没有数据
 }
 
+/** 集合视图 */
 @property (nonatomic, weak) UICollectionView *collectionView;
+/** 推荐模块视图模型数组 */
 @property (nonatomic, strong) NSMutableArray <RecommendViewModel *> *dataArr;
 
 @end

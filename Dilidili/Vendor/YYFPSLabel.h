@@ -9,18 +9,25 @@
 #import <UIKit/UIKit.h>
 
 /**
- Show Screen FPS...
- 
- The maximum fps in OSX/iOS Simulator is 60.00.
- The maximum fps on iPhone is 59.97.
- The maxmium fps on iPad is 60.0.
+ 帧速率标签
  */
 @interface YYFPSLabel : UILabel
 
+/**
+ 单例方法
+
+ @return 单例对象
+ */
 + (instancetype)sharedFPSLabel;
 
+/**
+ 展示
+ */
 + (void)show;
 
+/**
+ 移除
+ */
 + (void)dismiss;
 
 @end

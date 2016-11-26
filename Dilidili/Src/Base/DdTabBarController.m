@@ -14,7 +14,7 @@
 #import "DiscoveryViewController.h"
 #import "MineViewController.h"
 
-@interface DdTabBarController () <UITabBarControllerDelegate>
+@interface DdTabBarController ()
 
 @end
 
@@ -25,7 +25,6 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     
-    self.delegate = self;
     self.tabBar.translucent = NO;
     
     [self addChildViewControllers];
@@ -37,10 +36,9 @@
 }
 
 #pragma mark - Initialization
-
+#pragma mark 添加子视图控制器
 - (void)addChildViewControllers
 {
-//    NSArray *titles = @[@"首页", @"分区", @"关注", @"发现", @"我的"];
     NSArray *normalImages = @[@"home_home_tab", @"home_category_tab", @"home_attention_tab", @"home_discovery_tab", @"home_mine_tab"];
     NSArray *selectedImages = @[@"home_home_tab_s", @"home_category_tab_s", @"home_attention_tab_s", @"home_discovery_tab_s", @"home_mine_tab_s"];
     
@@ -79,13 +77,6 @@
         [viewControllers addObject:nvc];
     }
     self.viewControllers = viewControllers;
-}
-
-#pragma mark - TabBarControllerDelegate
-
-- (void)tabBarController:(UITabBarController *)tabBarController didSelectViewController:(UIViewController *)viewController
-{
-    
 }
 
 #pragma mark - Others

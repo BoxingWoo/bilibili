@@ -8,6 +8,9 @@
 
 #import <UIKit/UIKit.h>
 
+/**
+ 加载视图控制器
+ */
 @interface LaunchViewController : UIViewController
 
 @end

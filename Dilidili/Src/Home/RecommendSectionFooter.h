@@ -9,8 +9,12 @@
 #import <UIKit/UIKit.h>
 #import "BSLoopScrollView.h"
 
+/**
+ 推荐节尾
+ */
 @interface RecommendSectionFooter : UICollectionReusableView
 
+/** 循环滚动视图 */
 @property (nonatomic, weak) BSLoopScrollView *loopScrollView;
 
 @end

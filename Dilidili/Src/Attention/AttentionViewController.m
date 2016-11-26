@@ -11,6 +11,7 @@
 
 @interface AttentionViewController () <BSMultiViewControlDataSource, BSMultiViewControlDelegate>
 
+/** 复合视图控制器 */
 @property (nonatomic, weak) BSMultiViewControl *multiViewControl;
 
 @end
@@ -93,11 +94,6 @@
     UIViewController *vc = [[UIViewController alloc] init];
     vc.view.backgroundColor = kBgColor;
     return vc;
-}
-
-- (void)multiViewControl:(BSMultiViewControl *)multiViewControl didSelectViewController:(UIViewController *)vc atIndex:(NSUInteger)index
-{
-    
 }
 
 #pragma mark - Others

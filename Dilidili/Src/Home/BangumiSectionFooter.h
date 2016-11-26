@@ -8,8 +8,12 @@
 
 #import <UIKit/UIKit.h>
 
+/**
+ 番剧节尾
+ */
 @interface BangumiSectionFooter : UICollectionReusableView
 
+/** 封面按钮 */
 @property (nonatomic, weak) UIButton *coverBtn;
 
 @end

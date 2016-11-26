@@ -10,7 +10,7 @@
 
 @implementation DdImageManager
 
-static NSString *const PlaceholderImageName = @"default_img";
+static NSString *const kPlaceholderImageName = @"default_img";
 
 + (void)load
 {
@@ -19,6 +19,7 @@ static NSString *const PlaceholderImageName = @"default_img";
     imageCache.diskCache.ageLimit = 60 * 60 * 1;
 }
 
+#pragma mark 头像占位图片
 + (UIImage *)face_placeholderImage
 {
     NSString *name = @"misc_avatarDefault";
@@ -33,9 +34,10 @@ static NSString *const PlaceholderImageName = @"default_img";
     return placeholderImage;
 }
 
+#pragma mark 封面占位图片
 + (UIImage *)cover_placeholderImageBySize:(CGSize)size
 {
-    NSString *key = [NSString stringWithFormat:@"cover_%@_%@", PlaceholderImageName, [NSValue valueWithCGSize:size]].md5String;
+    NSString *key = [NSString stringWithFormat:@"cover_%@_%@", kPlaceholderImageName, [NSValue valueWithCGSize:size]].md5String;
     YYImageCache *imageCache = [YYImageCache sharedCache];
     UIImage *placeholderImage = [imageCache getImageForKey:key];
     if (placeholderImage == nil) {
@@ -54,9 +56,10 @@ static NSString *const PlaceholderImageName = @"default_img";
     return placeholderImage;
 }
 
+#pragma mark 直播封面占位图片
 + (UIImage *)live_placeholderImageBySize:(CGSize)size
 {
-    NSString *key = [NSString stringWithFormat:@"live_%@_%@", PlaceholderImageName, [NSValue valueWithCGSize:size]].md5String;
+    NSString *key = [NSString stringWithFormat:@"live_%@_%@", kPlaceholderImageName, [NSValue valueWithCGSize:size]].md5String;
     YYImageCache *imageCache = [YYImageCache sharedCache];
     UIImage *placeholderImage = [imageCache getImageForKey:key];
     if (placeholderImage == nil) {
@@ -67,9 +70,10 @@ static NSString *const PlaceholderImageName = @"default_img";
     return placeholderImage;
 }
 
+#pragma mark 活动封面占位图片
 + (UIImage *)activity_placeholderImageBySize:(CGSize)size
 {
-    NSString *key = [NSString stringWithFormat:@"activity_%@_%@", PlaceholderImageName, [NSValue valueWithCGSize:size]].md5String;
+    NSString *key = [NSString stringWithFormat:@"activity_%@_%@", kPlaceholderImageName, [NSValue valueWithCGSize:size]].md5String;
     YYImageCache *imageCache = [YYImageCache sharedCache];
     UIImage *placeholderImage = [imageCache getImageForKey:key];
     if (placeholderImage == nil) {
@@ -80,9 +84,10 @@ static NSString *const PlaceholderImageName = @"default_img";
     return placeholderImage;
 }
 
+#pragma mark 横幅广告占位图片
 + (UIImage *)banner_placeholderImageBySize:(CGSize)size
 {
-    NSString *key = [NSString stringWithFormat:@"banner_%@_%@", PlaceholderImageName, [NSValue valueWithCGSize:size]].md5String;
+    NSString *key = [NSString stringWithFormat:@"banner_%@_%@", kPlaceholderImageName, [NSValue valueWithCGSize:size]].md5String;
     YYImageCache *imageCache = [YYImageCache sharedCache];
     UIImage *placeholderImage = [imageCache getImageForKey:key];
     if (placeholderImage == nil) {
@@ -92,6 +97,7 @@ static NSString *const PlaceholderImageName = @"default_img";
     return placeholderImage;
 }
 
+#pragma mark 转化图片
 + (UIImage *)transformImage:(UIImage *)originImage size:(CGSize)size cornerRadius:(CGFloat)radius style:(DdImageStyle)style
 {
     UIImage *transformImage = [originImage imageByResizeToSize:CGSizeMake(size.width * kScreenScale, size.height * kScreenScale)];
@@ -106,10 +112,13 @@ static NSString *const PlaceholderImageName = @"default_img";
     return transformImage;
 }
 
+#pragma mark - Privates
+
+#pragma mark 占位图片
 + (UIImage *)_placeholderImageBySize:(CGSize)size
 {
     UIImage *bgImage = [UIImage imageWithColor:[UIColor colorWithRed:245 / 255.0 green:246 / 255.0 blue:247 / 255.0 alpha:1.0] size:CGSizeMake(size.width * kScreenScale, size.height * kScreenScale)];
-    UIImage *centerImage = [UIImage imageNamed:PlaceholderImageName];
+    UIImage *centerImage = [UIImage imageNamed:kPlaceholderImageName];
     CGRect rect = CGRectMake(0, 0, bgImage.size.width, bgImage.size.height);
     UIGraphicsBeginImageContextWithOptions(rect.size, YES, kScreenScale);
     [bgImage drawInRect:rect];
@@ -120,6 +129,7 @@ static NSString *const PlaceholderImageName = @"default_img";
     return placeholderImage;
 }
 
+#pragma mark 渐变图片
 + (UIImage *)_gradientImageWithRect:(CGRect)rect style:(DdImageStyle)style {
     UIColor *inputColor0;
     UIColor *inputColor1;

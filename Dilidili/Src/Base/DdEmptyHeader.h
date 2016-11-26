@@ -8,6 +8,9 @@
 
 #import "MJRefreshHeader.h"
 
+/**
+ dilidili空头部视图
+ */
 @interface DdEmptyHeader : MJRefreshHeader
 
 @end

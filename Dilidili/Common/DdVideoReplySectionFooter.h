@@ -8,6 +8,9 @@
 
 #import <UIKit/UIKit.h>
 
+/**
+ 视频评论节尾
+ */
 @interface DdVideoReplySectionFooter : UITableViewHeaderFooterView
 
 @end

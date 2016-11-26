@@ -8,6 +8,9 @@
 
 #import <UIKit/UIKit.h>
 
+/**
+ 关注视图控制器
+ */
 @interface AttentionViewController : UIViewController
 
 @end

@@ -8,9 +8,14 @@
 
 #import <UIKit/UIKit.h>
 
+/**
+ 推荐番剧节尾
+ */
 @interface RecommendBangumiFooter : UICollectionReusableView
 
+/** 每日放送按钮 */
 @property (nonatomic, weak) UIButton *timelineBtn;
+/** 番剧索引按钮 */
 @property (nonatomic, weak) UIButton *categoryBtn;
 
 @end

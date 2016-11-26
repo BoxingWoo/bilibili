@@ -9,6 +9,9 @@
 #import <Foundation/Foundation.h>
 #import "SVProgressHUD.h"
 
+/**
+ 自定义进度指示器
+ */
 @interface DdProgressHUD : NSObject
 
 + (void)show;

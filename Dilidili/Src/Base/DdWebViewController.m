@@ -12,6 +12,7 @@
 
 /** 网页视图 */
 @property (nonatomic, weak) UIWebView *webView;
+/** 左导航按钮 */
 @property (nonatomic, strong) UIBarButtonItem *leftBarButtonItem;
 
 @end
@@ -62,26 +63,28 @@
 }
 
 #pragma mark - HandleAction
-
+#pragma mark 返回
 - (void)handleBack
 {
-    if (self.webView.canGoBack) {
+    if (self.webView.canGoBack) {  // 返回上一级网页
         [self.webView goBack];
         UIBarButtonItem *closeBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"关闭" style:UIBarButtonItemStylePlain target:self action:@selector(handleClose)];
         [closeBarButtonItem setTitleTextAttributes:[self.leftBarButtonItem titleTextAttributesForState:UIControlStateNormal] forState:UIControlStateNormal];
         self.navigationItem.leftBarButtonItems = @[self.leftBarButtonItem, closeBarButtonItem];
         [self performSelector:@selector(hideCloseBarButtonItem) withObject:nil afterDelay:3.0];
     }else {
-        [self handleClose];
+        [self handleClose];  // 返回上一层视图控制器
     }
 }
 
+#pragma mark 关闭
 - (void)handleClose
 {
     [self.navigationController popViewControllerAnimated:YES];
 }
 
 #pragma mark - Utility
+#pragma mark 隐藏关闭按钮
 - (void)hideCloseBarButtonItem
 {
     [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(hideCloseBarButtonItem) object:nil];

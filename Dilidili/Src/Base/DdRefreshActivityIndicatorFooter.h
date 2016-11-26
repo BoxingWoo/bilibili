@@ -8,6 +8,9 @@
 
 #import "MJRefreshBackFooter.h"
 
+/**
+ dilidili活动指示器刷新尾部
+ */
 @interface DdRefreshActivityIndicatorFooter : MJRefreshBackFooter
 
 @end

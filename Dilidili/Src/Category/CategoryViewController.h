@@ -8,6 +8,9 @@
 
 #import <UIKit/UIKit.h>
 
+/**
+ 分区视图控制器
+ */
 @interface CategoryViewController : UIViewController
 
 @end
