@@ -10,7 +10,7 @@
 #import "LiveInfoModel.h"
 
 @protocol IJKMediaPlayback;
-@class DdDanmakuViewController;
+@class DdDanmakuViewModel;
 
 /**
  *  @brief 直播媒体控制器
@@ -36,8 +36,8 @@
 @property (nonatomic, copy) NSString *loadingDetail;
 /** 媒体播放器 */
 @property (nonatomic, weak) id<IJKMediaPlayback> delegatePlayer;
-/** 弹幕视图控制器 */
-@property (nonatomic, weak) DdDanmakuViewController *dvc;
+/** 弹幕视图模型 */
+@property (nonatomic, weak) DdDanmakuViewModel *danmakuVM;
 
 /**
  *  @brief 刷新媒体控制器

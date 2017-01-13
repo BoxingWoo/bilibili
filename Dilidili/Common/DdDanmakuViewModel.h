@@ -6,41 +6,50 @@
 //  Copyright © 2016年 BoxingWoo. All rights reserved.
 //
 
-#import <Foundation/Foundation.h>
-#import <BarrageRenderer/BarrageRenderer.h>
-#import "DdDanmakuModel.h"
+#import "DdBasedViewModel.h"
+#import <IJKMediaFramework/IJKMediaFramework.h>
+#import "DdDanmakuUserDefaults.h"
+#import "DdDanmakuListViewModel.h"
 
 /**
  弹幕视图模型
  */
-@interface DdDanmakuViewModel : NSObject
+@interface DdDanmakuViewModel : DdBasedViewModel
 
 /**
- 弹幕模型
+ 弹幕请求链接
  */
-@property (nonatomic, strong) DdDanmakuModel *model;
-
+@property (nonatomic, copy) NSString *cid;
 /**
- 弹幕描述模型
+ 媒体播放器
  */
-@property (nonatomic, strong) BarrageDescriptor *descriptor;
-
+@property (nonatomic, weak) id<IJKMediaPlayback> delegatePlayer;
 /**
- 构造方法
-
- @param model 弹幕模型
-
- @return 弹幕视图模型实例
+ 弹幕引擎
  */
-- (instancetype)initWithModel:(DdDanmakuModel *)model;
+@property (nonatomic, strong) BarrageRenderer *renderer;
+/**
+ 是否隐藏弹幕
+ */
+@property (nonatomic, assign) BOOL shouldHideDanmakus;
+/**
+ 弹幕视图模型数组
+ */
+@property (nonatomic, copy) NSArray <DdDanmakuListViewModel *> *danmakus;
+/**
+ 最大弹幕数
+ */
+@property (nonatomic, assign) NSUInteger maxlimit;
+/**
+ 请求弹幕信号
+ */
+@property (nonatomic, strong) RACSignal *danmakuSignal;
 
 /**
  请求弹幕数据
 
- @param cid 标识
-
  @return RACCommand instance
  */
-+ (RACCommand *)requestDanmakuDataByCid:(NSString *)cid;
+- (RACCommand *)requestDanmakuData;
 
 @end

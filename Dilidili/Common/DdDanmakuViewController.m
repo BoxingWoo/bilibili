@@ -7,12 +7,22 @@
 //
 
 #import "DdDanmakuViewController.h"
-#import <IJKMediaFramework/IJKMediaFramework.h>
-#import "DdDanmakuUserDefaults.h"
 #import "DdDanmakuViewModel.h"
 
 @interface DdDanmakuViewController () <BarrageRendererDelegate>
 
+/**
+ 弹幕视图模型
+ */
+@property (nonatomic, strong) DdDanmakuViewModel *viewModel;
+/**
+ 媒体播放器
+ */
+@property (nonatomic, weak) id<IJKMediaPlayback> delegatePlayer;
+/**
+ 弹幕引擎
+ */
+@property (nonatomic, weak) BarrageRenderer *renderer;
 /**
  定时器
  */
@@ -22,11 +32,10 @@
  当前同屏弹幕数量
  */
 @property (nonatomic, weak) UILabel *currentDanmakusCountLabel;
-
 /**
  弹幕视图模型数组
  */
-@property (nonatomic, strong) NSMutableArray <DdDanmakuViewModel *> *dataArr;
+@property (nonatomic, copy) NSArray <DdDanmakuListViewModel *> *dataArr;
 
 @end
 
@@ -34,27 +43,10 @@
 
 #pragma mark - LifeCycle
 
-- (instancetype)init
-{
-    if (self = [super init]) {
-        _renderer = [[BarrageRenderer alloc] init];
-        _renderer.delegate = self;
-        _renderer.canvasMargin = UIEdgeInsetsZero;
-        _renderer.redisplay = NO;
-        @weakify(self);
-        [[[DdDanmakuUserDefaults sharedInstance] rac_valuesForKeyPath:@"speed" observer:self] subscribeNext:^(id x) {
-            @strongify(self);
-            self.renderer.speed = [x doubleValue] * 1 / 7.5;
-        }];
-        _shouldHideDanmakus = NO;
-    }
-    return self;
-}
-
 - (void)viewDidLoad {
     [super viewDidLoad];
     
-    [self.view addSubview:self.renderer.view];
+    [self bindViewModel];
 }
 
 - (void)viewWillAppear:(BOOL)animated
@@ -82,6 +74,31 @@
 }
 
 #pragma mark - Initialization
+
+- (void)bindViewModel
+{
+    [super bindViewModel];
+    _delegatePlayer = self.viewModel.delegatePlayer;
+    _renderer = self.viewModel.renderer;
+    self.renderer.delegate = self;
+    [self.view addSubview:self.renderer.view];
+    
+    @weakify(self);
+    [RACObserve(self.viewModel, shouldHideDanmakus) subscribeNext:^(NSNumber *x) {
+        @strongify(self);
+        BOOL shouldHideDanmakus = x.boolValue;
+        [self showOrHideDanmakus:shouldHideDanmakus];
+    }];
+    
+    [RACObserve(self.viewModel, danmakuSignal) subscribeNext:^(RACSignal *danmakuSignal) {
+        @strongify(self);
+        if (danmakuSignal != nil) {
+            [self refreshData:danmakuSignal];
+        }
+    }];
+}
+
+#pragma mark - LazyLoad
 
 - (NSTimer *)timer
 {
@@ -114,23 +131,6 @@
     return _currentDanmakusCountLabel;
 }
 
-#pragma mark - Setter
-
-- (void)setShouldHideDanmakus:(BOOL)shouldHideDanmakus
-{
-    _shouldHideDanmakus = shouldHideDanmakus;
-    if (shouldHideDanmakus) {
-        [self.timer invalidate];
-        self.timer = nil;
-        [self.renderer stop];
-        [_currentDanmakusCountLabel removeFromSuperview];
-    }else {
-        [self.renderer start];
-        self.renderer.speed = [DdDanmakuUserDefaults sharedInstance].speed * 1 / 7.5;
-        [self.timer setFireDate:[NSDate date]];
-    }
-}
-
 #pragma mark - Utility
 #pragma mark 配置通知中心
 - (void)installMovieNotificationObservers
@@ -159,7 +159,7 @@
             break;
         }
         case IJKMPMoviePlaybackStatePlaying: {
-            if (!self.shouldHideDanmakus) {
+            if (!self.viewModel.shouldHideDanmakus) {
                 [self.renderer start];
                 self.renderer.speed = [DdDanmakuUserDefaults sharedInstance].speed * 1 / 7.5;
                 [self.timer setFireDate:[NSDate date]];
@@ -170,7 +170,7 @@
         case IJKMPMoviePlaybackStateInterrupted:
         case IJKMPMoviePlaybackStateSeekingForward:
         case IJKMPMoviePlaybackStateSeekingBackward: {
-            if (!self.shouldHideDanmakus) {
+            if (!self.viewModel.shouldHideDanmakus) {
                 [self.timer setFireDate:[NSDate distantFuture]];
                 [self.renderer pause];
             }
@@ -182,20 +182,28 @@
     }
 }
 
-#pragma mark 请求弹幕数据
-- (RACSignal *)requestData
+#pragma mark 刷新弹幕数据
+- (void)refreshData:(RACSignal *)signal
 {
-    RACSignal *signal = [[DdDanmakuViewModel requestDanmakuDataByCid:self.cid] execute:nil];
-    [signal subscribeNext:^(RACTuple *tuple) {
-        RACTupleUnpack(NSArray *models, NSNumber *maxlimit) = tuple;
-        DDLogInfo(@"视频弹幕总数：%@", maxlimit);
-        self.dataArr = [[NSMutableArray alloc] init];
-        for (DdDanmakuModel *model in models) {
-            DdDanmakuViewModel *viewModel = [[DdDanmakuViewModel alloc] initWithModel:model];
-            [self.dataArr addObject:viewModel];
-        }
+    [signal subscribeNext:^(id x) {
+        self.dataArr = self.viewModel.danmakus;
+        DDLogInfo(@"视频弹幕总数：%lu", self.viewModel.maxlimit);
     }];
-    return signal;
+}
+
+#pragma mark 展示/隐藏弹幕
+- (void)showOrHideDanmakus:(BOOL)shouldHideDanmakus
+{
+    if (shouldHideDanmakus) {
+        [self.timer invalidate];
+        self.timer = nil;
+        [self.renderer stop];
+        [_currentDanmakusCountLabel removeFromSuperview];
+    }else {
+        [self.renderer start];
+        self.renderer.speed = [DdDanmakuUserDefaults sharedInstance].speed * 1 / 7.5;
+        [self.timer setFireDate:[NSDate date]];
+    }
 }
 
 #pragma mark - 加载弹幕
@@ -221,7 +229,7 @@
     NSTimeInterval currentPlaybackTime = self.delegatePlayer.currentPlaybackTime;
     NSMutableArray *descriptors = [[NSMutableArray alloc] init];
     for (NSInteger i = 0; i < self.dataArr.count; i++) {
-        DdDanmakuViewModel *viewModel = self.dataArr[i];
+        DdDanmakuListViewModel *viewModel = self.dataArr[i];
         if (viewModel.model.delay >= currentPlaybackTime && viewModel.model.delay < currentPlaybackTime + timer.timeInterval) {
             BOOL isShielded = NO;
             if ((danmakuUserDefaults.shieldingOption & DdDanmakuShieldingFloatTop) && viewModel.model.style == DdDanmakuFloatTop) {  //屏蔽顶部弹幕

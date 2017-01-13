@@ -3,15 +3,15 @@
 <plist version="1.0">
 <dict>
 	<key>http</key>
-	<string>DdWebViewController</string>
+	<string>DdWeb</string>
 	<key>https</key>
-	<string>DdWebViewController</string>
+	<string>DdWeb</string>
 	<key>bilibili</key>
 	<dict>
 		<key>bilibili://video</key>
-		<string>DdVideoViewController</string>
+		<string>DdVideo</string>
 		<key>bilibili://live</key>
-		<string>LiveVideoViewController</string>
+		<string>LiveVideo</string>
 		<key>bilibili://bangumi</key>
 		<string></string>
 	</dict>

@@ -10,6 +10,7 @@
 #import "DdHTTPSessionManager.h"
 
 #pragma mark - 弹幕解析器
+
 @interface DdDanmakuParser : NSObject <NSXMLParserDelegate>
 {
     NSXMLParser *_parser;
@@ -27,9 +28,9 @@
 /**
  解析XML数据
 
- @param completionHandler 回调Block(models:弹幕模型数组, maxlimit:弹幕数量最大限制, error:错误)
+ @param completionHandler 回调Block(danmakus:弹幕视图模型模型数组, maxlimit:弹幕数量最大限制, error:错误)
  */
-- (void)parseWithCompletionHandler:(void (^)(NSArray <DdDanmakuModel *> *models, NSUInteger maxlimit, NSError *error))completionHandler;
+- (void)parseWithCompletionHandler:(void (^)(NSArray <DdDanmakuListViewModel *> *danmakus, NSUInteger maxlimit, NSError *error))completionHandler;
 
 @end
 
@@ -53,15 +54,15 @@
 }
 
 #pragma mark 解析XML数据
-- (void)parseWithCompletionHandler:(void (^)(NSArray <DdDanmakuModel *> *models, NSUInteger maxlimit, NSError *error))completionHandler
+- (void)parseWithCompletionHandler:(void (^)(NSArray<DdDanmakuListViewModel *> *, NSUInteger, NSError *))completionHandler
 {
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-        NSArray *models = nil;
+        NSArray *danmakus = nil;
         NSUInteger maxlimit = 0;
         NSError *error = nil;
         BOOL result = [_parser parse];
         if (result) {
-            models = [_parseObjects copy];
+            danmakus = [_parseObjects copy];
             maxlimit = _maxlimit;
         }else {
             error = _parser.parserError;
@@ -69,7 +70,7 @@
         }
         dispatch_async(dispatch_get_main_queue(), ^{
             if (completionHandler) {
-                completionHandler(models, maxlimit, error);
+                completionHandler(danmakus, maxlimit, error);
             }
         });
     });
@@ -154,7 +155,8 @@
         _maxlimit = [_tempStr unsignedIntegerValue];
     }else if ([elementName isEqualToString:@"d"]) {
         _tempModel.text = _tempStr;
-        [_parseObjects addObject:_tempModel];
+        DdDanmakuListViewModel *viewModel = [[DdDanmakuListViewModel alloc] initWithModel:_tempModel];
+        [_parseObjects addObject:viewModel];
     }
 }
 
@@ -163,83 +165,44 @@
 
 
 #pragma mark - 弹幕视图模型
-@interface DdDanmakuViewModel ()
-
-@end
 
 @implementation DdDanmakuViewModel
 
-#pragma mark 构造方法
-- (instancetype)initWithModel:(DdDanmakuModel *)model
+- (instancetype)init
 {
     if (self = [super init]) {
-        _model = model;
-        BarrageDescriptor *descriptor = [[BarrageDescriptor alloc]init];
-        _descriptor = descriptor;
-        if (model.style == DdDanmakuWalkR2L || model.style == DdDanmakuWalkL2R) {
-            descriptor.spriteName = NSStringFromClass([BarrageWalkTextSprite class]);
-            NSNumber *direction = nil;
-            switch (model.style) {
-                case DdDanmakuWalkR2L:
-                    direction = @(BarrageWalkDirectionR2L);
-                    break;
-                case DdDanmakuWalkL2R:
-                    direction = @(BarrageWalkDirectionL2R);
-                    break;
-                default:
-                    break;
-            }
-            descriptor.params[@"direction"] = direction;
-            descriptor.params[@"side"] = @(BarrageWalkSideDefault);
-            descriptor.params[@"speed"] = @(100 * (double)random()/RAND_MAX + 50);
-        }else {
-            descriptor.spriteName = NSStringFromClass([BarrageFloatTextSprite class]);
-            NSNumber *direction = nil;
-            switch (model.style) {
-                case DdDanmakuFloatTop:
-                    direction = @(BarrageFloatDirectionT2B);
-                    break;
-                case DdDanmakuFloatBottom:
-                    direction = @(BarrageFloatDirectionB2T);
-                    break;
-                default:
-                    direction = @(BarrageFloatDirectionT2B);
-                    break;
-            }
-            descriptor.params[@"direction"] = direction;
-            descriptor.params[@"side"] = @(BarrageFloatSideCenter);
-            descriptor.params[@"duration"] = @(5.0);
-        }
-//        descriptor.params[@"delay"] = @(model.delay);
-        NSMutableAttributedString *attributedText = [[NSMutableAttributedString alloc] initWithString:model.text];
-        [attributedText addAttribute:NSFontAttributeName value:[UIFont systemFontOfSize:model.fontSize] range:NSMakeRange(0, model.text.length)];
-        [attributedText addAttribute:NSForegroundColorAttributeName value:model.textColor range:NSMakeRange(0, model.text.length)];
-        CGFloat strokeWidth = [DdDanmakuUserDefaults sharedInstance].strokeWidth / kScreenScale;
-        NSShadow *shadow = [[NSShadow alloc] init];
-        shadow.shadowColor = [UIColor blackColor];
-        shadow.shadowOffset = CGSizeMake(strokeWidth, strokeWidth);
-        [attributedText addAttribute:NSShadowAttributeName value:shadow range:NSMakeRange(0, model.text.length)];
-        descriptor.params[@"attributedText"] = attributedText;
+        _renderer = [[BarrageRenderer alloc] init];
+        _renderer.canvasMargin = UIEdgeInsetsZero;
+        _renderer.redisplay = NO;
+        @weakify(self);
+        [[[DdDanmakuUserDefaults sharedInstance] rac_valuesForKeyPath:@"speed" observer:self] subscribeNext:^(id x) {
+            @strongify(self);
+            self.renderer.speed = [x doubleValue] * 1 / 7.5;
+        }];
     }
     return self;
 }
 
 #pragma mark 请求弹幕数据
-+ (RACCommand *)requestDanmakuDataByCid:(NSString *)cid
+- (RACCommand *)requestDanmakuData
 {
+    @weakify(self);
     return [[RACCommand alloc] initWithSignalBlock:^RACSignal * _Nonnull(id  _Nullable input) {
+        @strongify(self);
         RACSignal *signal = [RACSignal createSignal:^RACDisposable * _Nullable(id<RACSubscriber>  _Nonnull subscriber) {
             AFHTTPSessionManager *manager = [AFHTTPSessionManager manager];
-            manager.requestSerializer.timeoutInterval = 30.0;            manager.responseSerializer = [AFHTTPResponseSerializer serializer];
-            NSString *URLString = cid;
+            manager.requestSerializer.timeoutInterval = 30.0;
+            manager.responseSerializer = [AFHTTPResponseSerializer serializer];
+            NSString *URLString = self.cid;
             DDLogInfo(@"%@", URLString);
             [manager GET:URLString parameters:nil progress:NULL success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
                 
                 DdDanmakuParser *parser = [[DdDanmakuParser alloc] initWithXMLData:responseObject];
-                [parser parseWithCompletionHandler:^(NSArray<DdDanmakuModel *> *models, NSUInteger maxlimit, NSError *error) {
+                [parser parseWithCompletionHandler:^(NSArray<DdDanmakuListViewModel *> *danmakus, NSUInteger maxlimit, NSError *error) {
                     if (!error) {
-                        RACTuple *tuple = RACTuplePack(models, @(maxlimit));
-                        [subscriber sendNext:tuple];
+                        self.danmakus = danmakus;
+                        self.maxlimit = maxlimit;
+                        [subscriber sendNext:nil];
                     }else {
                         [subscriber sendError:error];
                     }
@@ -253,6 +216,8 @@
             }];
             return nil;
         }];
+        
+        self.danmakuSignal = signal;
         return signal;
     }];
 }

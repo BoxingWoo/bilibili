@@ -13,13 +13,5 @@
  */
 @interface LiveVideoViewController : UIViewController
 
-/**
- 房间ID
- */
-@property (nonatomic, assign) NSInteger room_id;
-/**
- 播放地址
- */
-@property (nonatomic, copy) NSString *playurl;
 
 @end

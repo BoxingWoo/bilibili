@@ -7,6 +7,7 @@
 //
 
 #import "BangumiViewController.h"
+#import "BangumiViewModel.h"
 #import <pop/POP.h>
 #import "UIScrollView+EmptyDataSet.h"
 #import "DdProgressHUD.h"
@@ -14,23 +15,53 @@
 #import "DdRefreshActivityIndicatorFooter.h"
 #import "DdImageManager.h"
 #import "BangumiFlowLayout.h"
-#import "BangumiViewModel.h"
 
 @interface BangumiViewController () <UICollectionViewDataSource, UICollectionViewDelegate, BSLoopScrollViewDataSource, BSLoopScrollViewDelegate, DZNEmptyDataSetSource, DZNEmptyDataSetDelegate>
 {
-    BOOL _isNoData;
+    BOOL _isNoData;  // 是否没有数据
 }
 
+/**
+ 番剧视图模型
+ */
+@property (nonatomic, strong) BangumiViewModel *viewModel;
+/**
+ 集合视图
+ */
 @property (nonatomic, weak) UICollectionView *collectionView;
+/**
+ 番剧列表流式布局
+ */
 @property (nonatomic, weak) BangumiFlowLayout *flowLayout;
 
-@property (nonatomic, copy) NSArray <BangumiViewModel *> *serializing;
-@property (nonatomic, copy) NSArray <BangumiViewModel *> *previous;
-@property (nonatomic, strong) NSMutableArray <BangumiViewModel *> *recommend;
+/**
+ 连载
+ */
+@property (nonatomic, copy) NSArray <BangumiListViewModel *> *serializing;
+/**
+ 完结
+ */
+@property (nonatomic, copy) NSArray <BangumiListViewModel *> *previous;
+/**
+ 推荐
+ */
+@property (nonatomic, copy) NSArray <BangumiListViewModel *> *recommend;
+/**
+ 广告
+ */
 @property (nonatomic, copy) NSDictionary *ad;
+/**
+ 季度
+ */
 @property (nonatomic, assign) NSUInteger season;
+/**
+ 节头模型
+ */
 @property (nonatomic, copy) NSArray *sectionHeaderModels;
 
+/**
+ 是否要刷新滚动视图
+ */
 @property (nonatomic, assign) BOOL shouldRefreshLoopScrollView;
 
 @end
@@ -65,14 +96,6 @@
     return _sectionHeaderModels;
 }
 
-- (NSMutableArray<BangumiViewModel *> *)recommend
-{
-    if (!_recommend) {
-        _recommend = [[NSMutableArray alloc] init];
-    }
-    return _recommend;
-}
-
 - (void)createUI
 {
     BangumiFlowLayout *flowLayout = [[BangumiFlowLayout alloc] init];
@@ -98,9 +121,9 @@
     collectionView.mj_header = (MJRefreshHeader *)[DdRefreshMainHeader headerWithRefreshingBlock:^{
         [self requestIndexData:YES];
     }];
-    collectionView.mj_footer = [DdRefreshActivityIndicatorFooter footerWithRefreshingBlock:^{
-        [self requestRecommendData:YES];
-    }];
+//    collectionView.mj_footer = [DdRefreshActivityIndicatorFooter footerWithRefreshingBlock:^{
+//        [self requestRecommendData:YES];
+//    }];
     
     [self.view addSubview:collectionView];
 }
@@ -125,7 +148,7 @@
 
 - (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath
 {
-    BangumiViewModel *viewModel = nil;
+    BangumiListViewModel *viewModel = nil;
     UICollectionViewCell *cell = nil;
     if (indexPath.section == 0) {
         viewModel = self.serializing[indexPath.row];
@@ -137,7 +160,7 @@
         viewModel = self.recommend[indexPath.row];
         cell = [collectionView dequeueReusableCellWithReuseIdentifier:kBangumiListCellID forIndexPath:indexPath];
     }
-    [viewModel configureCell:cell atIndexPath:indexPath];
+    [self.viewModel configureCell:cell atIndexPath:indexPath];
     return cell;
 }
 
@@ -206,7 +229,7 @@
                 @strongify(self);
                 return [RACSignal createSignal:^RACDisposable * _Nullable(id<RACSubscriber>  _Nonnull subscriber) {
                     BangumiBannerModel *bannerModel = [self.ad[@"body"] firstObject];
-                    [DCURLRouter pushURLString:bannerModel.link query:@{@"title":bannerModel.title, @"cover":bannerModel.img} animated:YES];
+                    [DdViewModelRouter pushURLString:bannerModel.link params:@{@"title":bannerModel.title, @"cover":bannerModel.img} animated:YES replace:NO];
                     [subscriber sendCompleted];
                     return nil;
                 }];
@@ -245,7 +268,7 @@
 - (void)loopScrollView:(BSLoopScrollView *)loopScrollView didTouchContentView:(UIView *)contentView atIndex:(NSUInteger)index
 {
     BangumiBannerModel *bannerModel = [self.ad[@"head"] objectAtIndex:index];
-    [DCURLRouter pushURLString:bannerModel.link query:@{@"title":bannerModel.title, @"cover":bannerModel.img} animated:YES];
+    [DdViewModelRouter pushURLString:bannerModel.link params:@{@"title":bannerModel.title, @"cover":bannerModel.img} animated:YES replace:NO];
 }
 
 #pragma mark - HandleAction
@@ -260,36 +283,22 @@
 - (void)requestIndexData:(BOOL)forceReload
 {
     _isNoData = NO;
-    [[[BangumiViewModel requestBangumiIndexData:forceReload] execute:nil] subscribeNext:^(RACTuple *x) {
+    @weakify(self);
+    [[[self.viewModel requestBangumiIndexData:forceReload] execute:nil] subscribeNext:^(id x) {
         
+        @strongify(self);
         [self.collectionView.mj_header endRefreshing];
         [self.collectionView.mj_footer resetNoMoreData];
-        [self.recommend removeAllObjects];
         
-        NSArray *first = x.first;
-        NSMutableArray *serializing = [[NSMutableArray alloc] init];
-        for (BangumiListModel *model in first) {
-            BangumiViewModel *viewModel = [[BangumiViewModel alloc] initWithModel:model];
-            [serializing addObject:viewModel];
-        }
-        self.serializing = serializing;
-        
-        NSArray *second = x.second;
-        NSMutableArray *previous = [[NSMutableArray alloc] init];
-        for (BangumiListModel *model in second) {
-            BangumiViewModel *viewModel = [[BangumiViewModel alloc] initWithModel:model];
-            [previous addObject:viewModel];
-        }
-        self.previous = previous;
-        
-        self.ad = x.third;
-        
-        self.season = [x.fourth unsignedIntegerValue];
+        self.serializing = self.viewModel.serializing;
+        self.previous = self.viewModel.previous;
+        self.ad = self.viewModel.ad;
+        self.season = self.viewModel.season;
         
         self.shouldRefreshLoopScrollView = YES;
         [self.flowLayout.viewModelDict setObject:self.serializing forKey:@"serializing"];
         [self.flowLayout.viewModelDict setObject:self.previous forKey:@"previous"];
-        [self.flowLayout.viewModelDict setObject:self.recommend.copy forKey:@"recommend"];
+        [self.flowLayout.viewModelDict setObject:@[] forKey:@"recommend"];
         self.flowLayout.refreshType = BangumiFlowLayoutRefreshAll;
         [self.collectionView reloadData];
         
@@ -303,14 +312,13 @@
 #pragma mark 请求推荐数据
 - (void)requestRecommendData:(BOOL)forceReload
 {
-    [[[BangumiViewModel requestBangumiRecommendData:forceReload] execute:nil] subscribeNext:^(NSArray *recommend) {
+    @weakify(self);
+    [[[self.viewModel requestBangumiRecommendData:forceReload] execute:nil] subscribeNext:^(id x) {
         
+        @strongify(self);
         [self.collectionView.mj_footer endRefreshingWithNoMoreData];
-        for (BangumiListModel *model in recommend) {
-            BangumiViewModel *viewModel = [[BangumiViewModel alloc] initWithModel:model];
-            [self.recommend addObject:viewModel];
-        }
-        [self.flowLayout.viewModelDict setObject:self.recommend.copy forKey:@"recommend"];
+        self.recommend = self.viewModel.recommend;
+        [self.flowLayout.viewModelDict setObject:self.recommend forKey:@"recommend"];
         self.flowLayout.refreshType = BangumiFlowLayoutRefreshRecommend;
         [self.collectionView reloadData];
         

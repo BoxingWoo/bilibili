@@ -6,13 +6,8 @@
 //  Copyright © 2016年 BoxingWoo. All rights reserved.
 //
 
-#import <Foundation/Foundation.h>
-#import "LiveListModel.h"
-#import "LiveBannerModel.h"
-#import "LiveHeaderView.h"
-#import "LiveFooterView.h"
-#import "LiveSectionHeader.h"
-#import "LiveCell.h"
+#import "DdBasedViewModel.h"
+#import "LiveListViewModel.h"
 
 static NSString *const kliveHeaderViewID = @"LiveHeaderView";
 static NSString *const kliveFooterViewID = @"LiveFooterView";
@@ -24,21 +19,16 @@ static NSString *const kliveBannerCellID = @"LiveBannerCell";
 /**
  直播视图模型
  */
-@interface LiveViewModel : NSObject
+@interface LiveViewModel : DdBasedViewModel
 
 /**
- 直播列表模型
+ 直播列表视图模型数组
  */
-@property (nonatomic, strong) LiveListModel *model;
-
-/**
- 构造方法
-
- @param model 直播列表模型
-
- @return 直播视图模型实例
+@property (nonatomic, strong) NSMutableArray <LiveListViewModel *> *lives;
+/** 
+ 直播横幅广告数组 
  */
-- (instancetype)initWithModel:(LiveListModel *)model;
+@property (nonatomic, copy) NSArray <LiveBannerModel *> *banners;
 
 /**
  配置单元格
@@ -56,14 +46,6 @@ static NSString *const kliveBannerCellID = @"LiveBannerCell";
  */
 - (void)configureSectionHeader:(LiveSectionHeader *)sectionHeader atIndex:(NSInteger)section;
 
-/**
- 刷新直播列表数据
- 
- @param section       索引
- @return RACCommand instance
- */
-- (RACCommand *)refreshLiveDataAtIndex:(NSInteger)section;
-
 
 /**
  请求直播模块数据
@@ -71,6 +53,6 @@ static NSString *const kliveBannerCellID = @"LiveBannerCell";
  @param  forceReload 是否强制刷新
  @return RACCommand instance
  */
-+ (RACCommand *)requestLiveData:(BOOL)forceReload;
+- (RACCommand *)requestLiveData:(BOOL)forceReload;
 
 @end

@@ -7,10 +7,13 @@
 //
 
 #import "LaunchViewController.h"
-#import "DdTabBarController.h"
+#import "LaunchViewModel.h"
+#import "DdTabBarViewModel.h"
 
 @interface LaunchViewController ()
 
+/** 加载视图模型 */
+@property (nonatomic, strong) LaunchViewModel *viewModel;
 /** 溅起图片视图 */
 @property (nonatomic, weak) UIImageView *splashImageView;
 
@@ -61,7 +64,7 @@
         self.splashImageView.transform = CGAffineTransformIdentity;
     } completion:^(BOOL finished) {
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.5 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-            [UIApplication sharedApplication].keyWindow.rootViewController = [[DdTabBarController alloc] init];
+            [UIApplication sharedApplication].keyWindow.rootViewController = [UIViewController initWithViewModel:[[DdTabBarViewModel alloc] initWithClassName:@"DdTabBarController" params:nil]];
         });
     }];
 }

@@ -12,20 +12,20 @@
 
 @implementation LiveViewModel
 
-#pragma mark 构造方法
-- (instancetype)initWithModel:(LiveListModel *)model
+- (NSMutableArray<LiveListViewModel *> *)lives
 {
-    if (self = [super init]) {
-        _model = model;
+    if (!_lives) {
+        _lives = [[NSMutableArray alloc] init];
     }
-    return self;
+    return _lives;
 }
 
 #pragma mark 配置单元格
 - (void)configureCell:(LiveCell *)cell atIndexPath:(NSIndexPath *)indexPath
 {
     UIImage *placeholderImage = [DdImageManager cover_placeholderImageBySize:CGSizeMakeEx(144, 92)];
-    LiveModel *model = self.model.lives[indexPath.item];
+    LiveListViewModel *viewModel = self.lives[indexPath.section];
+    LiveModel *model = viewModel.model.lives[indexPath.item];
     [cell.coverImageView setImageWithURL:[NSURL URLWithString:model.cover] placeholder:placeholderImage options:YYWebImageOptionSetImageWithFadeAnimation progress:NULL transform:^UIImage * _Nullable(UIImage * _Nonnull image, NSURL * _Nonnull url) {
         
         return [DdImageManager transformImage:image size:cell.coverImageView.size cornerRadius:kCoverCornerRadius style:DdImageDarkGradient];
@@ -39,8 +39,8 @@
     cell.titleLabel.attributedText = title;
     
     NSUInteger lastOne = 0;
-    if (indexPath.section == 0) {
-        lastOne = self.model.lives.count - 1;
+    if (viewModel.isRecommended) {
+        lastOne = viewModel.model.lives.count - 1;
     }else {
         lastOne = 3;
     }
@@ -53,7 +53,8 @@
 #pragma mark 配置直播列表头部视图
 - (void)configureSectionHeader:(LiveSectionHeader *)sectionHeader atIndex:(NSInteger)section
 {
-    LivePartitionModel *partition = self.model.partition;
+    LiveListViewModel *viewModel = self.lives[section];
+    LivePartitionModel *partition = viewModel.model.partition;
     [sectionHeader.iconImageView setImageURL:[NSURL URLWithString:partition.src]];
     sectionHeader.titleLabel.text = partition.name;
     NSString *count = [NSString stringWithFormat:@"%lu", partition.count];
@@ -64,57 +65,14 @@
     sectionHeader.moreBtn.tag = section;
 }
 
-#pragma mark 刷新直播列表数据
-- (RACCommand *)refreshLiveDataAtIndex:(NSInteger)section
-{
-    return [[RACCommand alloc] initWithSignalBlock:^RACSignal *(id input) {
-        RACSignal *signal = [RACSignal createSignal:^RACDisposable *(id<RACSubscriber> subscriber) {
-            NSString *url;
-            NSMutableDictionary *parameters = [NSMutableDictionary dictionary];
-            if (section == 0) {
-                url = DdLiveRecommendRefreshURL;
-                parameters[@"sign"] = @"39e3b557397f1026ddb239731c213004";
-                parameters[@"ts"] = @(1475576802);
-            }else {
-                url = DdLiveRefreshURL;
-                parameters[@"area"] = self.model.partition.area;
-                parameters[@"sign"] = [AppInfo sign];
-                parameters[@"ts"] = @([AppInfo ts]);
-            }
-            parameters[@"actionKey"] = [AppInfo actionKey];
-            parameters[@"appkey"] = [AppInfo appkey];
-            parameters[@"build"] = [AppInfo build];
-            parameters[@"device"] = [AppInfo device];
-            parameters[@"mobi_app"] = [AppInfo mobi_app];
-            parameters[@"platform"] = [AppInfo platform];
-            DdHTTPSessionManager *manager = [DdHTTPSessionManager manager];
-            [manager GET:url parameters:parameters complection:^(ResponseCode code, NSDictionary *responseObject, NSError *error) {
-                if (code == 0) {
-                    if (section == 0) {
-                        NSDictionary *dict = responseObject[kResponseDataKey];
-                        self.model.lives = [NSArray modelArrayWithClass:[LiveModel class] json:dict[@"lives"]];
-                        self.model.banner_data = [NSArray modelArrayWithClass:[LiveModel class] json:dict[@"banner_data"]];
-                        self.model.partition.count = [[dict[@"partition"] objectForKey:@"count"] unsignedIntegerValue];
-                    }else {
-                        self.model.lives = [NSArray modelArrayWithClass:[LiveModel class] json:responseObject[kResponseDataKey]];
-                    }
-                    [subscriber sendNext:nil];
-                }else {
-                    [subscriber sendError:error];
-                }
-                [subscriber sendCompleted];
-            }];
-            return nil;
-            
-        }];
-        return signal;
-    }];
-}
-
 #pragma mark 请求直播模块数据
-+ (RACCommand *)requestLiveData:(BOOL)forceReload
+- (RACCommand *)requestLiveData:(BOOL)forceReload
 {
+    @weakify(self);
     return [[RACCommand alloc] initWithSignalBlock:^RACSignal * _Nonnull(id  _Nullable input) {
+        @strongify(self);
+        [self.lives removeAllObjects];
+        
         //请求直播列表推荐数据
         RACSignal *recommendedSignal = [RACSignal createSignal:^RACDisposable * _Nullable(id<RACSubscriber>  _Nonnull subscriber) {
             NSMutableDictionary *parameters = [NSMutableDictionary dictionary];
@@ -142,7 +100,10 @@
                 if (code == 0) {
                     NSDictionary *recommend_data = [responseObject[kResponseDataKey] objectForKey:@"recommend_data"];
                     LiveListModel *recommendedModel = [LiveListModel modelWithDictionary:recommend_data];
-                    [subscriber sendNext:recommendedModel];
+                    LiveListViewModel *viewModel = [[LiveListViewModel alloc] initWithModel:recommendedModel];
+                    viewModel.isRecommended = YES;
+                    [self.lives addObject:viewModel];
+                    [subscriber sendNext:nil];
                 }else {
                     [subscriber sendError:error];
                 }
@@ -170,10 +131,13 @@
             [manager GET:DdLiveListURL parameters:parameters complection:^(ResponseCode code, NSDictionary *responseObject, NSError *error) {
                 if (code == 0) {
                     NSDictionary *dict = responseObject[kResponseDataKey];
-                    NSArray *banners = [NSArray modelArrayWithClass:[LiveBannerModel class] json:dict[@"banner"]];
+                    self.banners = [NSArray modelArrayWithClass:[LiveBannerModel class] json:dict[@"banner"]];
                     NSArray *partitions = [NSArray modelArrayWithClass:[LiveListModel class] json:dict[@"partitions"]];
-                    RACTuple *tuple = RACTuplePack(partitions, banners);
-                    [subscriber sendNext:tuple];
+                    for (LiveListModel *model in partitions) {
+                        LiveListViewModel *viewModel = [[LiveListViewModel alloc] initWithModel:model];
+                        [self.lives addObject:viewModel];
+                    }
+                    [subscriber sendNext:nil];
                 }else {
                     [subscriber sendError:error];
                 }
@@ -182,7 +146,7 @@
             return nil;
         }];
         
-        return [RACSignal combineLatest:@[recommendedSignal, listSignal]];
+        return [recommendedSignal concat:listSignal];
     }];
 }
 

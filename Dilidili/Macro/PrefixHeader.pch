@@ -22,6 +22,6 @@
 #import "AllKeyAndText.h"  // 键值配置
 
 #import "AppInfo.h"  // 应用信息
-#import "DCURLRouter.h"  // 路由
+#import "DdViewModelRouter.h"  // 视图模型路由
 
 #endif /* PrefixHeader_pch */

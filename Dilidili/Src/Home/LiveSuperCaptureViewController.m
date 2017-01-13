@@ -7,6 +7,7 @@
 //
 
 #import "LiveSuperCaptureViewController.h"
+#import "LiveCaptureViewModel.h"
 #import <LFLiveKit/LFLiveKit.h>
 
 @interface LiveSuperCaptureViewController ()<LFLiveSessionDelegate>
@@ -14,6 +15,8 @@
     CGFloat _panGestureOffsetX;  //拖动手势横向位移
 }
 
+/** 直播推流视图模型 */
+@property (nonatomic, strong) LiveCaptureViewModel *viewModel;
 /** 内容视图 */
 @property (nonatomic, weak) UIView *contentView;
 /** 直播会话 */
@@ -22,9 +25,6 @@
 @property (nonatomic, strong) LFLiveStreamInfo *streamInfo;
 /** 预览视图  */
 @property (nonatomic, weak) UIView *captureVideoPreview;
-
-/** 推流URL */
-@property (nonatomic, copy) NSString *rtmpUrl;
 
 @end
 
@@ -224,10 +224,8 @@
     _session.showDebugInfo = NO;
 #endif
     
-    // 填写你电脑的IP地址
-    _rtmpUrl = @"rtmp://192.168.1.247:1935/rtmplive/room";
     _streamInfo = [[LFLiveStreamInfo alloc] init];
-    _streamInfo.url = _rtmpUrl;
+    _streamInfo.url = self.viewModel.rtmpUrl;
 }
 
 - (UIView *)captureVideoPreview
@@ -306,7 +304,7 @@
         default:
             break;
     }
-    DDLogInfo(@"%@", [NSString stringWithFormat:@"状态: %@\nRTMP: %@", tempStatus, self.rtmpUrl]);
+    DDLogInfo(@"%@", [NSString stringWithFormat:@"状态: %@\nRTMP: %@", tempStatus, self.streamInfo.url]);
 }
 
 /** live debug info callback */
@@ -338,7 +336,7 @@
         default:
             break;
     }
-    DDLogError(@"%@", [NSString stringWithFormat:@"状态: %@\nRTMP: %@", tempStatus, self.rtmpUrl]);
+    DDLogError(@"%@", [NSString stringWithFormat:@"状态: %@\nRTMP: %@", tempStatus, self.streamInfo.url]);
 }
 
 #pragma mark - Others

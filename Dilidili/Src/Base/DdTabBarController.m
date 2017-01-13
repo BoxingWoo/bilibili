@@ -7,14 +7,14 @@
 //
 
 #import "DdTabBarController.h"
-#import "DdNavigationController.h"
-#import "HomeViewController.h"
-#import "CategoryViewController.h"
-#import "AttentionViewController.h"
-#import "DiscoveryViewController.h"
-#import "MineViewController.h"
+#import "DdTabBarViewModel.h"
 
 @interface DdTabBarController ()
+
+/**
+ dilidili标签视图模型
+ */
+@property (nonatomic, strong) DdTabBarViewModel *viewModel;
 
 @end
 
@@ -26,8 +26,6 @@
     [super viewDidLoad];
     
     self.tabBar.translucent = NO;
-    
-    [self addChildViewControllers];
 }
 
 - (void)didReceiveMemoryWarning {
@@ -36,39 +34,46 @@
 }
 
 #pragma mark - Initialization
+
+- (void)setViewModel:(DdBasedViewModel *)viewModel
+{
+    _viewModel = (DdTabBarViewModel *)viewModel;
+    [self addChildViewControllers];
+}
+
 #pragma mark 添加子视图控制器
 - (void)addChildViewControllers
 {
-    NSArray *normalImages = @[@"home_home_tab", @"home_category_tab", @"home_attention_tab", @"home_discovery_tab", @"home_mine_tab"];
-    NSArray *selectedImages = @[@"home_home_tab_s", @"home_category_tab_s", @"home_attention_tab_s", @"home_discovery_tab_s", @"home_mine_tab_s"];
-    
     NSMutableArray *viewControllers = [[NSMutableArray alloc] init];
-    for (NSInteger i = 0; i < 5; i++) {
+    for (NSInteger i = 0; i < self.viewModel.dataArr.count; i++) {
+        NSDictionary *dict = self.viewModel.dataArr[i];
+        DdBasedViewModel *viewModel = nil;
         UIViewController *childVc = nil;
         switch (i) {
             case 0:
-                childVc = [[HomeViewController alloc] init];
+                viewModel = [[HomeViewModel alloc] initWithClassName:dict[@"className"] params:nil];
+                childVc = [UIViewController initWithViewModel:viewModel];
                 break;
             case 1:
-                childVc = [[CategoryViewController alloc] init];
+                childVc = [[NSClassFromString(dict[@"className"]) alloc] init];
                 break;
             case 2:
-                childVc = [[AttentionViewController alloc] init];
+                childVc = [[NSClassFromString(dict[@"className"]) alloc] init];
                 break;
             case 3:
-                childVc = [[DiscoveryViewController alloc] init];
+                childVc = [[NSClassFromString(dict[@"className"]) alloc] init];
                 break;
             case 4:
-                childVc = [[MineViewController alloc] init];
+                childVc = [[NSClassFromString(dict[@"className"]) alloc] init];
             default:
                 break;
         }
         DdNavigationController *nvc = [[DdNavigationController alloc] initWithRootViewController:childVc];
-        
-        UIImage *image = [UIImage imageNamed:normalImages[i]];
+
+        UIImage *image = [UIImage imageNamed:dict[@"normalImage"]];
         image = [image imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal];
         nvc.tabBarItem.image = image;
-        UIImage *selectedImage = [UIImage imageNamed:selectedImages[i]];
+        UIImage *selectedImage = [UIImage imageNamed:dict[@"selectedImage"]];
         selectedImage = [selectedImage imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal];
         nvc.tabBarItem.selectedImage = selectedImage;
         

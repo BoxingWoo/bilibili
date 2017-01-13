@@ -7,13 +7,6 @@
 //
 
 #import "LiveCenterCell.h"
-#import "BSCentralButton.h"
-
-@interface LiveCenterCell ()
-
-@property (nonatomic, copy) NSArray *buttons;
-
-@end
 
 @implementation LiveCenterCell
 
@@ -46,20 +39,6 @@
         _buttons = stackView.arrangedSubviews;
     }
     return self;
-}
-
-- (void)setContents:(NSArray *)contents
-{
-    _contents = contents;
-    for (NSInteger i = 0; i < self.buttons.count; i++) {
-        BSCentralButton *button = self.buttons[i];
-        NSDictionary *dict = nil;
-        if (i < contents.count) {
-            dict = contents[i];
-        }
-        [button setImage:[UIImage imageNamed:dict[@"icon"]] forState:UIControlStateNormal];
-        [button setTitle:dict[@"title"] forState:UIControlStateNormal];
-    }
 }
 
 - (void)awakeFromNib {

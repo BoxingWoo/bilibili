@@ -7,6 +7,7 @@
 //
 
 #import "LiveVideoViewController.h"
+#import "LiveVideoViewModel.h"
 #import <IJKMediaFramework/IJKMediaFramework.h>
 #import "LiveInteractionViewController.h"
 #import "LiveMomijiViewController.h"
@@ -19,10 +20,11 @@
 #import "DdProgressHUD.h"
 #import "BSActionSheet.h"
 #import "YPPlayerFPSLabel.h"
-#import "LiveVideoViewModel.h"
 
 @interface LiveVideoViewController () <UITextFieldDelegate, BSMultiViewControlDataSource, BSMultiViewControlDelegate, YYTextKeyboardObserver>
 
+/** 直播视频视图模型 */
+@property (nonatomic, strong) LiveVideoViewModel *viewModel;
 /** 播放准备视图 */
 @property (nonatomic, weak) UIView *prepareView;
 /** 视频播放器 */
@@ -40,8 +42,6 @@
 
 /** 内容标题数组 */
 @property (nonatomic, copy) NSArray *contentTitles;
-/** 直播视频视图模型 */
-@property (nonatomic, strong) LiveVideoViewModel *viewModel;
 
 @end
 
@@ -110,10 +110,6 @@
 
 - (void)configureData
 {
-    if ([self.originUrl.absoluteString isNotBlank]) {
-        _room_id = [[self.originUrl.path stringByReplacingOccurrencesOfString:@"/" withString:@""] integerValue];
-    }
-    
     _contentTitles = @[@"互动", @"红叶祭", @"七日榜", @"粉丝榜"];
 }
 
@@ -317,7 +313,7 @@
             return signal;
         }];
         
-        NSURL *contentURL = [NSURL URLWithString:self.playurl];
+        NSURL *contentURL = [NSURL URLWithString:self.viewModel.playurl];
         IJKFFOptions *options = [IJKFFOptions optionsByDefault];
         IJKFFMoviePlayerController *player = [[IJKFFMoviePlayerController alloc] initWithContentURL:contentURL withOptions:options];
         _player = player;
@@ -417,9 +413,10 @@
 #pragma mark 请求数据
 - (void)requestData
 {
-    [[[LiveVideoViewModel requestLiveInfoByRoomID:self.room_id] execute:nil] subscribeNext:^(LiveInfoModel *model) {
+    @weakify(self);
+    [[[self.viewModel requestLiveInfo] execute:nil] subscribeNext:^(LiveInfoModel *model) {
         
-        self.viewModel = [[LiveVideoViewModel alloc] initWithModel:model];
+        @strongify(self);
         [self refreshUI];
         
     } error:^(NSError * _Nullable error) {

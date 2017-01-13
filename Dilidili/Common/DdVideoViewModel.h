@@ -6,42 +6,32 @@
 //  Copyright © 2016年 BoxingWoo. All rights reserved.
 //
 
-#import <Foundation/Foundation.h>
-#import "DdVideoModel.h"
+#import "DdBasedViewModel.h"
 
 /**
  *  @brief 视频视图模型
  */
-@interface DdVideoViewModel : NSObject
-
-/** 视频模型 */
-@property (nonatomic, strong) DdVideoModel *model;
+@interface DdVideoViewModel : DdBasedViewModel
 
 /**
- *  @brief 构造方法
- *
- *  @param model 视频模型
- *
- *  @return 视频视图模型实例
+ 视频标识
  */
-- (instancetype)initWithModel:(DdVideoModel *)model;
-
+@property (nonatomic, copy) NSString *aid;
 /**
- *  @brief 获取视频信息
- *
- *  @param aid  视频标识
- *  @param from 分类标识
- *
- *  @return RACCommand instance
+ 弹幕标识
  */
-+ (RACCommand *)requestVideoInfoByAid:(NSString *)aid from:(NSString *)from;
+@property (nonatomic, copy) NSString *cid;
+/**
+ 媒体URL
+ */
+@property (nonatomic, copy) NSURL *contentURL;
+
 
 /**
  *  @brief 获取视频播放链接
- *  @param aid  视频标识
  *
  *  @return RACCommand instance
  */
-+ (RACCommand *)requestVideoURLByAid:(NSString *)aid;
+- (RACCommand *)requestVideoURL;
 
 @end

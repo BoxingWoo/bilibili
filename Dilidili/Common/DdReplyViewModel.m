@@ -13,79 +13,92 @@
 #import "DdFormatter.h"
 #import "UITableView+FDTemplateLayoutCell.h"
 
-
 @implementation DdReplyViewModel
 
-#pragma mark 构造方法
-- (instancetype)initWithModel:(DdReplyModel *)model
+- (NSMutableArray<DdReplyListViewModel *> *)replies
 {
-    if (self = [super init]) {
-        _model = model;
-        _isSub = NO;
-        _isHot = NO;
-        NSMutableArray *replies = [NSMutableArray array];
-        for (DdReplyModel *replyModel in model.replies) {
-            DdReplyViewModel *replyViewModel = [[DdReplyViewModel alloc] initWithModel:replyModel];
-            replyViewModel.isSub = YES;
-            [replies addObject:replyViewModel];
-        }
-        _replies = replies;
+    if (!_replies) {
+        _replies = [[NSMutableArray alloc] init];
     }
-    return self;
+    return _replies;
 }
 
 #pragma mark 配置单元格
-- (void)configureCell:(UITableViewCell *)cell atIndexPath:(NSIndexPath *)indexPath
+- (void)configureCell:(UITableViewCell *)cell atIndexPath:(NSIndexPath *)indexPath isHot:(BOOL)isHot
 {
-    if (!self.isSub) {
+    DdReplyListViewModel *viewModel;
+    if (isHot) {
+        viewModel = self.hots[indexPath.section];
+    }else {
+        viewModel = self.replies[indexPath.section];
+    }
+    BOOL isSub = NO;
+    if (indexPath.row != 0) {
+        isSub = YES;
+        viewModel = viewModel.replies[indexPath.row - 1];
+    }
+    
+    if (!isSub) {
         DdVideoReplyCell *replyCell = (DdVideoReplyCell *)cell;
-        [replyCell.faceImageView setImageWithURL:[NSURL URLWithString:self.model.member.avatar] placeholder:[DdImageManager face_placeholderImage] options:YYWebImageOptionIgnoreDiskCache progress:NULL transform:^UIImage * _Nullable(UIImage * _Nonnull image, NSURL * _Nonnull url) {
+        [replyCell.faceImageView setImageWithURL:[NSURL URLWithString:viewModel.model.member.avatar] placeholder:[DdImageManager face_placeholderImage] options:YYWebImageOptionIgnoreDiskCache progress:NULL transform:^UIImage * _Nullable(UIImage * _Nonnull image, NSURL * _Nonnull url) {
             
             UIImage *transformImage = [image imageByResizeToSize:CGSizeMake(replyCell.faceImageView.width * kScreenScale, replyCell.faceImageView.width * kScreenScale)];
             transformImage = [transformImage imageByRoundCornerRadius:transformImage.size.width / 2];
             return transformImage;
             
         } completion:NULL];
-        replyCell.nameLabel.text = self.model.member.uname;
-        replyCell.levelImageView.image = [UIImage imageNamed:[NSString stringWithFormat:@"misc_level_colorfulLv%@", self.model.member.level_info[@"current_level"]]];
-        replyCell.floorLabel.text = [NSString stringWithFormat:@"#%li", self.model.floor];
-        replyCell.timeLabel.text = [BSTimeCalculate localDateFormatStringWithTimeInterval:self.model.ctime style:BSDateFormatDescription];
-        replyCell.contentLabel.text = self.model.content.message;
-        if (_isHot) {
+        replyCell.nameLabel.text = viewModel.model.member.uname;
+        replyCell.levelImageView.image = [UIImage imageNamed:[NSString stringWithFormat:@"misc_level_colorfulLv%@", viewModel.model.member.level_info[@"current_level"]]];
+        replyCell.floorLabel.text = [NSString stringWithFormat:@"#%li", viewModel.model.floor];
+        replyCell.timeLabel.text = [BSTimeCalculate localDateFormatStringWithTimeInterval:viewModel.model.ctime style:BSDateFormatDescription];
+        replyCell.contentLabel.text = viewModel.model.content.message;
+        if (isHot) {
             replyCell.replyBtn.hidden = NO;
-            [replyCell.replyBtn setTitle:[NSString stringWithFormat:@" %@", [DdFormatter stringForCount:self.model.count]] forState:UIControlStateNormal];
+            [replyCell.replyBtn setTitle:[NSString stringWithFormat:@" %@", [DdFormatter stringForCount:viewModel.model.count]] forState:UIControlStateNormal];
         }else {
             replyCell.replyBtn.hidden = YES;
         }
-        [replyCell.likeBtn setTitle:[NSString stringWithFormat:@" %@", [DdFormatter stringForCount:self.model.like]] forState:UIControlStateNormal];
-        replyCell.likeBtn.selected = self.model.isliked;
+        [replyCell.likeBtn setTitle:[NSString stringWithFormat:@" %@", [DdFormatter stringForCount:viewModel.model.like]] forState:UIControlStateNormal];
+        replyCell.likeBtn.selected = viewModel.model.isliked;
     }else {
         DdVideoReplySubCell *subCell = (DdVideoReplySubCell *)cell;
-        subCell.nameLabel.text = self.model.member.uname;
-        subCell.timeLabel.text = [BSTimeCalculate localDateFormatStringWithTimeInterval:self.model.ctime style:BSDateFormatDescription];
-        subCell.contentLabel.text = self.model.content.message;
+        subCell.nameLabel.text = viewModel.model.member.uname;
+        subCell.timeLabel.text = [BSTimeCalculate localDateFormatStringWithTimeInterval:viewModel.model.ctime style:BSDateFormatDescription];
+        subCell.contentLabel.text = viewModel.model.content.message;
     }
 }
 
 #pragma mark 单元格高度
-- (CGFloat)heightForCellOnTableView:(UITableView *)tableView atIndexPath:(NSIndexPath *)indexPath
+- (CGFloat)heightForCellOnTableView:(UITableView *)tableView atIndexPath:(NSIndexPath *)indexPath isHot:(BOOL)isHot
 {
+    DdReplyListViewModel *viewModel;
+    if (isHot) {
+        viewModel = self.hots[indexPath.section];
+    }else {
+        viewModel = self.replies[indexPath.section];
+    }
+    BOOL isSub = NO;
+    if (indexPath.row != 0) {
+        isSub = YES;
+        viewModel = viewModel.replies[indexPath.row - 1];
+    }
     NSString *identifier = nil;
-    if (!self.isSub) {
+    if (!isSub) {
         identifier = kvideoReplyCellID;
     }else {
         identifier = kvideoReplySubCellID;
     }
     return [tableView fd_heightForCellWithIdentifier:identifier cacheByIndexPath:indexPath configuration:^(id cell) {
-        [self configureCell:cell atIndexPath:indexPath];
+        [self configureCell:cell atIndexPath:indexPath isHot:isHot];
     }];
 }
 
 #pragma mark 请求评论数据
-+ (RACCommand *)requestReplyDataByOid:(NSString *)oid pageNum:(NSUInteger)pageNum
+- (RACCommand *)requestReplyDataByPageNum:(NSUInteger)pageNum
 {
+    @weakify(self);
     return [[RACCommand alloc] initWithSignalBlock:^RACSignal *(id input) {
-        
+        @strongify(self);
         RACSignal *signal = [RACSignal createSignal:^RACDisposable *(id<RACSubscriber> subscriber) {
             
             NSMutableDictionary *parameters = [NSMutableDictionary dictionary];
@@ -93,7 +106,7 @@
             parameters[@"_hwid"] = @"2e771212f4b4dc67";
             parameters[@"_ulv"] = @(0);
             parameters[@"access_key"] = @"";
-            parameters[@"oid"] = oid;
+            parameters[@"oid"] = self.oid;
             parameters[@"appkey"] = [AppInfo appkey];
             parameters[@"appver"] = [AppInfo appver];
             parameters[@"build"] = [AppInfo build];
@@ -108,11 +121,28 @@
             [manager GET:DdVideoReplyURL parameters:parameters complection:^(ResponseCode code, NSDictionary *responseObject, NSError *error) {
                 if (code == 0) {
                     NSDictionary *dict = responseObject[kResponseDataKey];
+                    
                     NSArray *hots = [NSArray modelArrayWithClass:DdReplyModel.class json:dict[@"hots"]];
+                    NSMutableArray *hotLists = [[NSMutableArray alloc] init];
+                    for (DdReplyModel *model in hots) {
+                        DdReplyListViewModel *viewModel = [[DdReplyListViewModel alloc] initWithModel:model];
+                        [hotLists addObject:viewModel];
+                    }
+                    self.hots = hotLists;
+                    
                     NSArray *replies = [NSArray modelArrayWithClass:DdReplyModel.class json:dict[@"replies"]];
-                    NSDictionary *page = dict[@"page"];
-                    RACTuple *tuple = RACTuplePack(hots, replies, page);
-                    [subscriber sendNext:tuple];
+                    NSMutableArray *replyLists = [[NSMutableArray alloc] init];
+                    for (DdReplyModel *model in replies) {
+                        DdReplyListViewModel *viewModel = [[DdReplyListViewModel alloc] initWithModel:model];
+                        [replyLists addObject:viewModel];
+                    }
+                    if (pageNum == 1) {
+                        [self.replies removeAllObjects];
+                    }
+                    [self.replies addObjectsFromArray:replyLists];
+                    
+                    self.page = dict[@"page"];
+                    [subscriber sendNext:nil];
                 }else {
                     [subscriber sendError:error];
                 }
@@ -122,6 +152,7 @@
             return nil;
         }];
         
+        self.replySignal = signal;
         return signal;
     }];
 }

@@ -7,11 +7,12 @@
 //
 
 #import "DdVideoInfoViewController.h"
+#import "DdVideoInfoViewModel.h"
 
 @interface DdVideoInfoViewController ()
 
-/** 视频视图模型 */
-@property (nonatomic, strong) DdVideoViewModel *videoViewModel;
+/** 视频信息视图模型 */
+@property (nonatomic, strong) DdVideoInfoViewModel *viewModel;
 
 @end
 
@@ -23,6 +24,8 @@
     [super viewDidLoad];
     
     self.view.backgroundColor = kBgColor;
+    
+    [self bindViewModel];
 }
 
 - (void)didReceiveMemoryWarning {
@@ -30,20 +33,18 @@
     // Dispose of any resources that can be recreated.
 }
 
-#pragma mark - Utility
-#pragma mark 请求数据
-- (RACSignal *)requestData
+#pragma mark - Initialization
+
+- (void)bindViewModel
 {
-    RACSignal *infoSignal = [[DdVideoViewModel requestVideoInfoByAid:self.aid from:self.from] execute:nil];
-    [infoSignal subscribeNext:^(DdVideoModel *model) {
-        
-        self.videoViewModel = [[DdVideoViewModel alloc] initWithModel:model];
-        
-    } error:^(NSError *error) {
-        
-        
+    [super bindViewModel];
+    [RACObserve(self.viewModel, infoSignal) subscribeNext:^(RACSignal *infoSignal) {
+        if (infoSignal != nil) {
+            [infoSignal subscribeNext:^(id  _Nullable x) {
+                
+            }];
+        }
     }];
-    return infoSignal;
 }
 
 /*

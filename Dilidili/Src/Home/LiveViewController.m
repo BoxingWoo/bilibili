@@ -7,29 +7,31 @@
 //
 
 #import "LiveViewController.h"
+#import "LiveViewModel.h"
+#import "LiveVideoViewModel.h"
+#import "LiveCenterViewModel.h"
 #import <pop/POP.h>
-#import "LiveCenterViewController.h"
-#import "LiveVideoViewController.h"
 #import "UIScrollView+EmptyDataSet.h"
 #import "DdProgressHUD.h"
 #import "DdRefreshMainHeader.h"
 #import "DdImageManager.h"
 #import "LiveFlowLayout.h"
-#import "LiveViewModel.h"
 
 @interface LiveViewController () <UICollectionViewDataSource, UICollectionViewDelegate, BSLoopScrollViewDataSource, BSLoopScrollViewDelegate, DZNEmptyDataSetSource, DZNEmptyDataSetDelegate>
 {
     BOOL _isNoData;  // 没有数据
 }
 
+/** 直播视图模型 */
+@property (nonatomic, strong) LiveViewModel *viewModel;
 /** 集合视图 */
 @property (nonatomic, weak) UICollectionView *collectionView;
 /** 自定义流式布局 */
 @property (nonatomic, weak) LiveFlowLayout *flowLayout;
 /** 直播视图模型数组 */
-@property (nonatomic, strong) NSMutableArray <LiveViewModel *> *dataArr;
+@property (nonatomic, copy) NSArray <LiveListViewModel *> *dataArr;
 /** 直播横幅广告数组 */
-@property (nonatomic, strong) NSMutableArray <LiveBannerModel *> *banners;
+@property (nonatomic, copy) NSArray <LiveBannerModel *> *banners;
 
 /** 是否需要重载循环滚动视图 */
 @property (nonatomic, assign) BOOL shouldRefreshLoopScrollView;
@@ -56,22 +58,6 @@
 }
 
 #pragma mark - Initialization
-
-- (NSMutableArray<LiveViewModel *> *)dataArr
-{
-    if (!_dataArr) {
-        _dataArr = [[NSMutableArray alloc] init];
-    }
-    return _dataArr;
-}
-
-- (NSMutableArray<LiveBannerModel *> *)banners
-{
-    if (!_banners) {
-        _banners = [[NSMutableArray alloc] init];
-    }
-    return _banners;
-}
 
 - (void)createUI
 {
@@ -112,7 +98,7 @@
 - (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section
 {
     if (section == 0) {
-        LiveViewModel *viewModel = self.dataArr[section];
+        LiveListViewModel *viewModel = self.dataArr[section];
         return viewModel.model.lives.count;
     }else {
         return 4;
@@ -121,7 +107,6 @@
 
 - (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath
 {
-    LiveViewModel *viewModel = self.dataArr[indexPath.section];
     LiveCell *cell = nil;
     if (indexPath.item == [self collectionView:collectionView numberOfItemsInSection:indexPath.section] - 1) {
         LiveRefreshCell *refreshCell = [collectionView dequeueReusableCellWithReuseIdentifier:kliveRefreshCellID forIndexPath:indexPath];
@@ -133,7 +118,7 @@
     }else {
         cell = [collectionView dequeueReusableCellWithReuseIdentifier:kliveCellID forIndexPath:indexPath];
     }
-    [viewModel configureCell:cell atIndexPath:indexPath];
+    [self.viewModel configureCell:cell atIndexPath:indexPath];
     return cell;
 }
 
@@ -150,13 +135,11 @@
 #pragma mark Action - 功能选项
         if (!headerView.actionSubject) {
             headerView.actionSubject = [RACSubject subject];
-            @weakify(self);
             [headerView.actionSubject subscribeNext:^(NSNumber *x) {
-                @strongify(self);
                 NSInteger index = x.integerValue;
                 if (index == 1) {  // 直播中心
-                    LiveCenterViewController *cvc = [[LiveCenterViewController alloc] init];
-                    [self.navigationController pushViewController:cvc animated:YES];
+                    LiveCenterViewModel *viewModel = [[LiveCenterViewModel alloc] initWithClassName:@"LiveCenterViewController" params:nil];
+                    [DdViewModelRouter pushViewModel:viewModel animated:YES];
                 }
             }];
         }
@@ -173,9 +156,8 @@
     }
     
     if ([kind isEqualToString:UICollectionElementKindSectionHeader]) {
-        LiveViewModel *viewModel = self.dataArr[indexPath.section];
         LiveSectionHeader *sectionHeader = [collectionView dequeueReusableSupplementaryViewOfKind:kind withReuseIdentifier:kliveSectionHeaderID forIndexPath:indexPath];
-        [viewModel configureSectionHeader:sectionHeader atIndex:indexPath.section];
+        [self.viewModel configureSectionHeader:sectionHeader atIndex:indexPath.section];
         NSArray *actions = [sectionHeader.moreBtn actionsForTarget:self forControlEvent:UIControlEventTouchUpInside];
         if (![actions containsObject:NSStringFromSelector(@selector(handleMore:))]) {
             [sectionHeader.moreBtn addTarget:self action:@selector(handleMore:) forControlEvents:UIControlEventTouchUpInside];
@@ -190,12 +172,12 @@
 
 - (void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath
 {
-    LiveViewModel *viewModel = self.dataArr[indexPath.section];
+    LiveListViewModel *viewModel = self.dataArr[indexPath.section];
     LiveModel *model = viewModel.model.lives[indexPath.item];
-    LiveVideoViewController *vvc = [[LiveVideoViewController alloc] init];
-    vvc.room_id = model.room_id;
-    vvc.playurl = model.playurl;
-    [self.navigationController pushViewController:vvc animated:YES];
+    LiveVideoViewModel *videoVM = [[LiveVideoViewModel alloc] initWithClassName:@"LiveVideoViewController" params:nil];
+    videoVM.room_id = model.room_id;
+    videoVM.playurl = model.playurl;
+    [DdViewModelRouter pushViewModel:videoVM animated:YES];
 }
 
 #pragma mark - LoopScrollView
@@ -217,7 +199,7 @@
 - (void)loopScrollView:(BSLoopScrollView *)loopScrollView didTouchContentView:(UIView *)contentView atIndex:(NSUInteger)index
 {
     LiveBannerModel *bannerModel = self.banners[index];
-    [DCURLRouter pushURLString:bannerModel.link query:@{@"title":bannerModel.title, @"cover":bannerModel.img} animated:YES];
+    [DdViewModelRouter pushURLString:bannerModel.link params:@{@"title":bannerModel.title, @"cover":bannerModel.img} animated:YES replace:NO];
 }
 
 #pragma mark - HandleAction
@@ -247,8 +229,8 @@
     
     button.enabled = NO;
     @weakify(self);
-    LiveViewModel *viewModel = self.dataArr[button.tag];
-    [[[viewModel refreshLiveDataAtIndex:button.tag] execute:nil] subscribeNext:^(id x) {
+    LiveListViewModel *viewModel = self.dataArr[button.tag];
+    [[[viewModel refreshLiveData] execute:nil] subscribeNext:^(id x) {
         @strongify(self);
         button.enabled = YES;
         [button.layer pop_removeAnimationForKey:@"refresh_rotate"];
@@ -267,29 +249,19 @@
 - (void)requestData:(BOOL)forceReload
 {
     _isNoData = NO;
-    [[[LiveViewModel requestLiveData:forceReload] execute:nil] subscribeNext:^(RACTuple *x) {
-        
+    @weakify(self);
+    [[[self.viewModel requestLiveData:forceReload] execute:nil] subscribeNext:^(id x) {
+        @strongify(self);
         [self.collectionView.mj_header endRefreshing];
-        [self.dataArr removeAllObjects];
-        [self.banners removeAllObjects];
-        
-        LiveListModel *recommendedModel = x.first;
-        LiveViewModel *recommendedViewModel = [[LiveViewModel alloc] initWithModel:recommendedModel];
-        [self.dataArr addObject:recommendedViewModel];
-        
-        RACTuple *tuple = x.second;
-        RACTupleUnpack(NSArray *partitions, NSArray *banners) = tuple;
-        for (LiveListModel *model in partitions) {
-            LiveViewModel *viewModel = [[LiveViewModel alloc] initWithModel:model];
-            [self.dataArr addObject:viewModel];
-        }
-        [self.banners addObjectsFromArray:banners];
+        self.dataArr = self.viewModel.lives;
+        self.banners = self.viewModel.banners;
         
         self.shouldRefreshLoopScrollView = YES;
         self.flowLayout.viewModels = self.dataArr;
         [self.collectionView reloadData];
         
     } error:^(NSError * _Nullable error) {
+        @strongify(self);
         _isNoData = YES;
         [self.collectionView.mj_header endRefreshing];
         [DdProgressHUD showErrorWithStatus:error.localizedDescription];

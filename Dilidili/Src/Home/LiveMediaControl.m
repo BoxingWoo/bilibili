@@ -242,7 +242,7 @@
             self.landscapeMediaControl.handleMoreCommand = self.handleMoreCommand;
             self.landscapeMediaControl.handleStatusBarHiddenCommand = self.handleStatusBarHiddenCommand;
             self.landscapeMediaControl.delegatePlayer = self.delegatePlayer;
-            self.landscapeMediaControl.dvc = self.dvc;
+            self.landscapeMediaControl.danmakuVM = self.danmakuVM;
             
             [self.landscapeMediaControl refreshLandscapeMediaControl];
         }

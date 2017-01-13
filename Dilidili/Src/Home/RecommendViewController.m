@@ -17,10 +17,11 @@
     BOOL _isNoData;  // 没有数据
 }
 
+@property (nonatomic, strong) RecommendViewModel *viewModel;
 /** 集合视图 */
 @property (nonatomic, weak) UICollectionView *collectionView;
 /** 推荐模块视图模型数组 */
-@property (nonatomic, strong) NSMutableArray <RecommendViewModel *> *dataArr;
+@property (nonatomic, copy) NSArray <RecommendListViewModel *> *dataArr;
 
 @end
 
@@ -44,14 +45,6 @@
 }
 
 #pragma mark - Initialization
-
-- (NSMutableArray<RecommendViewModel *> *)dataArr
-{
-    if (!_dataArr) {
-        _dataArr = [[NSMutableArray alloc] init];
-    }
-    return _dataArr;
-}
 
 - (void)createUI
 {
@@ -96,7 +89,7 @@
 
 - (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section
 {
-    RecommendViewModel *viewModel = self.dataArr[section];
+    RecommendListViewModel *viewModel = self.dataArr[section];
     if ([viewModel.model.style isEqualToString:RecommendStyleSmall]) {
         return 1;
     }else {
@@ -106,11 +99,11 @@
 
 - (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath
 {
-    RecommendViewModel *viewModel = self.dataArr[indexPath.section];
+    RecommendListViewModel *viewModel = self.dataArr[indexPath.section];
     if ([viewModel.model.style isEqualToString:RecommendStyleSmall]) {
         
         RecommendScrollCell *scrollCell = [collectionView dequeueReusableCellWithReuseIdentifier:krecommendScrollCellID forIndexPath:indexPath];
-        [viewModel configureCell:scrollCell atIndexPath:indexPath];
+        [self.viewModel configureCell:scrollCell atIndexPath:indexPath];
         for (RecommendScrollContentView *contentView in scrollCell.contentViews) {
             NSArray *actions = [contentView actionsForTarget:self forControlEvent:UIControlEventTouchUpInside];
             if (![actions containsObject:NSStringFromSelector(@selector(handleLink:))]) {
@@ -145,7 +138,7 @@
                 cell = normalCell;
             }
         }
-        [viewModel configureCell:cell atIndexPath:indexPath];
+        [self.viewModel configureCell:cell atIndexPath:indexPath];
         return cell;
         
     }
@@ -153,7 +146,7 @@
 
 - (UICollectionReusableView *)collectionView:(UICollectionView *)collectionView viewForSupplementaryElementOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath
 {
-    RecommendViewModel *viewModel = self.dataArr[indexPath.section];
+    RecommendListViewModel *viewModel = self.dataArr[indexPath.section];
     if ([kind isEqualToString:UICollectionElementKindSectionHeader]) {
         RecommendSectionHeader *sectionHeader;
         if (viewModel.model.bannerTop.count > 0) {
@@ -163,7 +156,7 @@
         }else {
             sectionHeader = [collectionView dequeueReusableSupplementaryViewOfKind:kind withReuseIdentifier:krecommendSectionHeaderID forIndexPath:indexPath];
         }
-        [viewModel configureSectionHeader:sectionHeader atIndex:indexPath.section];
+        [self.viewModel configureSectionHeader:sectionHeader atIndex:indexPath.section];
         sectionHeader.moreBtn.tag = indexPath.section;
         NSArray *actions = [sectionHeader.moreBtn actionsForTarget:self forControlEvent:UIControlEventTouchUpInside];
         if (![actions containsObject:NSStringFromSelector(@selector(handleMore:))]) {
@@ -196,7 +189,7 @@
         }else {
             if (viewModel.model.bannerBottom.count > 0) {
                 RecommendSectionFooter *secionFooter = [collectionView dequeueReusableSupplementaryViewOfKind:kind withReuseIdentifier:krecommendSectionFooterID forIndexPath:indexPath];
-                [viewModel configureSectionFooter:secionFooter atIndex:indexPath.section];
+                [self.viewModel configureSectionFooter:secionFooter atIndex:indexPath.section];
                 secionFooter.loopScrollView.delegate = self;
                 return secionFooter;
             }
@@ -211,7 +204,7 @@
 
 - (UIEdgeInsets)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout insetForSectionAtIndex:(NSInteger)section
 {
-    RecommendViewModel *viewModel = self.dataArr[section];
+    RecommendListViewModel *viewModel = self.dataArr[section];
     if ([viewModel.model.style isEqualToString:RecommendStyleSmall]) {
         return UIEdgeInsetsZero;
     }else {
@@ -221,19 +214,19 @@
 
 - (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout sizeForItemAtIndexPath:(NSIndexPath *)indexPath
 {
-    RecommendViewModel *viewModel = self.dataArr[indexPath.section];
+    RecommendListViewModel *viewModel = self.dataArr[indexPath.section];
     return viewModel.cellSize;
 }
 
 - (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout referenceSizeForHeaderInSection:(NSInteger)section
 {
-    RecommendViewModel *viewModel = self.dataArr[section];
+    RecommendListViewModel *viewModel = self.dataArr[section];
     return CGSizeMake(collectionView.width, viewModel.sectionHeaderHeight);
 }
 
 - (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout referenceSizeForFooterInSection:(NSInteger)section
 {
-    RecommendViewModel *viewModel = self.dataArr[section];
+    RecommendListViewModel *viewModel = self.dataArr[section];
     return CGSizeMake(collectionView.width, viewModel.sectionFooterHeight);
 }
 
@@ -241,11 +234,10 @@
 
 - (void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath
 {
-    RecommendViewModel *viewModel = self.dataArr[indexPath.section];
+    RecommendListViewModel *viewModel = self.dataArr[indexPath.section];
     if (![viewModel.model.style isEqualToString:RecommendStyleSmall]) {
-        RecommendViewModel *viewModel = self.dataArr[indexPath.section];
         RecommendModel *model = viewModel.model.body[indexPath.item];
-        [DCURLRouter pushURLString:model.uri query:@{@"from":viewModel.model.param, @"title":model.title, @"cover":model.cover} animated:YES];
+        [DdViewModelRouter pushURLString:model.uri params:@{@"from":viewModel.model.param, @"title":model.title, @"cover":model.cover} animated:YES replace:NO];
     }
 }
 
@@ -253,14 +245,14 @@
 
 - (void)loopScrollView:(BSLoopScrollView *)loopScrollView didTouchContentView:(UIView *)contentView atIndex:(NSUInteger)index
 {
-    RecommendViewModel *viewModel = self.dataArr[loopScrollView.tag];
+    RecommendListViewModel *viewModel = self.dataArr[loopScrollView.tag];
     BannerModel *bannerModel;
     if ([loopScrollView.superview isKindOfClass:[RecommendSectionHeader class]]) {
         bannerModel = viewModel.model.bannerTop[index];
     }else if ([loopScrollView.superview isKindOfClass:[RecommendSectionFooter class]]) {
         bannerModel = viewModel.model.bannerBottom[index];
     }
-    [DCURLRouter pushURLString:bannerModel.uri query:@{@"from":viewModel.model.param, @"title":bannerModel.title,  @"cover":bannerModel.image} animated:YES];
+    [DdViewModelRouter pushURLString:bannerModel.uri params:@{@"from":viewModel.model.param, @"title":bannerModel.title, @"cover":bannerModel.image} animated:YES replace:NO];
 }
 
 #pragma mark - HandleAction
@@ -283,7 +275,7 @@
     
     button.enabled = NO;
     @weakify(self);
-    RecommendViewModel *viewModel = self.dataArr[button.tag];
+    RecommendListViewModel *viewModel = self.dataArr[button.tag];
     [[[viewModel refreshRecommendData] execute:nil] subscribeNext:^(id x) {
         @strongify(self);
         button.enabled = YES;
@@ -301,9 +293,9 @@
 #pragma mark 跳转
 - (void)handleLink:(RecommendScrollContentView *)sender
 {
-    RecommendViewModel *viewModel = self.dataArr[sender.indexPath.section];
+    RecommendListViewModel *viewModel = self.dataArr[sender.indexPath.section];
     RecommendModel *model = viewModel.model.body[sender.indexPath.item];
-    [DCURLRouter pushURLString:model.uri animated:YES];
+    [DdViewModelRouter pushURLString:model.uri animated:YES];
 }
 
 #pragma mark - Utility
@@ -311,17 +303,14 @@
 - (void)requestData:(BOOL)forceReload
 {
     _isNoData = NO;
-    [[[RecommendViewModel requestRecommendData:forceReload] execute:nil] subscribeNext:^(NSArray *modelArr) {
-        
+    @weakify(self);
+    [[[self.viewModel requestRecommendData:forceReload] execute:nil] subscribeNext:^(NSArray *dataArr) {
+        @strongify(self);
         [self.collectionView.mj_header endRefreshing];
-        [self.dataArr removeAllObjects];
-        for (RecommendListModel *model in modelArr) {
-            RecommendViewModel *viewModel = [[RecommendViewModel alloc] initWithModel:model];
-            [self.dataArr addObject:viewModel];
-        }
+        self.dataArr = dataArr;
         [self.collectionView reloadData];
-        
     } error:^(NSError *error) {
+        @strongify(self);
         _isNoData = YES;
         [self.collectionView.mj_header endRefreshing];
         [DdProgressHUD showErrorWithStatus:error.localizedDescription];

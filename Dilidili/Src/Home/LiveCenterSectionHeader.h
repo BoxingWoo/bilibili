@@ -8,8 +8,14 @@
 
 #import <UIKit/UIKit.h>
 
+/**
+ 直播中心节头
+ */
 @interface LiveCenterSectionHeader : UITableViewHeaderFooterView
 
+/**
+ 标题标签
+ */
 @property (nonatomic, weak) UILabel *titleLabel;
 
 @end

@@ -11,58 +11,18 @@
 
 @implementation DdVideoViewModel
 
-#pragma mark 构造方法
-- (instancetype)initWithModel:(DdVideoModel *)model
+- (void)setURL:(NSURL *)URL
 {
-    if (self = [super init]) {
-        _model = model;
-    }
-    return self;
-}
-
-#pragma mark 获取视频信息链接
-+ (RACCommand *)requestVideoInfoByAid:(NSString *)aid from:(NSString *)from
-{
-    return [[RACCommand alloc] initWithSignalBlock:^RACSignal *(id input) {
-        RACSignal *singal = [RACSignal createSignal:^RACDisposable *(id<RACSubscriber> subscriber) {
-//            NSMutableDictionary *parameters = [NSMutableDictionary dictionary];
-//
-//            parameters[@"actionKey"] = [AppInfo actionKey];
-//            parameters[@"appkey"] = [AppInfo appkey];
-//            parameters[@"aid"] = aid;
-//            parameters[@"build"] = [AppInfo build];
-//            parameters[@"device"] = [AppInfo device];
-//            parameters[@"from"] = from;
-//            parameters[@"mobi_app"] = [AppInfo mobi_app];
-//            parameters[@"platform"] = [AppInfo platform];
-//            NSInteger ts = [AppInfo ts];
-//            parameters[@"sign"] = [AppInfo sign];
-//            parameters[@"ts"] = @(ts);
-//            
-//            DdHTTPSessionManager *manager = [DdHTTPSessionManager manager];
-//            [manager GET:DdVideoInfoURL parameters:parameters complection:^(ResponseCode code, NSDictionary *responseObject, NSError *error) {
-//                if (code == 0) {
-//                    DdVideoModel *model = [DdVideoModel modelWithDictionary:responseObject[kResponseDataKey]];
-//                    [subscriber sendNext:model];
-//                }else {
-//                    [subscriber sendError:error];
-//                }
-//
-//                [subscriber sendCompleted];
-//            }];
-            
-            [subscriber sendError:nil];
-            [subscriber sendCompleted];
-            return nil;
-        }];
-        return singal;
-    }];
+    [super setURL:URL];
+    _aid = [self.URL.path stringByReplacingOccurrencesOfString:@"/" withString:@""];
 }
 
 #pragma mark 获取视频播放链接
-+ (RACCommand *)requestVideoURLByAid:(NSString *)aid
+- (RACCommand *)requestVideoURL
 {
+    @weakify(self);
     return [[RACCommand alloc] initWithSignalBlock:^RACSignal *(id input) {
+        @strongify(self);
         RACSignal *signal = [RACSignal createSignal:^RACDisposable *(id<RACSubscriber> subscriber) {
             NSMutableDictionary *parameters = [NSMutableDictionary dictionary];
             parameters[@"callback"] = @"jQuery17209494781185433222_1479709396179";
@@ -73,7 +33,7 @@
             parameters[@"type"] = @"jsonp";
             parameters[@"token"] = @"d41d8cd98f00b204e9800998ecf8427e";
             parameters[@"_"] = @([AppInfo ts]);
-            parameters[@"aid"] = aid;
+            parameters[@"aid"] = self.aid;
             AFHTTPSessionManager *manager = [AFHTTPSessionManager manager];
             manager.responseSerializer = [AFHTTPResponseSerializer serializer];
             [manager GET:DdVideoPathURL parameters:parameters progress:NULL success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
@@ -84,7 +44,10 @@
                 NSDictionary *dict = [NSJSONSerialization JSONObjectWithData:[string dataUsingEncoding:NSUTF8StringEncoding] options:NSJSONReadingAllowFragments error:nil];
                 
                 if ([dict[kResponseCodeKey] integerValue] == 0) {
-                    [subscriber sendNext:dict];
+                    self.cid = dict[@"cid"];
+                    NSDictionary *urlDict = [dict[@"durl"] firstObject];
+                    self.contentURL = [NSURL URLWithString:urlDict[@"url"]];
+                    [subscriber sendNext:nil];
                 }else {
                     [subscriber sendError:nil];
                 }

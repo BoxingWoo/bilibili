@@ -9,7 +9,7 @@
 #import "LiveLandscapeMediaControl.h"
 #import <AVFoundation/AVFoundation.h>
 #import <IJKMediaFramework/IJKMediaFramework.h>
-#import "DdDanmakuViewController.h"
+#import "DdDanmakuViewModel.h"
 #import "BSCentralButton.h"
 #import "BSAlertView.h"
 #import "DdProgressHUD.h"
@@ -293,7 +293,7 @@ static NSString *const khotWordCellId = @"HotWordCell";
             [self hide];
             [self addSubview:self.settingView];
             DdDanmakuUserDefaults *danmakuUserDefaults = [DdDanmakuUserDefaults sharedInstance];
-            self.showDanmakuSwitch.on = !self.dvc.shouldHideDanmakus;
+            self.showDanmakuSwitch.on = !self.danmakuVM.shouldHideDanmakus;
             self.screenMaxlimitSlider.value = danmakuUserDefaults.screenMaxlimit;
             self.speedSlider.value = danmakuUserDefaults.speed;
             self.opacitySlider.value = danmakuUserDefaults.opacity;
@@ -566,7 +566,7 @@ static NSString *const khotWordCellId = @"HotWordCell";
 #pragma mark Action - 显示/关闭弹幕
         [[showDanmakuSwitch rac_signalForControlEvents:UIControlEventValueChanged] subscribeNext:^(UISwitch *x) {
             @strongify(self);
-            self.dvc.shouldHideDanmakus = !x.isOn;
+            self.danmakuVM.shouldHideDanmakus = !x.isOn;
             if (x.isOn) {
                 [DdProgressHUD showImage:nil status:@"已开启弹幕"];
             }else {
@@ -950,7 +950,7 @@ static NSString *const khotWordCellId = @"HotWordCell";
 {
     [textField resignFirstResponder];
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1.0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-        [self.dvc.renderer receive:[[DdDanmakuUserDefaults sharedInstance] preferredDanmakuDescriptorWithText:textField.text]];
+        [self.danmakuVM.renderer receive:[[DdDanmakuUserDefaults sharedInstance] preferredDanmakuDescriptorWithText:textField.text]];
     });
     [self.danmakuEntryView removeFromSuperview];
     return YES;

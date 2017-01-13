@@ -6,14 +6,8 @@
 //  Copyright © 2016年 BoxingWoo. All rights reserved.
 //
 
-#import <Foundation/Foundation.h>
-#import "BangumiListModel.h"
-#import "BangumiBannerModel.h"
-#import "BangumiHeaderView.h"
-#import "BangumiSectionHeader.h"
-#import "BangumiSectionFooter.h"
-#import "BangumiGirdCell.h"
-#import "BangumiListCell.h"
+#import "DdBasedViewModel.h"
+#import "BangumiListViewModel.h"
 
 static NSString *const kBangumiHeaderViewID = @"BangumiHeaderView";
 static NSString *const kBangumiSectionHeaderID = @"BangumiSectionHeader";
@@ -24,21 +18,28 @@ static NSString *const kBangumiListCellID = @"BangumiListCell";
 /**
  番剧视图模型
  */
-@interface BangumiViewModel : NSObject
+@interface BangumiViewModel : DdBasedViewModel
 
 /**
- 番剧列表模型
+ 连载
  */
-@property (nonatomic, strong) BangumiListModel *model;
-
+@property (nonatomic, copy) NSArray <BangumiListViewModel *> *serializing;
 /**
- 构造方法
- 
- @param model 番剧列表模型
- 
- @return 番剧视图模型实例
+ 完结
  */
-- (instancetype)initWithModel:(BangumiListModel *)model;
+@property (nonatomic, copy) NSArray <BangumiListViewModel *> *previous;
+/**
+ 推荐
+ */
+@property (nonatomic, strong) NSMutableArray <BangumiListViewModel *> *recommend;
+/**
+ 广告
+ */
+@property (nonatomic, copy) NSDictionary *ad;
+/**
+ 季度
+ */
+@property (nonatomic, assign) NSUInteger season;
 
 /**
  配置单元格
@@ -63,7 +64,7 @@ static NSString *const kBangumiListCellID = @"BangumiListCell";
  @param  forceReload 是否强制刷新
  @return RACCommand instance
  */
-+ (RACCommand *)requestBangumiIndexData:(BOOL)forceReload;
+- (RACCommand *)requestBangumiIndexData:(BOOL)forceReload;
 
 
 /**
@@ -72,6 +73,6 @@ static NSString *const kBangumiListCellID = @"BangumiListCell";
  @param  forceReload 是否强制刷新
  @return RACCommand instance
  */
-+ (RACCommand *)requestBangumiRecommendData:(BOOL)forceReload;
+- (RACCommand *)requestBangumiRecommendData:(BOOL)forceReload;
 
 @end

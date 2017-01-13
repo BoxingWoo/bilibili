@@ -78,7 +78,7 @@ NSString *const kLiveCollectionElementKindFooterView = @"LiveFooterView";
             UICollectionViewLayoutAttributes *sectionHeaderLayoutAttribute = [self layoutAttributesForSupplementaryViewOfKind:UICollectionElementKindSectionHeader atIndexPath:indexPath];
             [self.layoutAttributes addObject:sectionHeaderLayoutAttribute];
             
-            LiveViewModel *viewModel = self.viewModels[i];
+            LiveListViewModel *viewModel = self.viewModels[i];
             NSUInteger count = 0;
             if (i == 0) {
                 count = viewModel.model.lives.count;
@@ -120,7 +120,7 @@ NSString *const kLiveCollectionElementKindFooterView = @"LiveFooterView";
         for (NSInteger i = 0; i < self.viewModels.count; i++) {
             NSUInteger count = 0;
             if (i == 0) {
-                LiveViewModel *viewModel = self.viewModels[i];
+                LiveListViewModel *viewModel = self.viewModels[i];
                 count = viewModel.model.lives.count;
             }else {
                 count = 4;
@@ -135,7 +135,7 @@ NSString *const kLiveCollectionElementKindFooterView = @"LiveFooterView";
         for (NSInteger i = 0; i < indexPath.section; i++) {
             NSUInteger count = 0;
             if (i == 0) {
-                LiveViewModel *viewModel = self.viewModels[i];
+                LiveListViewModel *viewModel = self.viewModels[i];
                 count = viewModel.model.lives.count;
             }else {
                 count = 4;

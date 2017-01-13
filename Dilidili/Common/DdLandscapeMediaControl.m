@@ -9,7 +9,8 @@
 #import "DdLandscapeMediaControl.h"
 #import <AVFoundation/AVFoundation.h>
 #import <IJKMediaFramework/IJKMediaFramework.h>
-#import "DdDanmakuViewController.h"
+#import "DdDanmakuViewModel.h"
+#import "DdPlayUserDefaults.h"
 #import "BSCentralButton.h"
 #import "BSAlertView.h"
 #import "DdBrightnessView.h"
@@ -60,6 +61,8 @@
 @property (nonatomic, strong) UISlider *systemVolumeSlider;
 /** 亮度☼滑块 */
 @property (nonatomic, weak) UISlider *brightnessSlider;
+/** 后台音乐按钮 */
+@property (nonatomic, weak) BSCentralButton *backgroundMusicBtn;
 /** 播放模式按钮数组 */
 @property (nonatomic, copy) NSArray *playbackModeButtons;
 /** 屏占比按钮数组 */
@@ -232,6 +235,13 @@ NSInteger textColorValues[] = {DdDanmakuPurple, DdDanmakuBule, DdDanmakuMagenta,
             [self addSubview:self.moreView];
             self.volumeSlider.value = [[AVAudioSession sharedInstance] outputVolume];
             self.brightnessSlider.value = [UIScreen mainScreen].brightness;
+            DdPlayUserDefaults *playUserDefaults = [DdPlayUserDefaults sharedInstance];
+            self.backgroundMusicBtn.selected = playUserDefaults.activeBackgroundPlayback;
+            if (self.backgroundMusicBtn.isSelected) {
+                self.backgroundMusicBtn.tintColor = kThemeColor;
+            }else {
+                self.backgroundMusicBtn.tintColor = [UIColor whiteColor];
+            }
             self.moreEffectView.left = self.moreView.width;
             [UIView animateWithDuration:0.25 animations:^{
                 self.moreEffectView.left = self.moreView.width - self.moreEffectView.width;
@@ -364,7 +374,7 @@ NSInteger textColorValues[] = {DdDanmakuPurple, DdDanmakuBule, DdDanmakuMagenta,
         [[hideDanmakuBtn rac_signalForControlEvents:UIControlEventTouchUpInside] subscribeNext:^(UIButton *x) {
             @strongify(self);
             x.selected = !x.isSelected;
-            self.dvc.shouldHideDanmakus = x.isSelected;
+            self.danmakuVM.shouldHideDanmakus = x.isSelected;
         }];
         [bottomEffectView.contentView addSubview:hideDanmakuBtn];
         [hideDanmakuBtn mas_makeConstraints:^(MASConstraintMaker *make) {
@@ -586,6 +596,7 @@ NSInteger textColorValues[] = {DdDanmakuPurple, DdDanmakuBule, DdDanmakuMagenta,
         }];
         
         BSCentralButton *backgroundMusicBtn = [BSCentralButton buttonWithType:UIButtonTypeCustom andContentSpace:4.0];
+        _backgroundMusicBtn = backgroundMusicBtn;
         backgroundMusicBtn.tintColor = [UIColor whiteColor];
         backgroundMusicBtn.titleLabel.font = [UIFont systemFontOfSize:14];
         [backgroundMusicBtn setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
@@ -600,6 +611,9 @@ NSInteger textColorValues[] = {DdDanmakuPurple, DdDanmakuBule, DdDanmakuMagenta,
             }else {
                 button.tintColor = [UIColor whiteColor];
             }
+            DdPlayUserDefaults *playUserDefaults = [DdPlayUserDefaults sharedInstance];
+            playUserDefaults.activeBackgroundPlayback = button.selected;
+            [self.delegatePlayer setPauseInBackground:!playUserDefaults.activeBackgroundPlayback];
         }];
         [moreEffectView.contentView addSubview:backgroundMusicBtn];
         [backgroundMusicBtn mas_makeConstraints:^(MASConstraintMaker *make) {
@@ -1498,7 +1512,7 @@ NSInteger textColorValues[] = {DdDanmakuPurple, DdDanmakuBule, DdDanmakuMagenta,
 {
     [self cancelDanmakuEntryed];
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1.0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-        [self.dvc.renderer receive:[[DdDanmakuUserDefaults sharedInstance] preferredDanmakuDescriptorWithText:self.danmakuTextField.text]];
+        [self.danmakuVM.renderer receive:[[DdDanmakuUserDefaults sharedInstance] preferredDanmakuDescriptorWithText:self.danmakuTextField.text]];
     });
 }
 

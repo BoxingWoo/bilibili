@@ -7,9 +7,12 @@
 //
 
 #import "DdWebViewController.h"
+#import "DdWebViewModel.h"
 
 @interface DdWebViewController () <UIWebViewDelegate>
 
+/** 网页视图模型 */
+@property (nonatomic, strong) DdWebViewModel *viewModel;
 /** 网页视图 */
 @property (nonatomic, weak) UIWebView *webView;
 /** 左导航按钮 */
@@ -24,7 +27,7 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     
-    [self.webView loadRequest:[NSURLRequest requestWithURL:self.originUrl]];
+    [self.webView loadRequest:[NSURLRequest requestWithURL:self.viewModel.URL]];
 }
 
 - (void)viewWillAppear:(BOOL)animated
@@ -106,7 +109,7 @@
         NSString *title = [webView stringByEvaluatingJavaScriptFromString:js];
         js = @"document.getElementById('share_pic').src";
         NSString *cover = [webView stringByEvaluatingJavaScriptFromString:js];
-        [DCURLRouter pushURLString:urlString query:@{@"title":title, @"cover":cover} animated:YES];
+        [DdViewModelRouter pushURLString:urlString params:@{@"title":title, @"cover":cover} animated:YES replace:NO];
     }
     return YES;
 }
@@ -135,7 +138,7 @@
 
 - (UIInterfaceOrientationMask)supportedInterfaceOrientations
 {
-    return UIInterfaceOrientationMaskPortrait;
+    return UIInterfaceOrientationMaskAllButUpsideDown;
 }
 
 - (UIStatusBarStyle)preferredStatusBarStyle

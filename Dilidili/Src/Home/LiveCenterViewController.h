@@ -8,6 +8,9 @@
 
 #import <UIKit/UIKit.h>
 
+/**
+ 直播中心视图控制器
+ */
 @interface LiveCenterViewController : UIViewController
 
 @end

@@ -7,21 +7,27 @@
 //
 
 #import "LiveCenterViewController.h"
-#import "LiveSuperCaptureViewController.h"
-#import "LiveCenterCell.h"
-#import "LiveCenterSectionHeader.h"
+#import "LiveCenterViewModel.h"
+#import "LiveCaptureViewModel.h"
 
 @interface LiveCenterViewController () <UITableViewDataSource, UITableViewDelegate>
 
+/**
+ 直播中心视图模型
+ */
+@property (nonatomic, strong) LiveCenterViewModel *viewModel;
+/**
+ 表视图
+ */
 @property (nonatomic, weak) UITableView *tableView;
+/**
+ 数据数组
+ */
 @property (nonatomic, copy) NSArray *dataArr;
 
 @end
 
 @implementation LiveCenterViewController
-
-static NSString *const kliveCenterCellID = @"LiveCenterCell";
-static NSString *const kliveCenterSectionHeaderID = @"LiveCenterSectionHeader";
 
 #pragma mark - LifeCycle
 
@@ -56,7 +62,7 @@ static NSString *const kliveCenterSectionHeaderID = @"LiveCenterSectionHeader";
 
 - (void)configureData
 {
-    _dataArr = @[@{@"title":@"记忆之扉", @"data":@[@{@"icon":@"live_my_room", @"title":@"我的直播间"}, @{@"icon":@"live_attion_ico", @"title":@"关注主播"}, @{@"icon":@"live_history_ico", @"title":@"观看记录"}]}, @{@"title":@"副本掉落", @"data":@[@{@"icon":@"live_mineMedal", @"title":@"我的勋章"}, @{@"icon":@"live_honor", @"title":@"我的头衔"}, @{@"icon":@"live_capsule_ico", @"title":@"扭蛋机"}, @{@"icon":@"live_awardInfo_ico", @"title":@"获奖记录"}]}, @{@"title":@"氪金商店", @"data":@[@{@"icon":@"live_vip_ico", @"title":@"购买老爷"}, @{@"icon":@"live_goldseeds_ico", @"title":@"金瓜子购买"}, @{@"icon":@"live_silverseeds_ico", @"title":@"银瓜子兑换"}]}];
+    _dataArr = self.viewModel.dataArr;
 }
 
 - (void)createUI
@@ -167,21 +173,18 @@ static NSString *const kliveCenterSectionHeaderID = @"LiveCenterSectionHeader";
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
     LiveCenterCell *cell = [tableView dequeueReusableCellWithIdentifier:kliveCenterCellID];
-    NSDictionary *dict = self.dataArr[indexPath.section];
-    cell.contents = dict[@"data"];
+    [self.viewModel configureCell:cell atIndexPath:indexPath];
     if (!cell.actionSubject) {
         cell.actionSubject = [RACSubject subject];
 #pragma mark Action - 功能选项
-        @weakify(self);
         [cell.actionSubject subscribeNext:^(RACTuple *tuple) {
-            @strongify(self);
             RACTupleUnpack(LiveCenterCell *x, NSNumber *y) = tuple;
             NSInteger section = [tableView indexPathForCell:x].section;
             NSInteger index = y.integerValue;
             if (section == 0) {
                 if (index == 0) {  //我的直播间
-                    LiveSuperCaptureViewController *cvc = [[LiveSuperCaptureViewController alloc] init];
-                    [self.navigationController pushViewController:cvc animated:YES];
+                    LiveCaptureViewModel *viewModel = [[LiveCaptureViewModel alloc] initWithClassName:@"LiveSuperCaptureViewController" params:nil];
+                    [DdViewModelRouter pushViewModel:viewModel animated:YES];
                 }
             }
         }];
@@ -194,8 +197,7 @@ static NSString *const kliveCenterSectionHeaderID = @"LiveCenterSectionHeader";
 - (UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section
 {
     LiveCenterSectionHeader *sectionHeader = [tableView dequeueReusableHeaderFooterViewWithIdentifier:kliveCenterSectionHeaderID];
-    NSDictionary *dict = self.dataArr[section];
-    sectionHeader.titleLabel.text = dict[@"title"];
+    [self.viewModel configureSectionHeader:sectionHeader atIndex:section];
     return sectionHeader;
 }
 

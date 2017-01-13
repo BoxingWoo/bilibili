@@ -8,7 +8,7 @@
 
 #import <UIKit/UIKit.h>
 
-@class LiveViewModel;
+@class LiveListViewModel;
 
 extern NSString *const kLiveCollectionElementKindHeaderView;  //直播集合视图头部视图标识
 extern NSString *const kLiveCollectionElementKindFooterView;  //直播集合视图尾部视图标识
@@ -21,6 +21,6 @@ extern NSString *const kLiveCollectionElementKindFooterView;  //直播集合视�
 /**
  直播视图模型数组
  */
-@property (nonatomic, copy) NSArray <LiveViewModel *> *viewModels;
+@property (nonatomic, copy) NSArray <LiveListViewModel *> *viewModels;
 
 @end

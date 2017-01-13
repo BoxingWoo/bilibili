@@ -7,22 +7,41 @@
 //
 
 #import "DdVideoReplyViewController.h"
+#import "DdReplyViewModel.h"
 #import "DdRefreshNormalHeader.h"
 #import "DdRefreshActivityIndicatorFooter.h"
 
 @interface DdVideoReplyViewController () <UITableViewDataSource, UITableViewDelegate, UITextFieldDelegate, YYTextKeyboardObserver>
 
+/**
+ 视频评论视图模型
+ */
+@property (nonatomic, strong) DdReplyViewModel *viewModel;
+/**
+ 评论视图
+ */
 @property (nonatomic, weak) UIView *replyView;
+/**
+ 遮罩视图
+ */
 @property (nonatomic, weak) UIControl *overlayView;
+/**
+ 表视图
+ */
 @property (nonatomic, weak) UITableView *tableView;
+/**
+ 表头视图
+ */
 @property (nonatomic, strong) UITableView *tableHeaderView;
 
 /** 热门评论数组 */
-@property (nonatomic, copy) NSArray <DdReplyViewModel *> *hots;
+@property (nonatomic, copy) NSArray <DdReplyListViewModel *> *hots;
 /** 评论列表数组 */
-@property (nonatomic, strong) NSMutableArray <DdReplyViewModel *> *replies;
+@property (nonatomic, copy) NSArray <DdReplyListViewModel *> *replies;
 /** 页面信息 */
 @property (nonatomic, copy) NSDictionary *page;
+/** 页数 */
+@property (nonatomic, assign) NSUInteger pageNum;
 
 @end
 
@@ -34,6 +53,10 @@
     [super viewDidLoad];
     
     self.view.backgroundColor = kBgColor;
+    
+    _pageNum = 1;
+    
+    [self bindViewModel];
     
     [self createUI];
 }
@@ -49,6 +72,18 @@
 }
 
 #pragma mark - Initialization
+
+- (void)bindViewModel
+{
+    [super bindViewModel];
+    @weakify(self);
+    [RACObserve(self.viewModel, replySignal) subscribeNext:^(RACSignal *replySignal) {
+        @strongify(self);
+        if (replySignal != nil) {
+            [self refreshData:replySignal];
+        }
+    }];
+}
 
 - (void)createUI
 {
@@ -121,6 +156,8 @@
     }];
 }
 
+#pragma mark - LazyLoad
+
 - (UIControl *)overlayView
 {
     if (!_overlayView) {
@@ -157,13 +194,13 @@
         tableView.mj_header = [DdRefreshNormalHeader headerWithRefreshingBlock:^{
             @strongify(self);
             self.pageNum = 1;
-            [self requestData];
+            [[self.viewModel requestReplyDataByPageNum:self.pageNum] execute:nil];
         }];
         tableView.mj_footer = [DdRefreshActivityIndicatorFooter footerWithRefreshingBlock:^{
             @strongify(self);
             if (self.replies.count < [self.page[@"acount"] unsignedIntegerValue]) {
                 self.pageNum++;
-                [self requestData];
+                [[self.viewModel requestReplyDataByPageNum:self.pageNum] execute:nil];
             }else {
                 [self.tableView.mj_footer endRefreshingWithNoMoreData];
             }
@@ -245,7 +282,7 @@
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
-    DdReplyViewModel *viewModel = nil;
+    DdReplyListViewModel *viewModel = nil;
     if (tableView == _tableHeaderView) {
         viewModel = self.hots[section];
     }else if (tableView == _tableView) {
@@ -256,11 +293,14 @@
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    DdReplyViewModel *viewModel = nil;
+    DdReplyListViewModel *viewModel = nil;
+    BOOL isHot = NO;
     if (tableView == _tableHeaderView) {
         viewModel = self.hots[indexPath.section];
+        isHot = YES;
     }else if (tableView == _tableView) {
         viewModel = self.replies[indexPath.section];
+        isHot = NO;
     }
     
     UITableViewCell *cell = nil;
@@ -272,7 +312,7 @@
             [replyCell.moreSubject subscribeNext:^(DdVideoReplyCell *x) {
                 @strongify(self);
                 NSIndexPath *indexPath = [tableView indexPathForCell:x];
-                DdReplyViewModel *vm = nil;
+                DdReplyListViewModel *vm = nil;
                 if (tableView == self.tableHeaderView) {
                     vm = self.hots[indexPath.section];
                 }else if (tableView == self.tableView) {
@@ -286,7 +326,7 @@
             [replyCell.likeSubject subscribeNext:^(DdVideoReplyCell *x) {
                 @strongify(self);
                 NSIndexPath *indexPath = [tableView indexPathForCell:x];
-                DdReplyViewModel *vm = nil;
+                DdReplyListViewModel *vm = nil;
                 if (tableView == self.tableHeaderView) {
                     vm = self.hots[indexPath.section];
                 }else if (tableView == self.tableView) {
@@ -306,7 +346,7 @@
             [subCell.moreSubject subscribeNext:^(DdVideoReplySubCell *x) {
                 @strongify(self);
                 NSIndexPath *indexPath = [tableView indexPathForCell:x];
-                DdReplyViewModel *vm = nil;
+                DdReplyListViewModel *vm = nil;
                 if (tableView == self.tableHeaderView) {
                     vm = self.hots[indexPath.section].replies[indexPath.row - 1];
                 }else if (tableView == self.tableView) {
@@ -317,7 +357,7 @@
         }
         cell = subCell;
     }
-    [viewModel configureCell:cell atIndexPath:indexPath];
+    [self.viewModel configureCell:cell atIndexPath:indexPath isHot:isHot];
     return cell;
 }
 
@@ -325,16 +365,19 @@
 
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    DdReplyViewModel *viewModel = nil;
+    DdReplyListViewModel *viewModel = nil;
+    BOOL isHot = NO;
     if (tableView == _tableHeaderView) {
         viewModel = self.hots[indexPath.section];
+        isHot = YES;
     }else if (tableView == _tableView) {
         viewModel = self.replies[indexPath.section];
+        isHot = NO;
     }
     if (indexPath.row != 0) {
         viewModel = viewModel.replies[indexPath.row - 1];
     }
-    return [viewModel heightForCellOnTableView:tableView atIndexPath:indexPath];
+    return [self.viewModel heightForCellOnTableView:tableView atIndexPath:indexPath isHot:isHot];
 }
 
 - (UIView *)tableView:(UITableView *)tableView viewForFooterInSection:(NSInteger)section
@@ -353,12 +396,12 @@
         return 0;
     }
     
-    return 1 / kScreenScale;
+    return CGFloatFromPixel(1);
 }
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    DdReplyViewModel *viewModel = nil;
+    DdReplyListViewModel *viewModel = nil;
     if (tableView == self.tableHeaderView) {
         viewModel = self.hots[indexPath.section];
     }else if (tableView == self.tableView) {
@@ -386,11 +429,10 @@
 {
     CGFloat tableHeaderViewHeight = 0.0;
     for (NSInteger i = 0; i < self.hots.count; i++) {
-        DdReplyViewModel *viewModel = self.hots[i];
-        tableHeaderViewHeight += [viewModel heightForCellOnTableView:self.tableHeaderView atIndexPath:[NSIndexPath indexPathForRow:0 inSection:i]];
+        DdReplyListViewModel *viewModel = self.hots[i];
+        tableHeaderViewHeight += [self.viewModel heightForCellOnTableView:self.tableHeaderView atIndexPath:[NSIndexPath indexPathForRow:0 inSection:i] isHot:YES];
         for (NSInteger j = 0; j < viewModel.replies.count; j++) {
-            DdReplyViewModel *subViewModel = viewModel.replies[j];
-            tableHeaderViewHeight += [subViewModel heightForCellOnTableView:self.tableHeaderView atIndexPath:[NSIndexPath indexPathForRow:j + 1 inSection:i]];
+            tableHeaderViewHeight += [self.viewModel heightForCellOnTableView:self.tableHeaderView atIndexPath:[NSIndexPath indexPathForRow:j + 1 inSection:i] isHot:YES];
         }
     }
     tableHeaderViewHeight += self.tableHeaderView.tableFooterView.height;
@@ -400,40 +442,23 @@
     [self.tableView reloadData];
 }
 
-#pragma mark 请求数据
-- (RACSignal *)requestData
+#pragma mark 刷新数据
+- (void)refreshData:(RACSignal *)repliesSignal
 {
-    RACSignal *repliesSignal = [[DdReplyViewModel requestReplyDataByOid:self.oid pageNum:self.pageNum] execute:nil];
-    [repliesSignal subscribeNext:^(RACTuple *tuple) {
+    [repliesSignal subscribeNext:^(id x) {
         
-        [_tableView.mj_header endRefreshing];
-        [_tableView.mj_footer endRefreshing];
-        RACTupleUnpack(NSArray *hots, NSArray *replies, NSDictionary *page) = tuple;
-        NSMutableArray *hotViewModels = [NSMutableArray array];
-        for (DdReplyModel *model in hots) {
-            DdReplyViewModel *viewModel = [[DdReplyViewModel alloc] initWithModel:model];
-            viewModel.isHot = YES;
-            [hotViewModels addObject:viewModel];
-        }
-        self.hots = hotViewModels;
-        
-        if (self.pageNum == 1) {
-            self.replies = [NSMutableArray array];
-        }
-        for (DdReplyModel *model in replies) {
-            DdReplyViewModel *viewModel = [[DdReplyViewModel alloc] initWithModel:model];
-            [self.replies addObject:viewModel];
-        }
-        
-        self.page = page;
+        [self.tableView.mj_header endRefreshing];
+        [self.tableView.mj_footer endRefreshing];
+        self.hots = self.viewModel.hots;
+        self.replies = self.viewModel.replies;
+        self.page = self.viewModel.page;
         
         [self layout];
         
     } error:^(NSError *error) {
-        [_tableView.mj_header endRefreshing];
-        [_tableView.mj_footer endRefreshing];
+        [self.tableView.mj_header endRefreshing];
+        [self.tableView.mj_footer endRefreshing];
     }];
-    return repliesSignal;
 }
 
 #pragma mark - TextFieldDelegate

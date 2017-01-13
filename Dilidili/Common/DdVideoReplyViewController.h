@@ -14,14 +14,5 @@
  */
 @interface DdVideoReplyViewController : UIViewController
 
-/** 标识 */
-@property (nonatomic, copy) NSString *oid;
-/** 页数 */
-@property (nonatomic, assign) NSUInteger pageNum;
-
-/**
- *  @brief 请求数据
- */
-- (RACSignal *)requestData;
 
 @end

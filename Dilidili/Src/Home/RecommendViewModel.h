@@ -6,15 +6,8 @@
 //  Copyright © 2016年 BoxingWoo. All rights reserved.
 //
 
-#import <Foundation/Foundation.h>
-#import "RecommendListModel.h"
-#import "RecommendSectionHeader.h"
-#import "RecommendSectionFooter.h"
-#import "RecommendBangumiFooter.h"
-#import "RecommendCell.h"
-#import "RecommendLiveCell.h"
-#import "RecommendBangumiCell.h"
-#import "RecommendScrollCell.h"
+#import "DdBasedViewModel.h"
+#import "RecommendListViewModel.h"
 
 #import <pop/POP.h>
 
@@ -31,20 +24,9 @@ static NSString *const krecommendScrollCellID = @"RecommendScrollCell";
 /**
  *  @brief 推荐模块视图模型
  */
-@interface RecommendViewModel : NSObject
+@interface RecommendViewModel : DdBasedViewModel
 
-/** 推荐列表数据 */
-@property (nonatomic, strong) RecommendListModel *model;
-
-
-/**
- *  @brief 构造方法
- *
- *  @param model 推荐列表模型
- *
- *  @return 推荐模块视图模型实例
- */
-- (instancetype)initWithModel:(RecommendListModel *)model;
+@property (nonatomic, copy) NSArray <RecommendListViewModel *> *dataArr;
 
 /**
  *  @brief 配置单元格
@@ -70,34 +52,6 @@ static NSString *const krecommendScrollCellID = @"RecommendScrollCell";
  */
 - (void)configureSectionFooter:(RecommendSectionFooter *)sectionFooter atIndex:(NSInteger)section;
 
-/**
- *  @brief 单元格大小
- *
- *  @return 单元格大小
- */
-- (CGSize)cellSize;
-
-/**
- *  @brief 推荐列表头部视图高度
- *
- *  @return 推荐列表头部视图高度
- */
-- (CGFloat)sectionHeaderHeight;
-
-/**
- *  @brief 推荐列表尾部视图高度
- *
- *  @return 推荐列表尾部视图高度
- */
-- (CGFloat)sectionFooterHeight;
-
-/**
- *  @brief 刷新推荐列表数据
- *
- *  @return RACCommand instance
- */
-- (RACCommand *)refreshRecommendData;
-
 
 /**
  *  @brief 请求推荐模块数据
@@ -105,6 +59,6 @@ static NSString *const krecommendScrollCellID = @"RecommendScrollCell";
  *  @param  forceReload 是否强制刷新
  *  @return RACCommand instance
  */
-+ (RACCommand *)requestRecommendData:(BOOL)forceReload;
+- (RACCommand *)requestRecommendData:(BOOL)forceReload;
 
 @end

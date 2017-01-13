@@ -9,7 +9,7 @@
 #import <UIKit/UIKit.h>
 
 /**
- 直播视图控制器
+ 直播推流视图控制器
  */
 @interface LiveSuperCaptureViewController : UIViewController
 

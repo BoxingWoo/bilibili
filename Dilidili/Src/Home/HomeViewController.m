@@ -7,14 +7,13 @@
 //
 
 #import "HomeViewController.h"
-#import "LiveViewController.h"
-#import "RecommendViewController.h"
-#import "BangumiViewController.h"
-#import "BSMultiViewControl.h"
+#import "HomeViewModel.h"
 #import "YYFPSLabel.h"
 
-@interface HomeViewController () <BSMultiViewControlDataSource, BSMultiViewControlDelegate>
+@interface HomeViewController () <BSMultiViewControlDelegate>
 
+/** 视图模型 */
+@property (nonatomic, strong) HomeViewModel *viewModel;
 /** 复合视图控制器 */
 @property (nonatomic, weak) BSMultiViewControl *multiViewControl;
 
@@ -56,7 +55,7 @@
 {
     BSMultiViewControl *multiViewControl = [[BSMultiViewControl alloc] initWithFrame:CGRectMake(0, 20, kScreenWidth, kScreenHeight - 20) andStyle:BSMultiViewControlFixedPageSize owner:self];
     _multiViewControl = multiViewControl;
-    multiViewControl.dataSource = self;
+    multiViewControl.dataSource = self.viewModel;
     multiViewControl.delegate = self;
     multiViewControl.listBarWidth = 160.0;
     multiViewControl.listBarHeight = 28.0;
@@ -68,51 +67,6 @@
     [self.view addSubview:multiViewControl];
     
     [multiViewControl reloadData];
-}
-
-#pragma mark - MultiViewControl
-
-- (NSUInteger)numberOfItemsInMultiViewControl:(BSMultiViewControl *)multiViewControl
-{
-    return 3;
-}
-
-- (UIButton *)multiViewControl:(BSMultiViewControl *)multiViewControl buttonAtIndex:(NSUInteger)index
-{
-    UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
-    button.titleLabel.font = [UIFont systemFontOfSize:15];
-    [button setTitleColor:[UIColor colorWithWhite:1.0 alpha:0.7] forState:UIControlStateNormal];
-    [button setTitleColor:[UIColor whiteColor] forState:UIControlStateSelected];
-    switch (index) {
-        case 0:
-            [button setTitle:@"直播" forState:UIControlStateNormal];
-            break;
-        case 1:
-            [button setTitle:@"推荐" forState:UIControlStateNormal];
-            break;
-        case 2:
-            [button setTitle:@"番剧" forState:UIControlStateNormal];
-            break;
-        default:
-            break;
-    }
-    return button;
-}
-
-- (UIViewController *)multiViewControl:(BSMultiViewControl *)multiViewControl viewControllerAtIndex:(NSUInteger)index
-{
-    UIViewController *vc;
-    if (index == 0) {
-        LiveViewController *lvc = [[LiveViewController alloc] init];
-        vc = lvc;
-    }else if (index == 1) {
-        RecommendViewController *rvc = [[RecommendViewController alloc] init];
-        vc = rvc;
-    }else if (index == 2) {
-        BangumiViewController *bvc = [[BangumiViewController alloc] init];
-        vc = bvc;
-    }
-    return vc;
 }
 
 #pragma mark - Others
