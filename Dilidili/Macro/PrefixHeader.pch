@@ -10,7 +10,7 @@
 #define PrefixHeader_pch
 
 #import "CocoaLumberjack.h"  // 一个优秀的第三方调试日志输出库
-#import <ReactiveCocoa/ReactiveCocoa.h>  // ReactiveCocoa
+#import <ReactiveObjC/ReactiveObjC.h>  // ReactiveObjC
 #import <Masonry/Masonry.h>  // 一个优秀的第三方自动布局库
 #import "BSScreenAdaptation.h"  // 一些等比缩放函数
 #import <YYKit/YYKit.h>  // 拓展Foundation与UIKit

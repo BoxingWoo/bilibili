@@ -9,8 +9,9 @@
 #import "UIViewController+DdViewModel.h"
 
 @implementation UIViewController (DdViewModel)
-@dynamic viewModel;
+@dynamic viewModel;  // 视图控制器必须动态实现viewModel的getter和setter方法
 
+#pragma mark 构造方法
 + (instancetype)initWithViewModel:(DdBasedViewModel *)viewModel
 {
     UIViewController *VC = nil;
@@ -27,6 +28,7 @@
     return VC;
 }
 
+#pragma mark 绑定
 - (void)bindViewModel
 {
     RAC(self.navigationItem, title) = RACObserve(self.viewModel, title);

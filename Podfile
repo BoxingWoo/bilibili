@@ -5,14 +5,12 @@ use_frameworks!
 target 'Dilidili’ do
 
     pod 'CocoaLumberjack'
-    pod 'ReactiveCocoa'
+    pod 'ReactiveObjC'
     pod 'YYKit'
     pod 'Masonry'
     pod 'AFNetworking'
     pod 'pop'
-#pod 'GPUImage'
     pod 'LFLiveKit'
-#pod 'UMengSocialCOM'
     pod 'BarrageRenderer'
 
 end

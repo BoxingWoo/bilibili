@@ -14,21 +14,17 @@ PODS:
   - AFNetworking/Serialization (3.1.0)
   - AFNetworking/UIKit (3.1.0):
     - AFNetworking/NSURLSession
-  - BarrageRenderer (1.9.0)
-  - CocoaLumberjack (3.0.0):
-    - CocoaLumberjack/Default (= 3.0.0)
-    - CocoaLumberjack/Extensions (= 3.0.0)
-  - CocoaLumberjack/Core (3.0.0)
-  - CocoaLumberjack/Default (3.0.0):
-    - CocoaLumberjack/Core
-  - CocoaLumberjack/Extensions (3.0.0):
+  - BarrageRenderer (1.9.1)
+  - CocoaLumberjack (3.1.0):
+    - CocoaLumberjack/Default (= 3.1.0)
+    - CocoaLumberjack/Extensions (= 3.1.0)
+  - CocoaLumberjack/Default (3.1.0)
+  - CocoaLumberjack/Extensions (3.1.0):
     - CocoaLumberjack/Default
-  - LFLiveKit (2.5)
+  - LFLiveKit (2.6)
   - Masonry (1.0.2)
   - pop (1.0.9)
-  - ReactiveCocoa (4.2.2):
-    - Result (~> 2.0)
-  - Result (2.1.3)
+  - ReactiveObjC (2.1.2)
   - YYKit (1.0.9):
     - YYKit/no-arc (= 1.0.9)
   - YYKit/no-arc (1.0.9)
@@ -40,20 +36,19 @@ DEPENDENCIES:
   - LFLiveKit
   - Masonry
   - pop
-  - ReactiveCocoa
+  - ReactiveObjC
   - YYKit
 
 SPEC CHECKSUMS:
   AFNetworking: 5e0e199f73d8626b11e79750991f5d173d1f8b67
-  BarrageRenderer: a5b54aef34eed1eab48f35ed594082ae446947c9
-  CocoaLumberjack: c823149bccc5519a9447aeb433be7b1212a7d6a5
-  LFLiveKit: 4361bd588ae0c9244589119ccdb1c30d14686414
+  BarrageRenderer: 55bbe4557d48adbdca6c1ebdfef96946fdb5e5b2
+  CocoaLumberjack: 8311463ddf9ee86a06ef92a071dd656c89244500
+  LFLiveKit: 2219563721f8aa0f188effc3395a06e2d53b23f2
   Masonry: 7c429b56da9d4ee0bbb3ed77a5ea710d6a5df39e
   pop: f667631a5108a2e60d9e8797c9b32ddaf2080bce
-  ReactiveCocoa: 72263e7ac0770c274617ccd345e01049d0ca38ae
-  Result: 18e1a7597fbcca5923c565b40a25a98afafdee02
+  ReactiveObjC: 7b6782ae39f9ac0f57205c3b0c0b69b9dd7048c0
   YYKit: 7cda43304a8dc3696c449041e2cb3107b4e236e7
 
-PODFILE CHECKSUM: c7bb4665dc5e56b177be8b7d1084374cedc3946b
+PODFILE CHECKSUM: 46af85d5f06c21f71478a219888ccfe0b04ede29
 
-COCOAPODS: 1.0.1
+COCOAPODS: 1.1.1

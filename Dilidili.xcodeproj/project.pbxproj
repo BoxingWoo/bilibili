@@ -70,6 +70,7 @@
 		8817D7931DD9A1AB00284372 /* season_winter_icon.png in Resources */ = {isa = PBXBuildFile; fileRef = 8817D78A1DD9A1AB00284372 /* season_winter_icon.png */; };
 		8817D7941DD9A1AB00284372 /* season_winter_icon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 8817D78B1DD9A1AB00284372 /* season_winter_icon@2x.png */; };
 		8817D7951DD9A1AB00284372 /* season_winter_icon@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = 8817D78C1DD9A1AB00284372 /* season_winter_icon@3x.png */; };
+		882176A71E49C4DB00FBC500 /* BSTimeCalculate.m in Sources */ = {isa = PBXBuildFile; fileRef = 882176A61E49C4DB00FBC500 /* BSTimeCalculate.m */; };
 		882B1DD71DC6F9D6002C9000 /* LiveSuperCaptureViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 882B1DD61DC6F9D6002C9000 /* LiveSuperCaptureViewController.m */; };
 		882C8BF81E2478EE0015B291 /* DdWebViewModel.m in Sources */ = {isa = PBXBuildFile; fileRef = 882C8BF71E2478EE0015B291 /* DdWebViewModel.m */; };
 		882C8BFB1E247F700015B291 /* DdVideoInfoViewModel.m in Sources */ = {isa = PBXBuildFile; fileRef = 882C8BFA1E247F700015B291 /* DdVideoInfoViewModel.m */; };
@@ -846,7 +847,6 @@
 		BF9FF3621DA4BD390038F1EB /* live_home_search_ico.png in Resources */ = {isa = PBXBuildFile; fileRef = BF9FF3561DA4BD380038F1EB /* live_home_search_ico.png */; };
 		BF9FF3631DA4BD390038F1EB /* live_home_search_ico@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = BF9FF3571DA4BD380038F1EB /* live_home_search_ico@2x.png */; };
 		BF9FF3641DA4BD390038F1EB /* live_home_search_ico@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = BF9FF3581DA4BD380038F1EB /* live_home_search_ico@3x.png */; };
-		BFFCB0301D8C20D00035292D /* BSTimeCalculate.m in Sources */ = {isa = PBXBuildFile; fileRef = BFFCB02F1D8C20D00035292D /* BSTimeCalculate.m */; };
 		BFFCB06D1D8C21ED0035292D /* misc_level_colorfulLv0.png in Resources */ = {isa = PBXBuildFile; fileRef = BFFCB0311D8C21ED0035292D /* misc_level_colorfulLv0.png */; };
 		BFFCB06E1D8C21EE0035292D /* misc_level_colorfulLv0@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = BFFCB0321D8C21ED0035292D /* misc_level_colorfulLv0@2x.png */; };
 		BFFCB06F1D8C21EE0035292D /* misc_level_colorfulLv0@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = BFFCB0331D8C21ED0035292D /* misc_level_colorfulLv0@3x.png */; };
@@ -1026,6 +1026,8 @@
 		8817D78A1DD9A1AB00284372 /* season_winter_icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = season_winter_icon.png; sourceTree = "<group>"; };
 		8817D78B1DD9A1AB00284372 /* season_winter_icon@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "season_winter_icon@2x.png"; sourceTree = "<group>"; };
 		8817D78C1DD9A1AB00284372 /* season_winter_icon@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "season_winter_icon@3x.png"; sourceTree = "<group>"; };
+		882176A51E49C4DB00FBC500 /* BSTimeCalculate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BSTimeCalculate.h; sourceTree = "<group>"; };
+		882176A61E49C4DB00FBC500 /* BSTimeCalculate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BSTimeCalculate.m; sourceTree = "<group>"; };
 		882B1DD51DC6F9D6002C9000 /* LiveSuperCaptureViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LiveSuperCaptureViewController.h; sourceTree = "<group>"; };
 		882B1DD61DC6F9D6002C9000 /* LiveSuperCaptureViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LiveSuperCaptureViewController.m; sourceTree = "<group>"; };
 		882C8BF61E2478EE0015B291 /* DdWebViewModel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DdWebViewModel.h; sourceTree = "<group>"; };
@@ -1962,8 +1964,6 @@
 		BF9FF3561DA4BD380038F1EB /* live_home_search_ico.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = live_home_search_ico.png; sourceTree = "<group>"; };
 		BF9FF3571DA4BD380038F1EB /* live_home_search_ico@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "live_home_search_ico@2x.png"; sourceTree = "<group>"; };
 		BF9FF3581DA4BD380038F1EB /* live_home_search_ico@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "live_home_search_ico@3x.png"; sourceTree = "<group>"; };
-		BFFCB02E1D8C20D00035292D /* BSTimeCalculate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BSTimeCalculate.h; sourceTree = "<group>"; };
-		BFFCB02F1D8C20D00035292D /* BSTimeCalculate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BSTimeCalculate.m; sourceTree = "<group>"; };
 		BFFCB0311D8C21ED0035292D /* misc_level_colorfulLv0.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = misc_level_colorfulLv0.png; sourceTree = "<group>"; };
 		BFFCB0321D8C21ED0035292D /* misc_level_colorfulLv0@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "misc_level_colorfulLv0@2x.png"; sourceTree = "<group>"; };
 		BFFCB0331D8C21ED0035292D /* misc_level_colorfulLv0@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "misc_level_colorfulLv0@3x.png"; sourceTree = "<group>"; };
@@ -3488,8 +3488,8 @@
 				88446B631D991FFD000F9B85 /* DdDanmakuUserDefaults.m */,
 				88B0EBE11E13BC4600E94561 /* DdPlayUserDefaults.h */,
 				88B0EBE21E13BC4600E94561 /* DdPlayUserDefaults.m */,
-				BFFCB02E1D8C20D00035292D /* BSTimeCalculate.h */,
-				BFFCB02F1D8C20D00035292D /* BSTimeCalculate.m */,
+				882176A51E49C4DB00FBC500 /* BSTimeCalculate.h */,
+				882176A61E49C4DB00FBC500 /* BSTimeCalculate.m */,
 				8800CDE21D742ACF00C676F4 /* DdFormatter.h */,
 				8800CDE31D742ACF00C676F4 /* DdFormatter.m */,
 				88E1CB7F1D6C3B3D00A22293 /* MyCustomLogFormatter.h */,
@@ -4786,7 +4786,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_ROOT}/../Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [[ $? != 0 ]] ; then\n    cat << EOM\nerror: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\nEOM\n    exit 1\nfi\n";
+			shellScript = "diff \"${PODS_ROOT}/../Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n";
 			showEnvVarsInLog = 0;
 		};
 		99C72AE5322865541D56B3CA /* [CP] Copy Pods Resources */ = {
@@ -4840,6 +4840,7 @@
 				88E1CB8A1D6C4A0300A22293 /* CategoryViewController.m in Sources */,
 				8807C85D1E1E2BC100CB7ED2 /* RecommendListViewModel.m in Sources */,
 				885D7ADC1DDEA944000B2F29 /* SKTagButton.m in Sources */,
+				882176A71E49C4DB00FBC500 /* BSTimeCalculate.m in Sources */,
 				8838D0881DBF41E7000953E9 /* LiveRecommendView.m in Sources */,
 				882C8BFE1E24BBA60015B291 /* DdReplyListViewModel.m in Sources */,
 				BF9FF32A1DA4AF820038F1EB /* LiveModel.m in Sources */,
@@ -4927,7 +4928,6 @@
 				88F0B3451D6EECC7004E5D4A /* NSDictionary+Log.m in Sources */,
 				88E0B92F1D6D420A0039EA6A /* MJRefreshBackFooter.m in Sources */,
 				88E0B9311D6D420A0039EA6A /* MJRefreshFooter.m in Sources */,
-				BFFCB0301D8C20D00035292D /* BSTimeCalculate.m in Sources */,
 				8899D7561D951CA700C684A7 /* DdDanmakuViewModel.m in Sources */,
 				88503C091DD6FFBE00FD17AA /* BangumiGirdCell.m in Sources */,
 				88375D491D87AFD200B49D1B /* DdReplyContentModel.m in Sources */,

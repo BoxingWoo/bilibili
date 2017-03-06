@@ -14,7 +14,6 @@
 #import "BSAlertView.h"
 
 #import "AFNetworkReachabilityManager.h"
-#import <AVFoundation/AVFoundation.h>
 
 @interface AppDelegate ()
 
@@ -87,7 +86,7 @@
     [DDLog addLogger:[DDASLLogger sharedInstance]];
     
 #endif
-    
+
     DDLogDebug(@"====================dilidili====================");
 }
 
@@ -129,7 +128,7 @@
 #ifdef DEBUG
     viewModel = [[DdTabBarViewModel alloc] initWithClassName:@"DdTabBarController" params:nil];
 #else
-    viewModel = [[DdTabBarViewModel alloc] initWithClassName:@"LaunchViewController" params:nil];
+    viewModel = [[LaunchViewModel alloc] initWithClassName:@"LaunchViewController" params:nil];
 #endif
     
     UIViewController *rootVC = [UIViewController initWithViewModel:viewModel];

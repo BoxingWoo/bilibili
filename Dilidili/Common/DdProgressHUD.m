@@ -10,7 +10,7 @@
 
 @implementation DdProgressHUD
 
-+ (void)initialize
++ (void)load
 {
     [SVProgressHUD setDefaultStyle:SVProgressHUDStyleDark];
     [SVProgressHUD setMinimumDismissTimeInterval:3.0];

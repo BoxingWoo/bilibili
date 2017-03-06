@@ -8,6 +8,9 @@
 
 #import "DdBasedViewModel.h"
 
+/**
+ 网页视图模型
+ */
 @interface DdWebViewModel : DdBasedViewModel
 
 @end

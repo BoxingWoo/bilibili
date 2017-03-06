@@ -12,6 +12,9 @@
 #import "RecommendViewModel.h"
 #import "BangumiViewModel.h"
 
+/**
+ 首页视图模型
+ */
 @interface HomeViewModel : DdBasedViewModel <BSMultiViewControlDataSource>
 
 

@@ -8,6 +8,9 @@
 
 #import "DdBasedViewModel.h"
 
+/**
+ 加载页视图模型
+ */
 @interface LaunchViewModel : DdBasedViewModel
 
 @end

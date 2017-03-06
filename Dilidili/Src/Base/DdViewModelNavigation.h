@@ -8,6 +8,9 @@
 
 #import <Foundation/Foundation.h>
 
+/**
+ 视图模型导航工具
+ */
 @interface DdViewModelNavigation : NSObject
 
 + (instancetype)sharedInstance;

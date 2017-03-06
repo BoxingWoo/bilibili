@@ -10,12 +10,27 @@
 #import "DdNavigationController.h"
 #import "DdBasedViewModel.h"
 
+/**
+ 视图控制器（视图模型分类)
+ */
 @interface UIViewController (DdViewModel)
 
+/**
+ 视图模型
+ */
 @property (nonatomic, strong) DdBasedViewModel *viewModel;
 
+/**
+ 类构造方法
+
+ @param viewModel 视图模型
+ @return 视图控制器实例
+ */
 + (instancetype)initWithViewModel:(DdBasedViewModel *)viewModel;
 
+/**
+ 绑定
+ */
 - (void)bindViewModel NS_REQUIRES_SUPER;
 
 @end

@@ -72,9 +72,7 @@
         }else {
             RecommendCell *normalCell = (RecommendCell *)cell;
             [normalCell.coverImageView setImageWithURL:[NSURL URLWithString:model.cover] placeholder:[DdImageManager cover_placeholderImageBySize:CGSizeMakeEx(146.0, 92.0)] options:YYWebImageOptionSetImageWithFadeAnimation progress:NULL transform:^UIImage * _Nullable(UIImage * _Nonnull image, NSURL * _Nonnull url) {
-                
                 return [DdImageManager transformImage:image size:normalCell.coverImageView.size cornerRadius:kCoverCornerRadius style:DdImageDarkGradient];
-                
             } completion:NULL];
             normalCell.titleLabel.text = model.title;
             [normalCell.playCount setTitle:[DdFormatter stringForCount:model.play] forState:UIControlStateNormal];
