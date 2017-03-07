@@ -1,6 +1,6 @@
 # bilibili
-高仿山寨版bilibili
 ![logo](http://upload-images.jianshu.io/upload_images/2692232-e28e8fd94a496e5c.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+* 高仿山寨版bilibili
 [博客链接](http://www.jianshu.com/p/aed1a3fe5039)
 
 ###前言
@@ -42,8 +42,17 @@
 直播视频列表跟推荐视频列表的实现类似，因为本人不喜欢嵌套（譬如一个tableViewCell里嵌套一个collectionView），这里使用了自定义的流式布局来添加与tableView类似的HeaderView和FooterView。由于数据量比较小，布局的运算是一次完成的，并没有考虑性能问题（据说一般是使用二叉树算法）。
 
 视频预览图的请求和处理使用的是YYKit里的类，相比于大家常用的SDWebImage，YYKit除了提供图片的请求方法之外还包含了很多图片的处理方法，真的非常人性化。此外，图片请求方法还多了一个transform的block用于在图片请求完成之后加载之前对图片进行异步处理并可以缓存到硬盘，有着非常优秀的性能体验。
+
 ![原图](http://upload-images.jianshu.io/upload_images/2692232-9870579c82061b60.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
 ![效果图](http://upload-images.jianshu.io/upload_images/2692232-e4bf4ff22a3a6c2c.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+```
+[normalCell.coverImageView setImageWithURL:[NSURL URLWithString:model.cover] 
+placeholder:[DdImageManager cover_placeholderImageBySize:CGSizeMakeEx(146.0, 92.0)] 
+options:YYWebImageOptionSetImageWithFadeAnimation 
+progress:NULL 
+transform:^UIImage*_Nullable(UIImage*_Nonnull image,NSURL*_Nonnull url) {return [DdImageManager transformImage:image size:normalCell.coverImageView.size cornerRadius:kCoverCornerRadius style:DdImageDarkGradient];} 
+completion:NULL];
+```
 
 ####视频播放
 ![视频播放](http://upload-images.jianshu.io/upload_images/2692232-7fd8efb3ad54ad7f.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
