@@ -6,9 +6,9 @@
 ###前言
 本项目的所有数据均使用Charles抓包所得，使用MVVM+RAC模式进行编写。
 
-![首页-推荐](http://upload-images.jianshu.io/upload_images/2692232-a77164d603bfc1d2.png?imageMogr2/auto-orient/strip)
-![首页-直播](http://upload-images.jianshu.io/upload_images/2692232-315749bfc4f66030.png?imageMogr2/auto-orient/strip)
-![首页-番剧](http://upload-images.jianshu.io/upload_images/2692232-7e572ae41d718906.png?imageMogr2/auto-orient/strip)
+![首页-推荐](http://upload-images.jianshu.io/upload_images/2692232-a77164d603bfc1d2.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+![首页-直播](http://upload-images.jianshu.io/upload_images/2692232-315749bfc4f66030.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+![首页-番剧](http://upload-images.jianshu.io/upload_images/2692232-7e572ae41d718906.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
 ![视频播放界面1](http://upload-images.jianshu.io/upload_images/2692232-a4605ee270e901eb.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
 ![视频播放界面2](http://upload-images.jianshu.io/upload_images/2692232-08ca6c3b9dc9b911.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
 ![直播界面](http://upload-images.jianshu.io/upload_images/2692232-8e7791264d617661.PNG?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
