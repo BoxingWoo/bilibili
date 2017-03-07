@@ -1,17 +1,18 @@
 # bilibili
 ![logo](http://upload-images.jianshu.io/upload_images/2692232-e28e8fd94a496e5c.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
-* 高仿山寨版bilibili
+
+高仿山寨版bilibili
 [博客链接](http://www.jianshu.com/p/aed1a3fe5039)
 
 ###前言
 本项目的所有数据均使用Charles抓包所得，使用MVVM+RAC模式进行编写。
 
-![首页-推荐](http://upload-images.jianshu.io/upload_images/2692232-a77164d603bfc1d2.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
-![首页-直播](http://upload-images.jianshu.io/upload_images/2692232-315749bfc4f66030.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
-![首页-番剧](http://upload-images.jianshu.io/upload_images/2692232-7e572ae41d718906.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
-![视频播放界面1](http://upload-images.jianshu.io/upload_images/2692232-a4605ee270e901eb.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
-![视频播放界面2](http://upload-images.jianshu.io/upload_images/2692232-08ca6c3b9dc9b911.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
-![直播界面](http://upload-images.jianshu.io/upload_images/2692232-8e7791264d617661.PNG?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+![首页-推荐](http://upload-images.jianshu.io/upload_images/2692232-8a5841df87a62f74.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+![首页-直播](http://upload-images.jianshu.io/upload_images/2692232-c4052f7f90baa0a8.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+![首页-番剧](http://upload-images.jianshu.io/upload_images/2692232-5b216257ecf33767.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+![视频播放界面1](http://upload-images.jianshu.io/upload_images/2692232-0e9f508349d0cbc8.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+![视频播放界面2](http://upload-images.jianshu.io/upload_images/2692232-1f7ab980c232d517.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+![直播界面](http://upload-images.jianshu.io/upload_images/2692232-9a3f68b3fd4d9192.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
 
 ###项目描述
 
