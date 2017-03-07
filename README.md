@@ -36,9 +36,11 @@
 
 ####视频列表
 ![视频列表](http://upload-images.jianshu.io/upload_images/2692232-67474052dfbfce46.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+
 视频列表使用的是collectionView，viewController里只对collectionView进行了创建和配置，还有负责界面之间的跳转，collectionViewCell、sectionHeader、sectionFooter的配置和数据请求都交给了viewModel来实现。
 
 ![直播视频列表](http://upload-images.jianshu.io/upload_images/2692232-22427caba11a7f1b.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+
 直播视频列表跟推荐视频列表的实现类似，因为本人不喜欢嵌套（譬如一个tableViewCell里嵌套一个collectionView），这里使用了自定义的流式布局来添加与tableView类似的HeaderView和FooterView。由于数据量比较小，布局的运算是一次完成的，并没有考虑性能问题（据说一般是使用二叉树算法）。
 
 视频预览图的请求和处理使用的是YYKit里的类，相比于大家常用的SDWebImage，YYKit除了提供图片的请求方法之外还包含了很多图片的处理方法，真的非常人性化。此外，图片请求方法还多了一个transform的block用于在图片请求完成之后加载之前对图片进行异步处理并可以缓存到硬盘，有着非常优秀的性能体验。
@@ -50,14 +52,19 @@
 placeholder:[DdImageManager cover_placeholderImageBySize:CGSizeMakeEx(146.0, 92.0)] 
 options:YYWebImageOptionSetImageWithFadeAnimation 
 progress:NULL 
-transform:^UIImage*_Nullable(UIImage*_Nonnull image,NSURL*_Nonnull url) {return [DdImageManager transformImage:image size:normalCell.coverImageView.size cornerRadius:kCoverCornerRadius style:DdImageDarkGradient];} 
+transform:^UIImage*_Nullable(UIImage*_Nonnull image,NSURL*_Nonnull url) {
+return [DdImageManager transformImage:image size:normalCell.coverImageView.size cornerRadius:kCoverCornerRadius style:DdImageDarkGradient];
+} 
 completion:NULL];
 ```
 
 ####视频播放
 ![视频播放](http://upload-images.jianshu.io/upload_images/2692232-7fd8efb3ad54ad7f.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+
 视频播放器使用的是bilibili的开源框架IJKMediaFramework，而媒体控制器是防bilibili自定制UI和功能实现，分为竖屏方向的DdPortraitMediaControl，横屏方向的DdLandscapeMediaControl，虽然两者在功能上有部分重叠，但是为了方便实现而分成了两个控件。有一点是不可否认的，复制黏贴要比抽象封装来得快也舒服。两个控件的实现并不复杂，但是要同时集成播放设置、弹幕设置、弹幕发送、播放控制、媒体控制器自动隐藏、进度监控等诸多功能，代码量可谓惊为天人。此外还自定制了快进快退指示器和缓冲指示器等一些小控件。
+
 ![媒体控制器](http://upload-images.jianshu.io/upload_images/2692232-bf128e049cf279e1.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+
 弹幕的渲染和发送使用了一个第三方框架BarrageRenderer，使用简单并拥有以下特性：1、提供过场弹幕(4种方向)与悬浮弹幕(2种方向)支持; 支持图片弹幕与文字弹幕.2、弹幕字体可定义: 颜色,边框,圆角,背景,字体等皆可定制.3、自动轨道搜寻算法,新发弹幕会根据相同方向的同种弹幕获取最佳运动轨道.4、支持延时弹幕,为反复播放弹幕提供可能；支持与外界的时间同步.5、独立的动画时间系统, 可以统一调整动画速度.6、特制的动画引擎,播放弹幕更流畅,可承接持续的10条/s的弹幕流速.7、丰富的扩展接口, 实现了父类的接口就可以自定义弹幕动画.8、可以为任意UIView绑定弹幕,当然弹幕内容需要创建控件输入。
 
 ####直播
