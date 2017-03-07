@@ -1,11 +1,11 @@
 # bilibili
 高仿山寨版bilibili
+![logo](http://upload-images.jianshu.io/upload_images/2692232-e28e8fd94a496e5c.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
 [博客链接](http://www.jianshu.com/p/aed1a3fe5039)
 
 ###前言
 本项目的所有数据均使用Charles抓包所得，使用MVVM+RAC模式进行编写。
 
-![logo](http://upload-images.jianshu.io/upload_images/2692232-e28e8fd94a496e5c.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
 ![首页-推荐](http://upload-images.jianshu.io/upload_images/2692232-a77164d603bfc1d2.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
 ![首页-直播](http://upload-images.jianshu.io/upload_images/2692232-315749bfc4f66030.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
 ![首页-番剧](http://upload-images.jianshu.io/upload_images/2692232-7e572ae41d718906.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
@@ -44,9 +44,6 @@
 视频预览图的请求和处理使用的是YYKit里的类，相比于大家常用的SDWebImage，YYKit除了提供图片的请求方法之外还包含了很多图片的处理方法，真的非常人性化。此外，图片请求方法还多了一个transform的block用于在图片请求完成之后加载之前对图片进行异步处理并可以缓存到硬盘，有着非常优秀的性能体验。
 ![原图](http://upload-images.jianshu.io/upload_images/2692232-9870579c82061b60.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
 ![效果图](http://upload-images.jianshu.io/upload_images/2692232-e4bf4ff22a3a6c2c.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
-```
-[normalCell.coverImageView setImageWithURL:[NSURL URLWithString:model.cover] placeholder:[DdImageManager cover_placeholderImageBySize:CGSizeMakeEx(146.0, 92.0)] options:YYWebImageOptionSetImageWithFadeAnimation progress:NULL transform:^UIImage*_Nullable(UIImage*_Nonnull image,NSURL*_Nonnull url) {return [DdImageManager transformImage:image size:normalCell.coverImageView.size cornerRadius:kCoverCornerRadius style:DdImageDarkGradient];} completion:NULL];
-```
 
 ####视频播放
 ![视频播放](http://upload-images.jianshu.io/upload_images/2692232-7fd8efb3ad54ad7f.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
